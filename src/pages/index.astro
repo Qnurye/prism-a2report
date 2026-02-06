@@ -1,7 +1,32 @@
 ---
+import { getCollection } from "astro:content";
 import ReportLayout from "../layouts/ReportLayout.astro";
+
+const reports = await getCollection("reports");
+const sortedReports = reports.sort((a, b) => {
+  const dateA = a.data.date || "";
+  const dateB = b.data.date || "";
+  return dateB.localeCompare(dateA);
+});
 ---
 
 <ReportLayout title="Prism A2Report">
-  <p>Report archive. <a href="/test" class="text-primary underline">View test page</a>.</p>
+  <ul class="space-y-4 font-ui">
+    {sortedReports.length === 0 && <li class="text-muted-foreground">No reports published yet.</li>}
+    {
+      sortedReports.map((report) => (
+        <li>
+          <a
+            href={`/reports/${report.id}`}
+            class="text-primary underline hover:text-primary/80 transition-colors"
+          >
+            {report.data.title}
+          </a>
+          {report.data.date && (
+            <span class="text-muted-foreground text-sm ml-2">{report.data.date}</span>
+          )}
+        </li>
+      ))
+    }
+  </ul>
 </ReportLayout>

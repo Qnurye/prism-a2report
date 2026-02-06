@@ -2,6 +2,10 @@
 dist/
 # generated types
 .astro/
+# generated report content
+src/content/reports/
+public/reports/
+public/skill.tar.gz
 
 # dependencies
 node_modules/
