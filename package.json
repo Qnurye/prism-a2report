@@ -46,6 +46,7 @@
       "sharp"
     ]
   },
+  "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
