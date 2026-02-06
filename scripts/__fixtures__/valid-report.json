@@ -1,0 +1,56 @@
+{
+  "title": "Test Report",
+  "author": "Test Author",
+  "date": "2025-01-15",
+  "slug": "test-report",
+  "metadata": {
+    "tags": ["testing", "automation"],
+    "category": "analysis"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Introduction",
+      "level": 2,
+      "content": "This is the introduction paragraph."
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "Monthly Sales",
+      "data": {
+        "labels": ["Jan", "Feb", "Mar"],
+        "datasets": [
+          {
+            "label": "Revenue",
+            "data": [100, 200, 150]
+          }
+        ]
+      },
+      "options": {
+        "responsive": true
+      }
+    },
+    {
+      "type": "table",
+      "caption": "Sample Data",
+      "headers": ["Name", "Value"],
+      "rows": [
+        ["Alpha", "100"],
+        ["Beta", "200"]
+      ]
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "filename": "example.js",
+      "code": "console.log('hello');"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "Note",
+      "content": "This is an informational callout."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Bad Section Type",
+  "sections": [
+    {
+      "type": "unknown",
+      "content": "This section type does not exist."
+    }
+  ]
+}

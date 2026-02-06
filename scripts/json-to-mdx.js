@@ -4,55 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const jsonPath = process.argv[2];
-const slug = process.argv[3];
-
-if (!jsonPath || !slug) {
-  console.error("Usage: node scripts/json-to-mdx.js <report.json> <slug>");
-  process.exit(1);
-}
-
-const report = JSON.parse(readFileSync(resolve(jsonPath), "utf-8"));
-
-const lines = [];
-
-// YAML frontmatter
-lines.push("---");
-lines.push(`title: "${report.title}"`);
-if (report.author) lines.push(`author: "${report.author}"`);
-if (report.date) lines.push(`date: "${report.date}"`);
-lines.push("---");
-lines.push("");
-
-// Component imports
-lines.push("import Chart from '../../components/Chart.astro'");
-lines.push("import Table from '../../components/Table.astro'");
-lines.push("import Callout from '../../components/Callout.astro'");
-lines.push("import CodeBlock from '../../components/CodeBlock.astro'");
-lines.push("");
-
-// Sections
-for (const section of report.sections) {
-  switch (section.type) {
-    case "text":
-      renderText(section);
-      break;
-    case "chart":
-      renderChart(section);
-      break;
-    case "table":
-      renderTable(section);
-      break;
-    case "callout":
-      renderCallout(section);
-      break;
-    case "code":
-      renderCode(section);
-      break;
-  }
-}
-
-function renderText(s) {
+function renderText(lines, s) {
   const level = s.level || 2;
   if (s.heading) {
     lines.push(`${"#".repeat(level)} ${s.heading}`);
@@ -62,7 +14,7 @@ function renderText(s) {
   lines.push("");
 }
 
-function renderChart(s) {
+function renderChart(lines, s) {
   const props = [];
   props.push(`chartType="${s.chartType}"`);
   props.push(`data={${JSON.stringify(s.data)}}`);
@@ -73,7 +25,7 @@ function renderChart(s) {
   lines.push("");
 }
 
-function renderTable(s) {
+function renderTable(lines, s) {
   const props = [];
   props.push(`headers={${JSON.stringify(s.headers)}}`);
   props.push(`rows={${JSON.stringify(s.rows)}}`);
@@ -84,7 +36,7 @@ function renderTable(s) {
   lines.push("");
 }
 
-function renderCallout(s) {
+function renderCallout(lines, s) {
   const attrs = [`variant="${s.variant}"`];
   if (s.title) {
     attrs.push(`title=${JSON.stringify(s.title)}`);
@@ -95,7 +47,7 @@ function renderCallout(s) {
   lines.push("");
 }
 
-function renderCode(s) {
+function renderCode(lines, s) {
   const props = [];
   if (s.language) props.push(`language="${s.language}"`);
   if (s.filename) props.push(`filename=${JSON.stringify(s.filename)}`);
@@ -104,7 +56,62 @@ function renderCode(s) {
   lines.push("");
 }
 
-const outDir = resolve(__dirname, "../src/content/reports");
-mkdirSync(outDir, { recursive: true });
-writeFileSync(resolve(outDir, `${slug}.mdx`), lines.join("\n"));
-console.log(`MDX written to src/content/reports/${slug}.mdx`);
+export function convertToMdx(report) {
+  const lines = [];
+
+  // YAML frontmatter
+  lines.push("---");
+  lines.push(`title: "${report.title}"`);
+  if (report.author) lines.push(`author: "${report.author}"`);
+  if (report.date) lines.push(`date: "${report.date}"`);
+  lines.push("---");
+  lines.push("");
+
+  // Component imports
+  lines.push("import Chart from '../../components/Chart.astro'");
+  lines.push("import Table from '../../components/Table.astro'");
+  lines.push("import Callout from '../../components/Callout.astro'");
+  lines.push("import CodeBlock from '../../components/CodeBlock.astro'");
+  lines.push("");
+
+  // Sections
+  for (const section of report.sections) {
+    switch (section.type) {
+      case "text":
+        renderText(lines, section);
+        break;
+      case "chart":
+        renderChart(lines, section);
+        break;
+      case "table":
+        renderTable(lines, section);
+        break;
+      case "callout":
+        renderCallout(lines, section);
+        break;
+      case "code":
+        renderCode(lines, section);
+        break;
+    }
+  }
+
+  return lines.join("\n");
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const jsonPath = process.argv[2];
+  const slug = process.argv[3];
+
+  if (!jsonPath || !slug) {
+    console.error("Usage: node scripts/json-to-mdx.js <report.json> <slug>");
+    process.exit(1);
+  }
+
+  const report = JSON.parse(readFileSync(resolve(jsonPath), "utf-8"));
+  const output = convertToMdx(report);
+
+  const outDir = resolve(__dirname, "../src/content/reports");
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(resolve(outDir, `${slug}.mdx`), output);
+  console.log(`MDX written to src/content/reports/${slug}.mdx`);
+}

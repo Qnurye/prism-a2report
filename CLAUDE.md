@@ -15,6 +15,9 @@ pnpm lint             # ESLint
 pnpm lint:fix         # ESLint with auto-fix
 pnpm format:check     # Prettier check
 pnpm format           # Prettier write
+pnpm test             # Run tests in watch mode
+pnpm test:run         # Run tests once
+pnpm test:coverage    # Run tests with coverage
 
 # Report pipeline
 node scripts/validate-report.js <report.json>        # Validate JSON against schema

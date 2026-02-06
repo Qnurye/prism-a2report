@@ -1,0 +1,9 @@
+{
+  "title": "Minimal Report",
+  "sections": [
+    {
+      "type": "text",
+      "content": "Just a paragraph."
+    }
+  ]
+}
