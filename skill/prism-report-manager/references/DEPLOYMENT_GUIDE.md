@@ -6,7 +6,7 @@ Step-by-step instructions for deploying a report to prism.qnury.es.
 
 1. **Node.js** — Install via FNM (`fnm install`)
 2. **pnpm** — Install via `corepack enable && corepack prepare pnpm@latest --activate`
-3. **Wrangler CLI** — Install via `pnpm add -g wrangler` and authenticate with `wrangler login`
+3. **Git** — With push access to the prism-a2report repository
 4. **Project dependencies** — Run `pnpm install` in `~/Projects/prism-a2report`
 
 ## Step 1: Create Report JSON
@@ -36,22 +36,23 @@ node scripts/validate-report.js /path/to/report.json
 
 This validates the JSON against the schema. Fix any errors before proceeding.
 
-## Step 3: Run the Deploy Script
+## Step 3: Deploy via Git
+
+Copy the validated JSON into the `reports/` directory and push:
 
 ```bash
-./scripts/deploy-report.sh /path/to/report.json my-report-slug
+cp /path/to/report.json reports/<slug>.json
+git add reports/<slug>.json
+git commit -m "feat: add <slug> report"
+git push origin main
 ```
 
-The deploy script will:
+GitHub Actions will automatically:
 
-1. Validate the JSON against the schema
-2. Convert JSON to MDX (for HTML rendering)
-3. Convert JSON to Markdown (for AI-readable output)
-4. Pack the skill tarball
-5. Build the Astro site
-6. Deploy to Cloudflare Pages via Wrangler
-
-If no slug is provided, one is auto-generated from the current timestamp.
+1. Generate MDX and Markdown from all report JSON files
+2. Build the Astro site
+3. Copy AI-readable Markdown into the dist output
+4. Deploy to Cloudflare Pages
 
 ## Step 4: Verify the Deployment
 
@@ -70,4 +71,4 @@ curl https://prism.qnury.es/reports/<slug>
 
 - **Validation errors**: Check `A2UI_FORMAT.md` for required fields per section type
 - **Build errors**: Run `pnpm install` to ensure dependencies are up to date
-- **Deploy errors**: Run `wrangler login` to re-authenticate
+- **Deploy failures**: Check the GitHub Actions tab for workflow logs and error details
