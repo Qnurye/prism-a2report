@@ -25,6 +25,8 @@ node scripts/json-to-mdx.js <report.json> <slug>     # Generate MDX for Astro
 node scripts/json-to-markdown.js <report.json> <slug> # Generate AI-readable Markdown
 ./scripts/deploy-report.sh <report.json> [slug]       # Full pipeline: validate → convert → build → deploy
 ./scripts/list-reports.sh                              # List deployed reports
+./scripts/generate-all-reports.sh                      # Generate all reports from reports/*.json
+./scripts/copy-markdown-to-dist.sh                     # Copy AI-readable Markdown into dist/
 ```
 
 ## Architecture
@@ -36,13 +38,13 @@ Reports are authored as JSON conforming to `schema/report.schema.json`, then con
 1. **MDX** (`src/content/reports/<slug>.mdx`) — Rendered by Astro into interactive HTML with Chart.js charts, styled tables, syntax-highlighted code (Shiki), and callout boxes
 2. **Markdown** (`src/content/reports/<slug>/index.md`) — Plain Markdown for AI consumption, copied into `dist/` during build
 
-The JSON schema supports five section types: `text`, `chart`, `table`, `code`, `callout`.
+The JSON schema supports eleven section types: `text`, `chart`, `table`, `code`, `callout`, `statcard`, `tabs`, `timeline`, `figure`, `quote`, `accordion`.
 
 **Generated report content is gitignored** — `src/content/reports/` is in `.gitignore`. Reports are generated at build/deploy time.
 
 ### Content Collection
 
-Astro content collection (`src/content.config.ts`) uses glob loader to find `**/*.mdx` under `src/content/reports/`. Each MDX file uses frontmatter fields: `title` (required), `author`, `date`, `layout`.
+Astro content collection (`src/content.config.ts`) uses glob loader to find `**/*.mdx` under `src/content/reports/`. Each MDX file uses frontmatter fields: `title` (required), `author`, `date`.
 
 ### Components (src/components/)
 
@@ -52,6 +54,12 @@ All components are Astro components used within MDX reports:
 - **Table.astro** — Responsive data table with Tailwind styling
 - **CodeBlock.astro** — Shiki syntax highlighting with dual-theme (one-light / one-dark-pro)
 - **Callout.astro** — Styled aside with info/warning/success/error variants
+- **StatCard.astro** — Metric display with optional trend indicator and count-up animation
+- **Figure.astro** — Image with optional caption, lazy loading
+- **Quote.astro** — Styled blockquote with author/role attribution
+- **Tabs.astro** — WAI-ARIA tabbed content panels
+- **Timeline.astro** — Vertical chronological event display with staggered animations
+- **Accordion.astro** — Expandable/collapsible sections, single or multi-open mode
 
 ### Styling
 
@@ -60,6 +68,16 @@ Tailwind CSS v4 with class-based dark mode (`.dark` class on `<html>`). Theme to
 ### Agent Skill
 
 `skill/prism-report-manager/` is an installable Claude Code skill package. It gets tarred into `public/skill.tar.gz` during prebuild and is downloadable from the deployed site. The skill contains its own copies of scripts, schema, and reference docs.
+
+### CI/CD
+
+- **CI** (`.github/workflows/ci.yml`) — Runs lint, format check, and build on pull requests to `main`.
+- **Deploy** (`.github/workflows/deploy.yml`) — On push to `main` or manual dispatch: generates all reports, builds the site, copies Markdown into `dist/`, and deploys to Cloudflare Pages.
+- Report JSON source files live in `reports/` and are committed to the repo.
+
+### Testing
+
+Vitest with v8 coverage (`vitest.config.js`). Tests cover schema validation, Markdown conversion, MDX conversion, and Cloudflare middleware. Fixtures in `scripts/__fixtures__/`.
 
 ## Conventions
 

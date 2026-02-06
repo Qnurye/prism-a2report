@@ -9,10 +9,10 @@ description: >
 license: MIT
 compatibility: >
   Requires local filesystem access to ~/Projects/prism-a2report,
-  Node.js, pnpm, wrangler CLI, and internet access for deployment.
+  Node.js, pnpm, git, and internet access for pushing to the remote.
 metadata:
   author: qnurye
-  version: "1.0.0"
+  version: "2.0.0"
   site: https://prism.qnury.es
 allowed-tools: Bash Read Write
 ---
@@ -33,7 +33,7 @@ This skill operates on the local filesystem. Ensure:
 
 - Working directory: `~/Projects/prism-a2report`
 - Dependencies installed: `pnpm install`
-- Wrangler authenticated: `wrangler login`
+- Git configured with push access to the repo
 
 ## Deploying a Report
 
@@ -43,31 +43,34 @@ Write a JSON file following the A2UI format. See `references/A2UI_FORMAT.md`
 for the full specification, or `assets/example-simple-report.json` for a
 minimal example.
 
-### Step 2: Deploy
+### Step 2: Validate
 
 ```bash
 cd ~/Projects/prism-a2report
-./scripts/deploy-report.sh /path/to/report.json [optional-slug]
+node scripts/validate-report.js /path/to/report.json
 ```
 
-The script will:
+Fix any validation errors before proceeding.
 
-1. Validate the JSON against `references/REPORT_SCHEMA.json`
-2. Convert JSON to MDX
-3. Generate both HTML and Markdown outputs
-4. Build the Astro site
-5. Deploy to Cloudflare Pages
-6. Print the public URL
-
-### Step 3: Verify
+### Step 3: Deploy via Git
 
 ```bash
-# Human-readable
-open https://prism.qnury.es/reports/<slug>
-
-# AI-readable
-curl https://prism.qnury.es/reports/<slug>
+cp /path/to/report.json reports/<slug>.json
+git add reports/<slug>.json
+git commit -m "feat: add <slug> report"
+git push origin main
 ```
+
+GitHub Actions will automatically:
+
+1. Validate all report JSON files
+2. Generate MDX and Markdown from each report
+3. Build the Astro site
+4. Copy AI-readable Markdown into the dist output
+5. Deploy to Cloudflare Pages
+
+The report will be available at `https://prism.qnury.es/reports/<slug>` once
+the workflow completes.
 
 ## Reading Reports
 
@@ -88,3 +91,9 @@ See `references/A2UI_FORMAT.md` for supported section types:
 - `table` — Responsive data table
 - `code` — Syntax-highlighted code block
 - `callout` — Info/warning/success/error callout box
+- `statcard` — Metric display with trend indicator
+- `tabs` — Tabbed content panels
+- `timeline` — Chronological event display
+- `figure` — Image with optional caption
+- `quote` — Blockquote with author attribution
+- `accordion` — Expandable/collapsible sections
