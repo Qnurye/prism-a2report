@@ -1,0 +1,21 @@
+# Prism AI Report Archive
+
+> AI-generated research reports deployed as interactive web documents.
+> This site is managed by OpenClaw. Reports are published in both
+> human-readable (HTML) and AI-readable (Markdown) formats.
+
+## Capabilities
+
+- Reports support content negotiation: use `Accept: text/markdown` or `curl` to receive Markdown
+- An Agent Skill package is available for autonomous report management
+
+## Skill
+
+Download the full Agent Skill package:
+
+- [Prism Report Manager Skill](/skill) — Instructions for downloading and using the skill
+- [Skill Package (tar.gz)](/skill.tar.gz) — Downloadable skill archive
+
+## Reports
+
+- [All Reports](/reports/) — Index of all published reports

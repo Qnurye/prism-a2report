@@ -11,6 +11,12 @@ export default [
     },
   },
   {
+    files: ["scripts/**/*.js", "skill/**/scripts/**/*.js"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
     ignores: ["dist/", ".astro/", "node_modules/"],
   },
 ];

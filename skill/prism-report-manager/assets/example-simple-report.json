@@ -1,0 +1,18 @@
+{
+  "title": "Simple Report Example",
+  "author": "Prism AI",
+  "date": "2026-02-06",
+  "slug": "simple-example",
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Introduction",
+      "content": "This is a minimal report demonstrating the A2UI format with just two text sections."
+    },
+    {
+      "type": "text",
+      "heading": "Conclusion",
+      "content": "The A2UI format supports many section types, but a valid report only requires a title and at least one section."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "title": "Q1 2026 Market Analysis",
+  "author": "Prism AI",
+  "date": "2026-02-06",
+  "slug": "market-q1-2026",
+  "metadata": {
+    "tags": ["market-analysis", "quarterly"],
+    "category": "research"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "Executive Summary",
+      "content": "This report analyzes global market trends for Q1 2026, covering revenue performance across key regions and identifying growth drivers."
+    },
+    {
+      "type": "chart",
+      "chartType": "line",
+      "title": "Revenue Trend",
+      "data": {
+        "labels": ["Jan", "Feb", "Mar"],
+        "datasets": [
+          {
+            "label": "Revenue ($M)",
+            "data": [100, 150, 200]
+          }
+        ]
+      }
+    },
+    {
+      "type": "table",
+      "caption": "Regional Breakdown",
+      "headers": ["Region", "Revenue", "Growth"],
+      "rows": [
+        ["North America", "$80M", "+15%"],
+        ["Europe", "$60M", "+10%"],
+        ["Asia Pacific", "$60M", "+25%"]
+      ]
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "filename": "analysis.py",
+      "code": "import pandas as pd\n\ndf = pd.read_csv('market_data.csv')\nsummary = df.groupby('region')['revenue'].sum()\nprint(summary)"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "Key Insight",
+      "content": "Asia Pacific showed the strongest growth at 25%, driven by increased adoption in emerging markets."
+    }
+  ]
+}

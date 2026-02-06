@@ -1,0 +1,23 @@
+# Prism Report Manager — Agent Skill
+
+To use this skill, download and extract the skill package:
+
+    curl -fsSL https://prism.qnury.es/skill.tar.gz | tar -xz
+
+This creates a `prism-report-manager/` directory containing:
+
+    prism-report-manager/
+    ├── SKILL.md                       — Read this first
+    ├── scripts/
+    │   ├── deploy-report.sh           — Build and deploy a report
+    │   ├── list-reports.sh            — List all deployed reports
+    │   └── validate-report.js         — Validate report JSON against schema
+    ├── references/
+    │   ├── A2UI_FORMAT.md             — Report JSON format specification
+    │   ├── REPORT_SCHEMA.json         — JSON Schema for report validation
+    │   └── DEPLOYMENT_GUIDE.md        — Step-by-step deployment instructions
+    └── assets/
+        ├── example-simple-report.json — Minimal report example
+        └── example-full-report.json   — Full-featured report example
+
+After extracting, read SKILL.md for complete instructions.

@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "author": { "type": "string", "default": "Prism AI" },
+    "date": { "type": "string", "format": "date" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "category": { "type": "string" }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Section" }
+    }
+  },
+  "required": ["title", "sections"],
+  "definitions": {
+    "Section": {
+      "oneOf": [
+        { "$ref": "#/definitions/TextSection" },
+        { "$ref": "#/definitions/ChartSection" },
+        { "$ref": "#/definitions/TableSection" },
+        { "$ref": "#/definitions/CodeSection" },
+        { "$ref": "#/definitions/CalloutSection" }
+      ]
+    },
+    "TextSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "text" },
+        "heading": { "type": "string" },
+        "level": { "type": "integer", "minimum": 1, "maximum": 6, "default": 2 },
+        "content": { "type": "string", "description": "Markdown content" }
+      },
+      "required": ["type", "content"]
+    },
+    "ChartSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "chart" },
+        "chartType": { "enum": ["line", "bar", "pie", "doughnut"] },
+        "title": { "type": "string" },
+        "data": { "type": "object", "description": "Chart.js data object" },
+        "options": { "type": "object", "description": "Chart.js options" }
+      },
+      "required": ["type", "chartType", "data"]
+    },
+    "TableSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "table" },
+        "caption": { "type": "string" },
+        "headers": { "type": "array", "items": { "type": "string" } },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "required": ["type", "headers", "rows"]
+    },
+    "CodeSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "code" },
+        "language": { "type": "string" },
+        "filename": { "type": "string" },
+        "code": { "type": "string" }
+      },
+      "required": ["type", "code"]
+    },
+    "CalloutSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "callout" },
+        "variant": { "enum": ["info", "warning", "success", "error"] },
+        "title": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["type", "variant", "content"]
+    }
+  }
+}
