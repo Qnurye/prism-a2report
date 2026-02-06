@@ -22,7 +22,7 @@
 @theme inline {
   --font-sans: "Inter", "LXGW Neo XiHei", sans-serif;
   --font-serif: "Baskervville", "GenRyuMin2 TC", "Songti SC", serif;
-  --font-mono: "Maple Mono", monospace;
+  --font-mono: "Maple Mono CN", "Maple Mono", monospace;
   --font-ui: "IBM Plex Sans", sans-serif;
 
   --color-background: var(--background);
