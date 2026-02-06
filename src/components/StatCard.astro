@@ -1,0 +1,101 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  description?: string;
+  trend?: "up" | "down" | "neutral";
+  trendValue?: string;
+}
+
+const { label, value, description, trend, trendValue } = Astro.props;
+const cardId = `statcard-${Math.random().toString(36).slice(2, 9)}`;
+const isNumeric = typeof value === "number";
+
+const trendColors = {
+  up: "text-green-600 dark:text-green-400",
+  down: "text-red-600 dark:text-red-400",
+  neutral: "text-muted-foreground",
+};
+
+const trendArrows = {
+  up: "\u2191",
+  down: "\u2193",
+  neutral: "\u2192",
+};
+---
+
+<figure class="my-6">
+  <div
+    class="border border-border rounded-lg p-6 bg-secondary/30 a2r-animate"
+    id={cardId}
+    data-target-value={isNumeric ? value : undefined}
+  >
+    <p class="text-muted-foreground text-sm font-ui">{label}</p>
+    <div class="flex items-baseline gap-3 mt-1">
+      <span class="font-ui font-bold text-4xl" data-value>
+        {value}
+      </span>
+      {
+        trend && (
+          <span class={`text-sm font-ui font-medium ${trendColors[trend]}`}>
+            {trendArrows[trend]} {trendValue}
+          </span>
+        )
+      }
+    </div>
+    {description && <p class="text-sm text-muted-foreground mt-2">{description}</p>}
+  </div>
+</figure>
+
+<script>
+  function initStatCards() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            el.classList.add("a2r-visible");
+            el.style.animation = "a2r-scale-in 0.4s ease forwards";
+
+            const target = parseFloat(el.dataset.targetValue || "");
+            if (!isNaN(target)) {
+              animateValue(el.querySelector("[data-value]") as HTMLElement, target);
+            }
+
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.3 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='statcard-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  function animateValue(el: HTMLElement, target: number) {
+    const duration = 800;
+    const start = performance.now();
+    const isInteger = Number.isInteger(target);
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+
+      el.textContent = isInteger ? Math.round(current).toString() : current.toFixed(1);
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        el.textContent = isInteger ? target.toString() : target.toFixed(1);
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  initStatCards();
+</script>

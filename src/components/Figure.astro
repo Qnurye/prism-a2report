@@ -1,0 +1,50 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  width?: string;
+}
+
+const { src, alt, caption, width = "100%" } = Astro.props;
+const figureId = `figure-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<figure class="my-6 a2r-animate" id={figureId}>
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    class="rounded-lg border border-border"
+    style={`width: ${width}; height: auto;`}
+  />
+  {
+    caption && (
+      <figcaption class="text-muted-foreground text-sm text-center font-ui mt-2">
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  function initFigures() {
+    document.querySelectorAll<HTMLElement>("[id^='figure-']").forEach((figure) => {
+      const img = figure.querySelector("img");
+      if (!img) return;
+
+      const show = () => {
+        figure.classList.add("a2r-visible");
+        figure.style.animation = "a2r-fade-in 0.5s ease forwards";
+      };
+
+      if (img.complete) {
+        show();
+      } else {
+        img.addEventListener("load", show, { once: true });
+      }
+    });
+  }
+
+  initFigures();
+</script>

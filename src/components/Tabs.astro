@@ -1,0 +1,85 @@
+---
+interface Props {
+  tabs: Array<{ label: string; content: string }>;
+  defaultTab?: number;
+}
+
+const { tabs, defaultTab = 0 } = Astro.props;
+const tabsId = `tabs-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="my-6" id={tabsId} data-tabs-id={tabsId}>
+  <div class="border-b border-border" role="tablist">
+    {
+      tabs.map((tab, index) => (
+        <button
+          role="tab"
+          aria-selected={index === defaultTab ? "true" : "false"}
+          aria-controls={`${tabsId}-panel-${index}`}
+          data-tab-index={index}
+          class:list={[
+            "px-4 py-2 font-ui text-sm transition-colors -mb-px",
+            index === defaultTab
+              ? "border-b-2 border-primary text-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground",
+          ]}
+        >
+          {tab.label}
+        </button>
+      ))
+    }
+  </div>
+  {
+    tabs.map((tab, index) => (
+      <div
+        id={`${tabsId}-panel-${index}`}
+        role="tabpanel"
+        data-tab-panel={index}
+        class:list={["p-4 text-sm leading-relaxed", index !== defaultTab && "hidden"]}
+        style={index === defaultTab ? "opacity: 1" : "opacity: 0"}
+      >
+        {tab.content}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  function initTabs() {
+    document.querySelectorAll<HTMLElement>("[data-tabs-id]").forEach((container) => {
+      const buttons = container.querySelectorAll<HTMLButtonElement>("[role='tab']");
+      const panels = container.querySelectorAll<HTMLElement>("[role='tabpanel']");
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = btn.dataset.tabIndex!;
+
+          buttons.forEach((b) => {
+            const isActive = b.dataset.tabIndex === index;
+            b.setAttribute("aria-selected", String(isActive));
+            b.className = isActive
+              ? "px-4 py-2 font-ui text-sm transition-colors -mb-px border-b-2 border-primary text-foreground font-medium"
+              : "px-4 py-2 font-ui text-sm transition-colors -mb-px text-muted-foreground hover:text-foreground";
+          });
+
+          panels.forEach((panel) => {
+            const isActive = panel.dataset.tabPanel === index;
+            if (isActive) {
+              panel.classList.remove("hidden");
+              panel.style.opacity = "0";
+              requestAnimationFrame(() => {
+                panel.style.transition = "opacity 150ms ease";
+                panel.style.opacity = "1";
+              });
+            } else {
+              panel.classList.add("hidden");
+              panel.style.opacity = "0";
+            }
+          });
+        });
+      });
+    });
+  }
+
+  initTabs();
+</script>

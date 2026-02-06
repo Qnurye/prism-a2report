@@ -56,6 +56,54 @@ function renderCode(lines, s) {
   lines.push("");
 }
 
+function renderStatCard(lines, s) {
+  const props = [`label=${JSON.stringify(s.label)}`];
+  if (typeof s.value === "number") {
+    props.push(`value={${s.value}}`);
+  } else {
+    props.push(`value=${JSON.stringify(s.value)}`);
+  }
+  if (s.description) props.push(`description=${JSON.stringify(s.description)}`);
+  if (s.trend) props.push(`trend="${s.trend}"`);
+  if (s.trendValue) props.push(`trendValue=${JSON.stringify(s.trendValue)}`);
+  lines.push(`<StatCard ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderTabs(lines, s) {
+  const props = [`tabs={${JSON.stringify(s.tabs)}}`];
+  if (s.defaultTab !== undefined) props.push(`defaultTab={${s.defaultTab}}`);
+  lines.push(`<Tabs ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderTimeline(lines, s) {
+  lines.push(`<Timeline events={${JSON.stringify(s.events)}} />`);
+  lines.push("");
+}
+
+function renderFigure(lines, s) {
+  const props = [`src=${JSON.stringify(s.src)}`, `alt=${JSON.stringify(s.alt)}`];
+  if (s.caption) props.push(`caption=${JSON.stringify(s.caption)}`);
+  if (s.width) props.push(`width=${JSON.stringify(s.width)}`);
+  lines.push(`<Figure ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderQuote(lines, s) {
+  const props = [`text=${JSON.stringify(s.text)}`, `author=${JSON.stringify(s.author)}`];
+  if (s.role) props.push(`role=${JSON.stringify(s.role)}`);
+  lines.push(`<Quote ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderAccordion(lines, s) {
+  const props = [`items={${JSON.stringify(s.items)}}`];
+  if (s.allowMultiple) props.push(`allowMultiple={true}`);
+  lines.push(`<Accordion ${props.join(" ")} />`);
+  lines.push("");
+}
+
 export function convertToMdx(report) {
   const lines = [];
 
@@ -72,6 +120,12 @@ export function convertToMdx(report) {
   lines.push("import Table from '../../components/Table.astro'");
   lines.push("import Callout from '../../components/Callout.astro'");
   lines.push("import CodeBlock from '../../components/CodeBlock.astro'");
+  lines.push("import StatCard from '../../components/StatCard.astro'");
+  lines.push("import Tabs from '../../components/Tabs.astro'");
+  lines.push("import Timeline from '../../components/Timeline.astro'");
+  lines.push("import Figure from '../../components/Figure.astro'");
+  lines.push("import Quote from '../../components/Quote.astro'");
+  lines.push("import Accordion from '../../components/Accordion.astro'");
   lines.push("");
 
   // Sections
@@ -91,6 +145,24 @@ export function convertToMdx(report) {
         break;
       case "code":
         renderCode(lines, section);
+        break;
+      case "statcard":
+        renderStatCard(lines, section);
+        break;
+      case "tabs":
+        renderTabs(lines, section);
+        break;
+      case "timeline":
+        renderTimeline(lines, section);
+        break;
+      case "figure":
+        renderFigure(lines, section);
+        break;
+      case "quote":
+        renderQuote(lines, section);
+        break;
+      case "accordion":
+        renderAccordion(lines, section);
         break;
     }
   }

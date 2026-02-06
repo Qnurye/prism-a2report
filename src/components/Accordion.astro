@@ -1,0 +1,90 @@
+---
+interface Props {
+  items: Array<{ title: string; content: string }>;
+  allowMultiple?: boolean;
+}
+
+const { items, allowMultiple = false } = Astro.props;
+const accordionId = `accordion-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div
+  class="my-6 border border-border rounded-lg divide-y divide-border overflow-hidden"
+  id={accordionId}
+  data-allow-multiple={allowMultiple ? "true" : "false"}
+>
+  {
+    items.map((item, index) => (
+      <div data-accordion-item>
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 font-ui font-semibold text-sm text-left hover:bg-accent/50 transition-colors"
+          aria-expanded="false"
+          aria-controls={`${accordionId}-content-${index}`}
+          data-accordion-trigger
+        >
+          <span>{item.title}</span>
+          <svg
+            class="w-4 h-4 text-muted-foreground transition-transform duration-250 shrink-0"
+            data-accordion-chevron
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+        <div
+          id={`${accordionId}-content-${index}`}
+          class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-250 ease-in-out"
+          data-accordion-content
+        >
+          <div class="overflow-hidden">
+            <div class="px-4 pb-3 pt-0 text-sm leading-relaxed">{item.content}</div>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  function initAccordions() {
+    document.querySelectorAll<HTMLElement>("[id^='accordion-']").forEach((container) => {
+      const allowMultiple = container.dataset.allowMultiple === "true";
+
+      container.querySelectorAll<HTMLButtonElement>("[data-accordion-trigger]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const item = btn.closest("[data-accordion-item]")!;
+          const content = item.querySelector<HTMLElement>("[data-accordion-content]")!;
+          const chevron = btn.querySelector<HTMLElement>("[data-accordion-chevron]")!;
+          const isExpanded = btn.getAttribute("aria-expanded") === "true";
+
+          if (!allowMultiple && !isExpanded) {
+            container
+              .querySelectorAll<HTMLButtonElement>("[data-accordion-trigger]")
+              .forEach((otherBtn) => {
+                if (otherBtn !== btn) {
+                  otherBtn.setAttribute("aria-expanded", "false");
+                  const otherContent = otherBtn
+                    .closest("[data-accordion-item]")!
+                    .querySelector<HTMLElement>("[data-accordion-content]")!;
+                  const otherChevron = otherBtn.querySelector<HTMLElement>(
+                    "[data-accordion-chevron]",
+                  )!;
+                  otherContent.style.gridTemplateRows = "0fr";
+                  otherChevron.style.transform = "rotate(0deg)";
+                }
+              });
+          }
+
+          btn.setAttribute("aria-expanded", String(!isExpanded));
+          content.style.gridTemplateRows = isExpanded ? "0fr" : "1fr";
+          chevron.style.transform = isExpanded ? "rotate(0deg)" : "rotate(180deg)";
+        });
+      });
+    });
+  }
+
+  initAccordions();
+</script>

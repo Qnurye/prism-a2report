@@ -73,6 +73,64 @@ function renderChart(lines, s) {
   }
 }
 
+function renderStatCard(lines, s) {
+  const trendArrows = { up: "\u2191", down: "\u2193", neutral: "\u2192" };
+  let line = `**${s.label}**: ${s.value}`;
+  if (s.trend && s.trendValue) {
+    line += ` ${trendArrows[s.trend] || ""} ${s.trendValue}`;
+  }
+  lines.push(line);
+  if (s.description) {
+    lines.push(`*${s.description}*`);
+  }
+  lines.push("");
+}
+
+function renderTabs(lines, s) {
+  for (const tab of s.tabs) {
+    lines.push(`### Tab: ${tab.label}`);
+    lines.push("");
+    lines.push(tab.content);
+    lines.push("");
+  }
+}
+
+function renderTimeline(lines, s) {
+  for (const event of s.events) {
+    lines.push(`**${event.date}** \u2014 ${event.title}`);
+    if (event.description) {
+      lines.push("");
+      lines.push(event.description);
+    }
+    lines.push("");
+  }
+}
+
+function renderFigure(lines, s) {
+  lines.push(`![${s.alt}](${s.src})`);
+  if (s.caption) {
+    lines.push(`*${s.caption}*`);
+  }
+  lines.push("");
+}
+
+function renderQuote(lines, s) {
+  lines.push(`> ${s.text}`);
+  lines.push(">");
+  const attribution = s.role ? `\u2014 ${s.author}, ${s.role}` : `\u2014 ${s.author}`;
+  lines.push(`> ${attribution}`);
+  lines.push("");
+}
+
+function renderAccordion(lines, s) {
+  for (const item of s.items) {
+    lines.push(`### ${item.title}`);
+    lines.push("");
+    lines.push(item.content);
+    lines.push("");
+  }
+}
+
 export function convertToMarkdown(report) {
   const lines = [];
 
@@ -104,6 +162,24 @@ export function convertToMarkdown(report) {
         break;
       case "chart":
         renderChart(lines, section);
+        break;
+      case "statcard":
+        renderStatCard(lines, section);
+        break;
+      case "tabs":
+        renderTabs(lines, section);
+        break;
+      case "timeline":
+        renderTimeline(lines, section);
+        break;
+      case "figure":
+        renderFigure(lines, section);
+        break;
+      case "quote":
+        renderQuote(lines, section);
+        break;
+      case "accordion":
+        renderAccordion(lines, section);
         break;
     }
   }

@@ -26,7 +26,13 @@
         { "$ref": "#/definitions/ChartSection" },
         { "$ref": "#/definitions/TableSection" },
         { "$ref": "#/definitions/CodeSection" },
-        { "$ref": "#/definitions/CalloutSection" }
+        { "$ref": "#/definitions/CalloutSection" },
+        { "$ref": "#/definitions/StatCardSection" },
+        { "$ref": "#/definitions/TabsSection" },
+        { "$ref": "#/definitions/TimelineSection" },
+        { "$ref": "#/definitions/FigureSection" },
+        { "$ref": "#/definitions/QuoteSection" },
+        { "$ref": "#/definitions/AccordionSection" }
       ]
     },
     "TextSection": {
@@ -85,6 +91,99 @@
         "content": { "type": "string" }
       },
       "required": ["type", "variant", "content"]
+    },
+    "StatCardSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "statcard" },
+        "label": { "type": "string" },
+        "value": { "oneOf": [{ "type": "string" }, { "type": "number" }] },
+        "description": { "type": "string" },
+        "trend": { "enum": ["up", "down", "neutral"] },
+        "trendValue": { "type": "string" }
+      },
+      "required": ["type", "label", "value"]
+    },
+    "TabsSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "tabs" },
+        "tabs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "content": { "type": "string" }
+            },
+            "required": ["label", "content"]
+          },
+          "minItems": 2
+        },
+        "defaultTab": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["type", "tabs"]
+    },
+    "TimelineSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "timeline" },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "required": ["date", "title"]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "events"]
+    },
+    "FigureSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "figure" },
+        "src": { "type": "string" },
+        "alt": { "type": "string" },
+        "caption": { "type": "string" },
+        "width": { "type": "string" }
+      },
+      "required": ["type", "src", "alt"]
+    },
+    "QuoteSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "quote" },
+        "text": { "type": "string" },
+        "author": { "type": "string" },
+        "role": { "type": "string" }
+      },
+      "required": ["type", "text", "author"]
+    },
+    "AccordionSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "accordion" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "content": { "type": "string" }
+            },
+            "required": ["title", "content"]
+          },
+          "minItems": 1
+        },
+        "allowMultiple": { "type": "boolean" }
+      },
+      "required": ["type", "items"]
     }
   }
 }

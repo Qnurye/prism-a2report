@@ -1,0 +1,56 @@
+---
+interface Props {
+  events: Array<{ date: string; title: string; description?: string }>;
+}
+
+const { events } = Astro.props;
+const timelineId = `timeline-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="my-6" id={timelineId}>
+  <div class="relative border-l-2 border-border ml-3">
+    {
+      events.map((event, index) => (
+        <div
+          class="relative pl-8 pb-8 last:pb-0 a2r-animate"
+          data-timeline-item
+          style={`--delay: ${index * 100}ms`}
+        >
+          <div class="absolute left-[-7px] top-1 w-3 h-3 rounded-full bg-primary" />
+          <p class="font-mono text-sm text-muted-foreground">{event.date}</p>
+          <p class="font-ui font-semibold mt-0.5">{event.title}</p>
+          {event.description && (
+            <p class="text-sm text-muted-foreground mt-1">{event.description}</p>
+          )}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  function initTimelines() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const container = entry.target as HTMLElement;
+            container.querySelectorAll<HTMLElement>("[data-timeline-item]").forEach((item) => {
+              const delay = item.style.getPropertyValue("--delay");
+              item.classList.add("a2r-visible");
+              item.style.animation = `a2r-slide-up 0.4s ease ${delay} forwards`;
+            });
+            observer.unobserve(container);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='timeline-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  initTimelines();
+</script>

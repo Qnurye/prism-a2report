@@ -1,0 +1,49 @@
+---
+interface Props {
+  text: string;
+  author: string;
+  role?: string;
+}
+
+const { text, author, role } = Astro.props;
+const quoteId = `quote-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<figure
+  class="border-l-4 border-primary rounded-lg bg-secondary/30 p-6 my-6 a2r-animate"
+  id={quoteId}
+>
+  <span class="text-6xl text-primary/20 font-serif leading-none select-none" aria-hidden="true"
+    >&ldquo;</span
+  >
+  <blockquote class="font-serif text-lg italic -mt-6 ml-2">
+    <p>{text}</p>
+  </blockquote>
+  <figcaption class="font-ui text-sm text-muted-foreground mt-3 ml-2">
+    &mdash; {author}{role && <span>, {role}</span>}
+  </figcaption>
+</figure>
+
+<script>
+  function initQuotes() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            el.classList.add("a2r-visible");
+            el.style.animation = "a2r-slide-in-left 0.5s ease forwards";
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.2 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='quote-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  initQuotes();
+</script>
