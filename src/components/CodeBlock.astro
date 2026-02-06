@@ -1,0 +1,53 @@
+---
+import { createHighlighter } from "shiki";
+
+interface Props {
+  code: string;
+  language?: string;
+  filename?: string;
+}
+
+const { code, language = "text", filename } = Astro.props;
+
+const highlighter = await createHighlighter({
+  themes: ["one-light", "one-dark-pro"],
+  langs: [language],
+});
+
+const html = highlighter.codeToHtml(code, {
+  lang: language,
+  themes: {
+    light: "one-light",
+    dark: "one-dark-pro",
+  },
+  defaultColor: false,
+});
+---
+
+<figure class="my-6 rounded-lg overflow-hidden border border-border">
+  {
+    filename && (
+      <div class="bg-secondary px-4 py-2 text-xs text-muted-foreground font-mono border-b border-border">
+        {filename}
+      </div>
+    )
+  }
+  <div
+    class="codeblock [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:text-sm [&_pre]:leading-relaxed [&_pre]:m-0 [&_code]:bg-transparent [&_code]:p-0"
+    set:html={html}
+  />
+</figure>
+
+<style is:global>
+  .codeblock .shiki,
+  .codeblock .shiki span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+
+  :root.dark .codeblock .shiki,
+  :root.dark .codeblock .shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+</style>

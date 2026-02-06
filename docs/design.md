@@ -11,12 +11,12 @@ The design system is derived from `qnury.es` to maintain visual consistency acro
 
 ### 1.1 Font Stack
 
-| Role     | Latin           | CJK                      | Fallback     | Notes                                      |
-| -------- | --------------- | ------------------------- | ------------ | ------------------------------------------ |
-| Body     | Inter           | LXGW Neo XiHei            | `sans-serif` | Article prose                              |
-| Headings | Baskervville    | GenRyuMin2 TC, Songti SC  | `serif`      | Report section headings                    |
-| Code     | Maple Mono      | Maple Mono CN             | `monospace`  | Code blocks, inline code                   |
-| UI       | IBM Plex Sans   | —                         | `sans-serif` | Navigation, buttons, labels (English-only) |
+| Role     | Latin         | CJK                      | Fallback     | Notes                                      |
+| -------- | ------------- | ------------------------ | ------------ | ------------------------------------------ |
+| Body     | Inter         | LXGW Neo XiHei           | `sans-serif` | Article prose                              |
+| Headings | Baskervville  | GenRyuMin2 TC, Songti SC | `serif`      | Report section headings                    |
+| Code     | Maple Mono    | Maple Mono CN            | `monospace`  | Code blocks, inline code                   |
+| UI       | IBM Plex Sans | —                        | `sans-serif` | Navigation, buttons, labels (English-only) |
 
 ### 1.2 CSS Custom Properties
 
@@ -76,11 +76,21 @@ body {
   @apply bg-background text-foreground font-sans antialiased;
 }
 
-.prose h1 { @apply font-black text-4xl font-serif mt-8; }
-.prose h2 { @apply font-semibold text-3xl font-serif mt-4; }
-.prose h3 { @apply font-medium text-2xl font-serif mt-3; }
-.prose h4 { @apply font-bold text-xl font-serif; }
-.prose p  { @apply leading-relaxed text-pretty; }
+.prose h1 {
+  @apply font-black text-4xl font-serif mt-8;
+}
+.prose h2 {
+  @apply font-semibold text-3xl font-serif mt-4;
+}
+.prose h3 {
+  @apply font-medium text-2xl font-serif mt-3;
+}
+.prose h4 {
+  @apply font-bold text-xl font-serif;
+}
+.prose p {
+  @apply leading-relaxed text-pretty;
+}
 
 .prose blockquote {
   @apply border-l-4 border-gray-500 pl-4 italic text-gray-600 dark:text-gray-400 my-2;
@@ -105,9 +115,9 @@ Uses OKLCH color space for perceptually uniform color representation. Both light
 
 ```css
 :root {
-  --background: oklch(1 0 0);              /* Pure white */
-  --foreground: oklch(0.145 0 0);          /* Near black */
-  --primary: oklch(0.65 0.08 250);         /* Muted blue */
+  --background: oklch(1 0 0); /* Pure white */
+  --foreground: oklch(0.145 0 0); /* Near black */
+  --primary: oklch(0.65 0.08 250); /* Muted blue */
   --primary-foreground: oklch(0.98 0.01 250);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -131,9 +141,9 @@ Uses OKLCH color space for perceptually uniform color representation. Both light
 
 ```css
 .dark {
-  --background: oklch(0.145 0 0);          /* Near black */
-  --foreground: oklch(0.985 0 0);          /* Near white */
-  --primary: oklch(0.75 0.1 250);          /* Brighter blue */
+  --background: oklch(0.145 0 0); /* Near black */
+  --foreground: oklch(0.985 0 0); /* Near white */
+  --primary: oklch(0.75 0.1 250); /* Brighter blue */
   --primary-foreground: oklch(0.15 0.02 250);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -188,9 +198,9 @@ Reports must be comfortable to read on mobile devices. Layout uses a max-width c
 
 Standard Tailwind CSS v4 breakpoints:
 
-| Prefix | Min width | Typical device  |
-| ------ | --------- | --------------- |
-| `sm`   | 640px     | Large phone     |
-| `md`   | 768px     | Tablet          |
-| `lg`   | 1024px    | Desktop         |
-| `xl`   | 1280px    | Large desktop   |
+| Prefix | Min width | Typical device |
+| ------ | --------- | -------------- |
+| `sm`   | 640px     | Large phone    |
+| `md`   | 768px     | Tablet         |
+| `lg`   | 1024px    | Desktop        |
+| `xl`   | 1280px    | Large desktop  |

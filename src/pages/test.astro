@@ -1,0 +1,182 @@
+---
+import ReportLayout from "../layouts/ReportLayout.astro";
+import Table from "../components/Table.astro";
+import Callout from "../components/Callout.astro";
+import Chart from "../components/Chart.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+---
+
+<ReportLayout title="Component Test Report">
+  <p>
+    This page exercises all four report components with hardcoded data. Resize the browser from
+    375px to 1440px to verify responsive behavior.
+  </p>
+
+  <!-- Section: Table -->
+  <h2>Table Component</h2>
+  <p>A responsive data table with horizontal scroll on narrow viewports.</p>
+
+  <Table
+    caption="Q1 2026 Regional Revenue Breakdown"
+    headers={["Region", "Revenue", "Growth", "Market Share", "Status"]}
+    rows={[
+      ["North America", "$80M", "+15%", "40%", "Strong"],
+      ["Europe", "$60M", "+10%", "30%", "Stable"],
+      ["Asia Pacific", "$60M", "+25%", "20%", "Growing"],
+      ["Latin America", "$15M", "+18%", "7%", "Emerging"],
+      ["Middle East & Africa", "$5M", "+30%", "3%", "New"],
+    ]}
+  />
+
+  <!-- Section: Callout -->
+  <h2>Callout Component</h2>
+  <p>Four callout variants for contextual information.</p>
+
+  <Callout variant="info" title="Key Insight">
+    <p>
+      Asia Pacific showed the strongest growth at 25%, driven by expanding digital adoption and
+      favorable regulatory changes in the region.
+    </p>
+  </Callout>
+
+  <Callout variant="warning" title="Risk Factor">
+    <p>
+      European markets may face headwinds from upcoming regulatory changes in Q2. Monitor closely.
+    </p>
+  </Callout>
+
+  <Callout variant="success" title="Milestone Reached">
+    <p>Total annual revenue exceeded $200M for the first time, ahead of the Q3 target.</p>
+  </Callout>
+
+  <Callout variant="error" title="Action Required">
+    <p>
+      Data pipeline for LATAM region failed on 2026-01-28. Manual reconciliation is needed for 3
+      missing data points.
+    </p>
+  </Callout>
+
+  <!-- Section: Chart -->
+  <h2>Chart Component</h2>
+  <p>Chart.js charts rendered client-side.</p>
+
+  <h3>Line Chart — Revenue Trend</h3>
+  <Chart
+    chartType="line"
+    data={{
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [
+        {
+          label: "Revenue ($M)",
+          data: [65, 78, 90, 81, 106, 120],
+          borderColor: "oklch(0.65 0.08 250)",
+          backgroundColor: "oklch(0.65 0.08 250 / 20%)",
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    }}
+  />
+
+  <h3>Bar Chart — Regional Comparison</h3>
+  <Chart
+    chartType="bar"
+    data={{
+      labels: ["NA", "EU", "APAC", "LATAM", "MEA"],
+      datasets: [
+        {
+          label: "Q1 Revenue ($M)",
+          data: [80, 60, 60, 15, 5],
+          backgroundColor: [
+            "oklch(0.646 0.222 41.116)",
+            "oklch(0.6 0.118 184.704)",
+            "oklch(0.398 0.07 227.392)",
+            "oklch(0.828 0.189 84.429)",
+            "oklch(0.769 0.188 70.08)",
+          ],
+        },
+      ],
+    }}
+  />
+
+  <h3>Doughnut Chart — Market Share</h3>
+  <Chart
+    chartType="doughnut"
+    data={{
+      labels: ["North America", "Europe", "Asia Pacific", "LATAM", "MEA"],
+      datasets: [
+        {
+          data: [40, 30, 20, 7, 3],
+          backgroundColor: [
+            "oklch(0.646 0.222 41.116)",
+            "oklch(0.6 0.118 184.704)",
+            "oklch(0.398 0.07 227.392)",
+            "oklch(0.828 0.189 84.429)",
+            "oklch(0.769 0.188 70.08)",
+          ],
+        },
+      ],
+    }}
+  />
+
+  <!-- Section: CodeBlock -->
+  <h2>CodeBlock Component</h2>
+  <p>Syntax-highlighted code blocks with optional filename headers.</p>
+
+  <CodeBlock
+    filename="deploy-report.sh"
+    language="bash"
+    code={`#!/bin/bash
+set -e
+
+REPORT_JSON="$1"
+SLUG="\${2:-"report-$(date +%Y%m%d-%H%M%S)"}"
+
+echo "Validating report..."
+node scripts/validate-report.js "$REPORT_JSON"
+
+echo "Building site..."
+pnpm run build
+
+echo "Deploying to Cloudflare Pages..."
+wrangler pages deploy dist --project-name=prism-a2report`}
+  />
+
+  <CodeBlock
+    filename="example.ts"
+    language="typescript"
+    code={`interface ReportSection {
+  type: "text" | "chart" | "table" | "code" | "callout";
+  heading?: string;
+  content: string;
+}
+
+function generateReport(sections: ReportSection[]): string {
+  return sections
+    .map((s) => renderSection(s))
+    .join("\\n\\n");
+}`}
+  />
+
+  <CodeBlock
+    language="json"
+    code={`{
+  "title": "Q1 2026 Market Analysis",
+  "author": "Prism AI",
+  "date": "2026-02-06",
+  "slug": "market-q1-2026"
+}`}
+  />
+
+  <!-- CJK Test -->
+  <h2>CJK Typography Test</h2>
+  <p>
+    中文排版测试：霜禽欲下先偷眼，粉蝶如知合断魂。这段文字使用 LXGW Neo XiHei 字体（正文），标题使用
+    GenRyuMin2 TC 字体。
+  </p>
+  <p>
+    Inline <code>code</code> should use Maple Mono / Maple Mono CN: <code
+      >const 测试 = "你好世界";</code
+    >
+  </p>
+</ReportLayout>

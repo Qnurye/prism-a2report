@@ -40,17 +40,17 @@ OpenClaw researches topic
 
 ## 2. Technical Stack
 
-| Layer              | Technology                                      |
-| ------------------ | ----------------------------------------------- |
-| Static Site Gen    | Astro                                           |
-| Content Format     | MDX (Markdown + JSX components)                 |
-| Styling            | Tailwind CSS v4 (via `@tailwindcss/vite`)       |
-| Charts             | Chart.js                                        |
-| Code Highlighting  | Shiki (built into Astro)                        |
-| Font Optimization  | `vite-plugin-font` (powered by `cn-font-split`) |
-| Deployment         | Cloudflare Pages (Direct Upload via Wrangler)   |
-| Content Negotiation| Cloudflare Pages Functions                      |
-| Runtime            | Node.js (via FNM) + pnpm                        |
+| Layer               | Technology                                      |
+| ------------------- | ----------------------------------------------- |
+| Static Site Gen     | Astro                                           |
+| Content Format      | MDX (Markdown + JSX components)                 |
+| Styling             | Tailwind CSS v4 (via `@tailwindcss/vite`)       |
+| Charts              | Chart.js                                        |
+| Code Highlighting   | Shiki (built into Astro)                        |
+| Font Optimization   | `vite-plugin-font` (powered by `cn-font-split`) |
+| Deployment          | Cloudflare Pages (Direct Upload via Wrangler)   |
+| Content Negotiation | Cloudflare Pages Functions                      |
+| Runtime             | Node.js (via FNM) + pnpm                        |
 
 ### 2.1 Rationale
 
@@ -357,13 +357,13 @@ The full SKILL.md content and the `/skill` guide text are in [tech-details.md](t
 
 ### Cloudflare Pages Free Tier
 
-| Resource               | Limit         |
-| ---------------------- | ------------- |
-| Deploys                | 500/month     |
-| Bandwidth              | Unlimited     |
-| Requests               | Unlimited     |
-| Pages Functions        | 100,000/day   |
-| Build minutes (CI)     | 20,000/month  |
+| Resource           | Limit        |
+| ------------------ | ------------ |
+| Deploys            | 500/month    |
+| Bandwidth          | Unlimited    |
+| Requests           | Unlimited    |
+| Pages Functions    | 100,000/day  |
+| Build minutes (CI) | 20,000/month |
 
 Since we use Direct Upload (not CI builds), the build minute limit does not apply. At 500 deploys/month, we can publish multiple reports per day at zero cost.
 

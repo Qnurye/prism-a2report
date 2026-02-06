@@ -1,0 +1,62 @@
+---
+interface Props {
+  chartType: "line" | "bar" | "pie" | "doughnut";
+  data: Record<string, unknown>;
+  options?: Record<string, unknown>;
+}
+
+const { chartType, data, options = {} } = Astro.props;
+const chartId = `chart-${Math.random().toString(36).slice(2, 9)}`;
+const config = JSON.stringify({ chartType, data, options });
+---
+
+<figure class="my-6">
+  <div class="relative w-full">
+    <canvas id={chartId} data-chart-config={config}></canvas>
+  </div>
+</figure>
+
+<script>
+  import { Chart, registerables } from "chart.js";
+  Chart.register(...registerables);
+
+  function initChart(canvas: HTMLCanvasElement) {
+    const { chartType, data, options } = JSON.parse(canvas.dataset.chartConfig!);
+
+    const isDark = document.documentElement.classList.contains("dark");
+    const textColor = isDark ? "oklch(0.985 0 0)" : "oklch(0.145 0 0)";
+    const gridColor = isDark ? "oklch(1 0 0 / 10%)" : "oklch(0 0 0 / 10%)";
+
+    const mergedOptions = {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          labels: { color: textColor },
+        },
+      },
+      scales:
+        chartType === "pie" || chartType === "doughnut"
+          ? undefined
+          : {
+              x: {
+                ticks: { color: textColor },
+                grid: { color: gridColor },
+              },
+              y: {
+                ticks: { color: textColor },
+                grid: { color: gridColor },
+              },
+            },
+      ...options,
+    };
+
+    new Chart(canvas, {
+      type: chartType,
+      data,
+      options: mergedOptions,
+    });
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>("[data-chart-config]").forEach(initChart);
+</script>

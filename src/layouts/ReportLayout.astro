@@ -1,0 +1,102 @@
+---
+import "../styles/global.css";
+// CJK fonts: vite-plugin-font slices these at build time
+import "../../fonts/LXGWNeoXiHei.ttf";
+import "../../fonts/GenRyuMin2TC-R.otf";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+
+    <!-- Dark mode: prevent FOUC -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        if (stored === "dark" || (!stored && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
+    <!-- Google Fonts: Inter, IBM Plex Sans, Baskervville -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Baskervville:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div
+      class="report-container max-w-4xl mx-auto px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen py-8 sm:py-12"
+    >
+      <header class="mb-8 flex items-center justify-between">
+        <h1 class="font-serif text-3xl sm:text-4xl font-black text-foreground">{title}</h1>
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Toggle dark mode"
+          class="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-accent transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+        >
+          <svg
+            id="icon-sun"
+            class="hidden w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          <svg
+            id="icon-moon"
+            class="hidden w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            ></path>
+          </svg>
+        </button>
+      </header>
+      <main class="prose">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      function updateIcons() {
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("icon-sun")!.classList.toggle("hidden", !isDark);
+        document.getElementById("icon-moon")!.classList.toggle("hidden", isDark);
+      }
+
+      updateIcons();
+
+      document.getElementById("theme-toggle")!.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        updateIcons();
+      });
+    </script>
+  </body>
+</html>
