@@ -72,4 +72,105 @@ describe("validateReport", () => {
     expect(valid).toBe(false);
     expect(errors.length).toBeGreaterThan(1);
   });
+
+  it("accepts tabs with nested sections", () => {
+    const report = {
+      title: "Test",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            {
+              label: "Text",
+              sections: [{ type: "text", content: "Simple text" }],
+            },
+            {
+              label: "Data",
+              sections: [
+                { type: "statcard", label: "Users", value: 100 },
+                { type: "code", code: "console.log(1)" },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const { valid, errors } = validateReport(report, schema);
+    expect(valid).toBe(true);
+    expect(errors).toHaveLength(0);
+  });
+
+  it("accepts tabs with different section types", () => {
+    const report = {
+      title: "Test",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            {
+              label: "Chart",
+              sections: [
+                {
+                  type: "chart",
+                  chartType: "bar",
+                  data: { labels: ["A"], datasets: [{ data: [1] }] },
+                },
+              ],
+            },
+            {
+              label: "Table",
+              sections: [{ type: "table", headers: ["X"], rows: [["1"]] }],
+            },
+          ],
+        },
+      ],
+    };
+    const { valid } = validateReport(report, schema);
+    expect(valid).toBe(true);
+  });
+
+  it("rejects tabs with nested tabs (no recursive nesting)", () => {
+    const report = {
+      title: "Test",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            {
+              label: "A",
+              sections: [{ type: "text", content: "text" }],
+            },
+            {
+              label: "B",
+              sections: [
+                {
+                  type: "tabs",
+                  tabs: [
+                    { label: "Inner1", sections: [{ type: "text", content: "x" }] },
+                    { label: "Inner2", sections: [{ type: "text", content: "y" }] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const { valid } = validateReport(report, schema);
+    expect(valid).toBe(false);
+  });
+
+  it("rejects tab item without sections", () => {
+    const report = {
+      title: "Test",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [{ label: "A" }, { label: "B", sections: [{ type: "text", content: "text" }] }],
+        },
+      ],
+    };
+    const { valid } = validateReport(report, schema);
+    expect(valid).toBe(false);
+  });
 });

@@ -33,6 +33,7 @@
     "ajv-formats": "^3.0.1",
     "astro": "^5.17.1",
     "chart.js": "^4.5.1",
+    "marked": "^17.0.1",
     "shiki": "^3.22.0",
     "tailwindcss": "^4.1.18",
     "vite-plugin-font": "^5.1.2"

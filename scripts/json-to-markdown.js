@@ -86,12 +86,51 @@ function renderStatCard(lines, s) {
   lines.push("");
 }
 
+function renderSection(lines, section) {
+  switch (section.type) {
+    case "text":
+      renderText(lines, section);
+      break;
+    case "table":
+      renderTable(lines, section);
+      break;
+    case "code":
+      renderCode(lines, section);
+      break;
+    case "callout":
+      renderCallout(lines, section);
+      break;
+    case "chart":
+      renderChart(lines, section);
+      break;
+    case "statcard":
+      renderStatCard(lines, section);
+      break;
+    case "tabs":
+      renderTabs(lines, section);
+      break;
+    case "timeline":
+      renderTimeline(lines, section);
+      break;
+    case "figure":
+      renderFigure(lines, section);
+      break;
+    case "quote":
+      renderQuote(lines, section);
+      break;
+    case "accordion":
+      renderAccordion(lines, section);
+      break;
+  }
+}
+
 function renderTabs(lines, s) {
   for (const tab of s.tabs) {
     lines.push(`### Tab: ${tab.label}`);
     lines.push("");
-    lines.push(tab.content);
-    lines.push("");
+    for (const section of tab.sections) {
+      renderSection(lines, section);
+    }
   }
 }
 
@@ -147,41 +186,7 @@ export function convertToMarkdown(report) {
 
   // Sections
   for (const section of report.sections) {
-    switch (section.type) {
-      case "text":
-        renderText(lines, section);
-        break;
-      case "table":
-        renderTable(lines, section);
-        break;
-      case "code":
-        renderCode(lines, section);
-        break;
-      case "callout":
-        renderCallout(lines, section);
-        break;
-      case "chart":
-        renderChart(lines, section);
-        break;
-      case "statcard":
-        renderStatCard(lines, section);
-        break;
-      case "tabs":
-        renderTabs(lines, section);
-        break;
-      case "timeline":
-        renderTimeline(lines, section);
-        break;
-      case "figure":
-        renderFigure(lines, section);
-        break;
-      case "quote":
-        renderQuote(lines, section);
-        break;
-      case "accordion":
-        renderAccordion(lines, section);
-        break;
-    }
+    renderSection(lines, section);
   }
 
   return lines.join("\n");

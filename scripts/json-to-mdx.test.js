@@ -125,4 +125,67 @@ describe("convertToMdx", () => {
     expect(output).not.toContain("date:");
     expect(output).toContain("Just a paragraph.");
   });
+
+  it("renders tabs with sections as JSON props", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "One", sections: [{ type: "text", content: "First tab" }] },
+            { label: "Two", sections: [{ type: "text", content: "Second tab" }] },
+          ],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Tabs");
+    expect(output).toContain('"label":"One"');
+    expect(output).toContain('"sections"');
+    expect(output).toContain('"type":"text"');
+  });
+
+  it("renders tabs with mixed section types", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "Text", sections: [{ type: "text", content: "Simple" }] },
+            {
+              label: "Data",
+              sections: [
+                { type: "statcard", label: "Users", value: 100 },
+                { type: "code", code: "x = 1" },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Tabs");
+    expect(output).toContain('"type":"statcard"');
+    expect(output).toContain('"type":"code"');
+  });
+
+  it("renders tabs with defaultTab", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "A", sections: [{ type: "text", content: "a" }] },
+            { label: "B", sections: [{ type: "text", content: "b" }] },
+          ],
+          defaultTab: 1,
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("defaultTab={1}");
+  });
 });

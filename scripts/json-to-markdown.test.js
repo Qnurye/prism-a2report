@@ -214,4 +214,74 @@ describe("convertToMarkdown", () => {
     const output = convertToMarkdown(report);
     expect(output).toContain("| Label | Value |");
   });
+
+  it("renders tabs with text sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "One", sections: [{ type: "text", content: "First tab" }] },
+            { label: "Two", sections: [{ type: "text", content: "Second tab" }] },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### Tab: One");
+    expect(output).toContain("First tab");
+    expect(output).toContain("### Tab: Two");
+    expect(output).toContain("Second tab");
+  });
+
+  it("renders tabs with mixed section types", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "Summary", sections: [{ type: "text", content: "Overview text" }] },
+            {
+              label: "Data",
+              sections: [
+                { type: "statcard", label: "Users", value: 12500, trend: "up", trendValue: "+15%" },
+                { type: "table", headers: ["A", "B"], rows: [["1", "2"]] },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### Tab: Summary");
+    expect(output).toContain("Overview text");
+    expect(output).toContain("### Tab: Data");
+    expect(output).toContain("**Users**: 12500");
+    expect(output).toContain("| A | B |");
+    expect(output).toContain("| 1 | 2 |");
+  });
+
+  it("renders tabs with code sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "tabs",
+          tabs: [
+            { label: "A", sections: [{ type: "text", content: "text" }] },
+            {
+              label: "Code",
+              sections: [{ type: "code", language: "python", code: "print('hello')" }],
+            },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### Tab: Code");
+    expect(output).toContain("```python");
+    expect(output).toContain("print('hello')");
+  });
 });

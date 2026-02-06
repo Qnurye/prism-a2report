@@ -104,6 +104,20 @@
       },
       "required": ["type", "label", "value"]
     },
+    "NonTabsSection": {
+      "oneOf": [
+        { "$ref": "#/definitions/TextSection" },
+        { "$ref": "#/definitions/ChartSection" },
+        { "$ref": "#/definitions/TableSection" },
+        { "$ref": "#/definitions/CodeSection" },
+        { "$ref": "#/definitions/CalloutSection" },
+        { "$ref": "#/definitions/StatCardSection" },
+        { "$ref": "#/definitions/TimelineSection" },
+        { "$ref": "#/definitions/FigureSection" },
+        { "$ref": "#/definitions/QuoteSection" },
+        { "$ref": "#/definitions/AccordionSection" }
+      ]
+    },
     "TabsSection": {
       "type": "object",
       "properties": {
@@ -114,9 +128,13 @@
             "type": "object",
             "properties": {
               "label": { "type": "string" },
-              "content": { "type": "string" }
+              "sections": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/NonTabsSection" },
+                "minItems": 1
+              }
             },
-            "required": ["label", "content"]
+            "required": ["label", "sections"]
           },
           "minItems": 2
         },

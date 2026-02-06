@@ -1,6 +1,22 @@
 ---
+import { marked } from "marked";
+import Chart from "./Chart.astro";
+import Table from "./Table.astro";
+import Callout from "./Callout.astro";
+import CodeBlock from "./CodeBlock.astro";
+import StatCard from "./StatCard.astro";
+import Timeline from "./Timeline.astro";
+import Figure from "./Figure.astro";
+import Quote from "./Quote.astro";
+import Accordion from "./Accordion.astro";
+
+interface Section {
+  type: string;
+  [key: string]: any;
+}
+
 interface Props {
-  tabs: Array<{ label: string; content: string }>;
+  tabs: Array<{ label: string; sections: Section[] }>;
   defaultTab?: number;
 }
 
@@ -38,7 +54,62 @@ const tabsId = `tabs-${Math.random().toString(36).slice(2, 9)}`;
         class:list={["p-4 text-sm leading-relaxed", index !== defaultTab && "hidden"]}
         style={index === defaultTab ? "opacity: 1" : "opacity: 0"}
       >
-        {tab.content}
+        {tab.sections.map((section) => (
+          <>
+            {section.type === "text" && (
+              <div class="prose">
+                {section.heading && (
+                  <Fragment
+                    set:html={`<h${section.level || 2}>${section.heading}</h${section.level || 2}>`}
+                  />
+                )}
+                <Fragment set:html={marked.parse(section.content)} />
+              </div>
+            )}
+            {section.type === "chart" && (
+              <Chart chartType={section.chartType} data={section.data} options={section.options} />
+            )}
+            {section.type === "table" && (
+              <Table headers={section.headers} rows={section.rows} caption={section.caption} />
+            )}
+            {section.type === "code" && (
+              <CodeBlock
+                language={section.language}
+                filename={section.filename}
+                code={section.code}
+              />
+            )}
+            {section.type === "callout" && (
+              <Callout variant={section.variant} title={section.title}>
+                {section.content}
+              </Callout>
+            )}
+            {section.type === "statcard" && (
+              <StatCard
+                label={section.label}
+                value={section.value}
+                description={section.description}
+                trend={section.trend}
+                trendValue={section.trendValue}
+              />
+            )}
+            {section.type === "timeline" && <Timeline events={section.events} />}
+            {section.type === "figure" && (
+              <Figure
+                src={section.src}
+                alt={section.alt}
+                caption={section.caption}
+                width={section.width}
+              />
+            )}
+            {section.type === "quote" && (
+              <Quote text={section.text} author={section.author} role={section.role} />
+            )}
+            {section.type === "accordion" && (
+              <Accordion items={section.items} allowMultiple={section.allowMultiple} />
+            )}
+          </>
+        ))}
       </div>
     ))
   }

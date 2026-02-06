@@ -166,15 +166,17 @@ Renders a key metric card with optional trend indicator and count-up animation.
 
 ### 7. Tabs Section
 
-Renders tabbed content panels for organizing related content.
+Renders tabbed content panels for organizing related content. Each tab contains an array of nested section objects.
 
-| Field            | Type     | Required | Description                     |
-| ---------------- | -------- | -------- | ------------------------------- |
-| `type`           | `"tabs"` | Yes      | Section type identifier         |
-| `tabs`           | array    | Yes      | Array of tab objects (min 2)    |
-| `tabs[].label`   | string   | Yes      | Tab button label                |
-| `tabs[].content` | string   | Yes      | Tab panel content               |
-| `defaultTab`     | integer  | No       | Zero-based index of default tab |
+| Field             | Type     | Required | Description                                            |
+| ----------------- | -------- | -------- | ------------------------------------------------------ |
+| `type`            | `"tabs"` | Yes      | Section type identifier                                |
+| `tabs`            | array    | Yes      | Array of tab objects (min 2)                           |
+| `tabs[].label`    | string   | Yes      | Tab button label                                       |
+| `tabs[].sections` | array    | Yes      | Array of nested section objects (any type except tabs) |
+| `defaultTab`      | integer  | No       | Zero-based index of default tab                        |
+
+**Nested sections** accept any valid section type except `tabs` (no recursive nesting): `text`, `chart`, `table`, `code`, `callout`, `statcard`, `timeline`, `figure`, `quote`, `accordion`.
 
 **Example:**
 
@@ -182,11 +184,35 @@ Renders tabbed content panels for organizing related content.
 {
   "type": "tabs",
   "tabs": [
-    { "label": "Overview", "content": "General project overview..." },
-    { "label": "Technical", "content": "Technical implementation details..." },
-    { "label": "Timeline", "content": "Project milestones and deadlines..." }
-  ],
-  "defaultTab": 0
+    {
+      "label": "Summary",
+      "sections": [{ "type": "text", "content": "Overview text with **markdown**" }]
+    },
+    {
+      "label": "Data",
+      "sections": [
+        {
+          "type": "statcard",
+          "label": "Users",
+          "value": 12500,
+          "trend": "up",
+          "trendValue": "+15%"
+        },
+        {
+          "type": "chart",
+          "chartType": "bar",
+          "data": {
+            "labels": ["Jan", "Feb", "Mar"],
+            "datasets": [{ "label": "Revenue", "data": [100, 150, 200] }]
+          }
+        }
+      ]
+    },
+    {
+      "label": "Code",
+      "sections": [{ "type": "code", "language": "python", "code": "print('hello')" }]
+    }
+  ]
 }
 ```
 
