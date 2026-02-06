@@ -1,0 +1,531 @@
+{
+  "title": "四大 AI 巨头深度对比：ChatGPT vs Claude vs Gemini vs Grok（2026 年 2 月）",
+  "author": "Prism",
+  "date": "2026-02-07",
+  "slug": "ai-chatbot-comparison-2026",
+  "metadata": {
+    "tags": ["AI", "LLM", "ChatGPT", "Claude", "Gemini", "Grok", "深度对比"],
+    "category": "技术研究"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "摘要",
+      "level": 2,
+      "content": "2025 年是大模型全面爆发的一年——OpenAI 推出 GPT-5 系列并冲刺 IPO，Anthropic 凭借 Claude Code 实现「ChatGPT 时刻」，Google DeepMind 以 Gemini 3 重登基准测试王座，xAI 则以疯狂的硬件投入和 SpaceX 合并震惊行业。\n\n本报告对四大平台截至 2026 年 2 月的**模型能力、基准表现、定价策略、产品生态和市场地位**进行全方位深度对比，帮助开发者和用户做出明智选择。"
+    },
+    {
+      "type": "quote",
+      "text": "The best way to predict the future is to build it.",
+      "author": "Alan Kay",
+      "role": "计算机科学家"
+    },
+    {
+      "type": "statcard",
+      "label": "ChatGPT 周活跃用户",
+      "value": "8 亿+",
+      "description": "OpenAI 2025 年底公布数据",
+      "trend": "up",
+      "trendValue": "+200% YoY"
+    },
+    {
+      "type": "statcard",
+      "label": "Claude 企业市场份额",
+      "value": "32%",
+      "description": "企业 AI 助手市场占有率（2025 Q3）",
+      "trend": "up",
+      "trendValue": "超越 OpenAI"
+    },
+    {
+      "type": "statcard",
+      "label": "Gemini 月活跃用户",
+      "value": "7.5 亿",
+      "description": "Google 生态加持下的用户规模",
+      "trend": "up",
+      "trendValue": "+15% QoQ"
+    },
+    {
+      "type": "statcard",
+      "label": "xAI 估值",
+      "value": "$2500 亿",
+      "description": "2026 年 1 月 E 轮融资后",
+      "trend": "up",
+      "trendValue": "与 SpaceX 合并"
+    },
+    {
+      "type": "text",
+      "heading": "模型矩阵对比",
+      "level": 2,
+      "content": "四家厂商均已形成「旗舰 + 推理 + 轻量」的三层模型架构。以下对比各平台截至 2026 年 2 月的最新旗舰模型。"
+    },
+    {
+      "type": "table",
+      "caption": "旗舰模型核心规格对比",
+      "headers": ["维度", "GPT-5.2", "Claude Opus 4.6", "Gemini 3 Pro", "Grok 4.1"],
+      "rows": [
+        [
+          "发布时间",
+          "2025 年 12 月",
+          "2026 年 2 月 5 日",
+          "2025 年 11 月 18 日",
+          "2025 年 11 月 17 日"
+        ],
+        ["上下文窗口", "400K tokens", "200K（1M beta）", "1M（企业版 2M）", "256K（Fast: 2M）"],
+        ["最大输出", "100K tokens", "128K tokens", "65K tokens", "~8K tokens"],
+        [
+          "多模态输入",
+          "文本/图像/音频/视频",
+          "文本/图像/PDF",
+          "文本/图像/音频/视频/PDF",
+          "文本/图像"
+        ],
+        ["图像生成", "GPT Image 1.5", "不支持", "Imagen 4", "Aurora"],
+        ["视频生成", "Sora", "不支持", "Veo 3.1", "Grok Imagine"],
+        ["实时语音", "Realtime API", "不支持", "Flash Live API", "不支持"],
+        ["联网搜索", "内置", "有限", "Google Search 接地", "X/Web 实时搜索"],
+        ["代码执行", "代码解释器", "Claude Code", "原生代码执行", "代码解释器"],
+        ["知识截止", "2025 年中", "2025 年 5 月", "2025 年 1 月", "实时（X 数据）"]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "基准测试表现",
+      "level": 2,
+      "content": "以下汇总各平台在主流学术基准上的最佳成绩。需注意，不同模型使用不同的评测设置（推理模式、工具使用等），分数之间的直接比较需谨慎对待。"
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "GPQA Diamond（博士级科学推理）",
+      "data": {
+        "labels": [
+          "Gemini 3 Pro",
+          "GPT-5.2",
+          "Claude Opus 4.5",
+          "Grok-4",
+          "Claude Opus 4.6",
+          "OpenAI o3"
+        ],
+        "datasets": [
+          {
+            "label": "GPQA Diamond (%)",
+            "data": [91.9, 90.3, 87.0, 88.0, 87.0, 87.7],
+            "backgroundColor": [
+              "rgba(66, 133, 244, 0.8)",
+              "rgba(16, 163, 127, 0.8)",
+              "rgba(204, 119, 34, 0.8)",
+              "rgba(120, 120, 120, 0.8)",
+              "rgba(204, 119, 34, 0.6)",
+              "rgba(16, 163, 127, 0.6)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "SWE-bench Verified（软件工程实战）",
+      "data": {
+        "labels": [
+          "Claude Opus 4.5",
+          "Gemini 3 Flash",
+          "Claude Sonnet 4.5",
+          "Gemini 3 Pro",
+          "Grok 4.1",
+          "OpenAI o3"
+        ],
+        "datasets": [
+          {
+            "label": "SWE-bench Verified (%)",
+            "data": [80.9, 78.0, 77.2, 76.2, 79.0, 71.7],
+            "backgroundColor": [
+              "rgba(204, 119, 34, 0.8)",
+              "rgba(66, 133, 244, 0.8)",
+              "rgba(204, 119, 34, 0.6)",
+              "rgba(66, 133, 244, 0.6)",
+              "rgba(120, 120, 120, 0.8)",
+              "rgba(16, 163, 127, 0.8)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "AIME 2025（数学竞赛推理）",
+      "data": {
+        "labels": ["Gemini 3 Pro", "OpenAI o3", "Grok-3 Think", "Claude Opus 4.5"],
+        "datasets": [
+          {
+            "label": "AIME 2025 (%)",
+            "data": [95.0, 96.7, 93.3, 92.8],
+            "backgroundColor": [
+              "rgba(66, 133, 244, 0.8)",
+              "rgba(16, 163, 127, 0.8)",
+              "rgba(120, 120, 120, 0.8)",
+              "rgba(204, 119, 34, 0.8)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "table",
+      "caption": "综合基准成绩汇总（各平台最佳模型）",
+      "headers": ["基准", "ChatGPT (最佳)", "Claude (最佳)", "Gemini (最佳)", "Grok (最佳)"],
+      "rows": [
+        ["GPQA Diamond", "90.3% (GPT-5.2)", "87.0% (Opus 4.5)", "91.9% (3 Pro)", "88.0% (Grok-4)"],
+        ["SWE-bench Verified", "71.7% (o3)", "80.9% (Opus 4.5)", "78.0% (3 Flash)", "~79% (4.1)"],
+        ["AIME 2025", "96.7% (o3)", "92.8% (Opus 4.5)", "95.0% (3 Pro)", "93.3% (Grok-3 Think)"],
+        ["MMLU-Pro", "87.1% (GPT-5)", "89.5% (Opus 4.5)", "89.8% (3 Pro)", "79.9% (Grok-3)"],
+        ["HLE (无工具)", "—", "43.2% (Opus 4.5)", "37.5% (3 Pro)", "—"],
+        ["LMArena Elo", "~1430", "~1420", "1501 (3 Pro)", "1483 (4.1 Think)"],
+        ["Terminal-Bench", "—", "59.3% (Opus 4.5)", "—", "—"],
+        ["EQ-Bench3", "—", "—", "—", "#1 (4.1)"]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "基准测试的局限性",
+      "content": "GPT-5.2 在多项基准上取得满分，但用户反馈却称其「比 5.1 更无聊、更差」。基准分数与实际体验之间的鸿沟，已成为 2025 年 AI 行业最具争议的话题之一。正如 Arizona State University 的研究指出：链式思维推理可能是「一种在超出训练分布后便消失的脆弱幻象」。"
+    },
+    {
+      "type": "text",
+      "heading": "API 定价对比",
+      "level": 2,
+      "content": "定价已成为各平台竞争的关键战场。以下对比旗舰模型与轻量模型的 API 定价（每百万 token，单位：美元）。"
+    },
+    {
+      "type": "table",
+      "caption": "旗舰模型 API 定价（$/M tokens）",
+      "headers": ["模型", "输入价格", "输出价格", "性价比评级"],
+      "rows": [
+        ["GPT-5.2", "~$2.50", "~$10.00", "★★★☆☆"],
+        ["Claude Opus 4.6", "$5.00", "$25.00", "★★☆☆☆"],
+        ["Gemini 3 Pro", "$2.00", "$12.00", "★★★☆☆"],
+        ["Grok-4", "$3.00", "$15.00", "★★★☆☆"],
+        ["Grok 4.1 Fast", "$0.20", "$0.50", "★★★★★"],
+        ["Gemini 3 Flash", "$0.50", "$3.00", "★★★★★"],
+        ["Claude Haiku 4.5", "$0.80", "$4.00", "★★★★☆"],
+        ["Gemini 2.5 Flash-Lite", "$0.10", "$0.40", "★★★★★"]
+      ]
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "旗舰模型输入/输出定价对比（$/M tokens）",
+      "data": {
+        "labels": ["GPT-5.2", "Claude Opus 4.6", "Gemini 3 Pro", "Grok-4"],
+        "datasets": [
+          {
+            "label": "输入价格",
+            "data": [2.5, 5.0, 2.0, 3.0],
+            "backgroundColor": "rgba(99, 102, 241, 0.7)"
+          },
+          {
+            "label": "输出价格",
+            "data": [10.0, 25.0, 12.0, 15.0],
+            "backgroundColor": "rgba(244, 114, 182, 0.7)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "heading": "消费者订阅方案",
+      "level": 2,
+      "content": "各平台均已推出多层订阅方案，价格从免费到每月 $300 不等。"
+    },
+    {
+      "type": "table",
+      "caption": "消费者订阅方案对比",
+      "headers": ["层级", "ChatGPT", "Claude", "Gemini", "Grok"],
+      "rows": [
+        ["免费", "✅ 基础功能", "✅ 基础功能", "✅ 基础功能", "✅ grok.com 基础"],
+        ["入门 ($8-10/月)", "Go $8/月", "—", "AI Plus $7.99/月", "X Premium $8/月"],
+        ["标准 ($20/月)", "Plus $20/月", "Pro $20/月", "AI Pro $19.99/月", "SuperGrok $30/月"],
+        [
+          "高级 ($200+/月)",
+          "Pro $200/月",
+          "Max $100-200/月",
+          "AI Ultra $249.99/月",
+          "SuperGrok Heavy $300/月"
+        ],
+        [
+          "企业",
+          "Enterprise（定制）",
+          "Enterprise（定制）",
+          "Vertex AI（定制）",
+          "Business $30/用户/月"
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "产品生态与特色功能",
+      "level": 2,
+      "content": "模型能力之外，各平台的产品生态和差异化功能正成为用户选择的关键因素。"
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "ChatGPT / OpenAI",
+          "sections": [
+            {
+              "type": "text",
+              "content": "**核心优势：最成熟的消费级产品**\n\n- **GPT-5 系列**：GPT-5.2 为通用旗舰，GPT-5.2 Codex 专精代码，o3/o4-mini 专精推理\n- **多模态全栈**：统一多模态 tokenization，文本/图像/音频/视频共享 token 空间\n- **Sora 视频生成**：可生成完整视频，扩展图片或视频\n- **GPT Image 1.5**：高保真图像生成与迭代编辑\n- **Realtime API**：低延迟双向音频流，可构建生产级语音助手\n- **Agent 生态**：Responses API、Agents SDK、AgentKit 构建多步骤工作流\n- **Custom GPTs & GPT Store**：用户自定义 AI 助手生态\n- **ChatGPT Go**：$8/月入门方案，已覆盖 170+ 国家\n\n**痛点**：GPT-5/5.2 遭遇大量用户差评——「基准满分但实际体验倒退」；强制替换 GPT-4o 引发强烈不满；Plus 用户功能被削减。"
+            }
+          ]
+        },
+        {
+          "label": "Claude / Anthropic",
+          "sections": [
+            {
+              "type": "text",
+              "content": "**核心优势：编码之王 + 安全标杆**\n\n- **Claude Code**：2025 年最成功的 AI 编码工具，6 个月达到 $1B ARR，2026 年 1 月已接近 $2B\n- **Claude Opus 4.6**（2026.2.5）：1M 上下文窗口（Opus 级首次）、自适应思维、上下文压缩、Agent Teams\n- **SWE-bench 霸主**：Opus 4.5 以 80.9% 领跑，代码生成市占率 42%（OpenAI 仅 21%）\n- **MCP 协议**：Model Context Protocol，开放的 AI 工具集成标准\n- **Computer Use**：AI 操控桌面应用的能力\n- **Claude in Office**：Excel 增强规划、PowerPoint 设计（研究预览）\n- **安全第一**：业界最低误拒率 + 最低不当行为率\n\n**痛点**：不支持图像/视频生成；联网能力有限；消费级产品功能不如 ChatGPT 丰富；API 定价在旗舰模型中最贵。"
+            }
+          ]
+        },
+        {
+          "label": "Gemini / Google",
+          "sections": [
+            {
+              "type": "text",
+              "content": "**核心优势：Google 生态 + 超长上下文**\n\n- **原生多模态**：端到端训练的文本/图像/视频/音频/PDF 理解\n- **1M-2M 上下文**：标准 1M tokens，企业可达 2M——行业最大\n- **Deep Research**：迭代式研究 Agent，HLE 46.4%（SOTA）、BrowseComp 59.2%\n- **Google 生态集成**：Gmail、Docs、Sheets、Maps、YouTube、Search 无缝集成\n- **NotebookLM**：基于笔记本的对话，支持 Audio Overviews（80+ 语言）\n- **Imagen 4 + Veo 3.1**：图像/视频生成，价格低至 $0.02/张\n- **免费层极其慷慨**：大多数模型提供无限免费 token\n- **Gemini CLI**：开发者命令行工具\n\n**痛点**：安全过滤过于严格；图像生成质量不稳定；Gemini 3 仍为预览版；用户粘性低于 ChatGPT（人均访问 5.73 次 vs 12.74 次）。"
+            }
+          ]
+        },
+        {
+          "label": "Grok / xAI",
+          "sections": [
+            {
+              "type": "text",
+              "content": "**核心优势：实时数据 + 极致性价比**\n\n- **X/Twitter 实时数据**：独家接入全球最大公共对话平台的实时数据流\n- **Grok 4.1**：LMArena #1（1483 Elo），EQ-Bench3 #1，幻觉率降低 65%\n- **Grok 4.1 Fast**：$0.20/$0.50 每百万 token + 2M 上下文，极致性价比\n- **DeepSearch / DeeperSearch**：深度互联网和 X 研究能力\n- **Aurora 图像生成 + Grok Imagine 视频**：集成在聊天体验中\n- **Colossus**：全球最大 AI 训练集群（20 万+ GPU），计划扩展至 100 万\n- **开源承诺**：Grok-2.5 已开源，Grok-3 预计 2026 年初开源\n\n**痛点**：DeepSearch 偶尔编造来源 URL；过度依赖 X 生态；内容安全堪忧（对青少年有害报告）；输出上限仅 8K tokens；订阅取消困难。"
+            }
+          ]
+        }
+      ],
+      "defaultTab": 0
+    },
+    {
+      "type": "text",
+      "heading": "2025-2026 关键事件时间线",
+      "level": 2,
+      "content": "过去一年，四家公司的竞争达到白热化。以下是最重要的里程碑事件。"
+    },
+    {
+      "type": "timeline",
+      "events": [
+        {
+          "date": "2025-01",
+          "title": "DeepSeek R1 开源",
+          "description": "中国团队发布的开源推理模型震撼行业，推理能力达到 GPT-4 级别。"
+        },
+        {
+          "date": "2025-02",
+          "title": "Grok-3 发布",
+          "description": "xAI 发布 Grok-3 及 Think 推理模式、DeepSearch 功能。基于 Colossus 10x 算力训练。"
+        },
+        {
+          "date": "2025-02",
+          "title": "Claude Code 研究预览",
+          "description": "Anthropic 推出 Claude Code 终端编码工具，开启「AI 工程师」时代。"
+        },
+        {
+          "date": "2025-03",
+          "title": "Gemini 2.5 Pro 实验版",
+          "description": "Google 发布「最智能模型」，首创 Thinking 可控推理深度。"
+        },
+        {
+          "date": "2025-04",
+          "title": "OpenAI o3 / o4-mini",
+          "description": "OpenAI 发布 o3 和 o4-mini 推理模型，200K 上下文，ARC-AGI 87.5%。"
+        },
+        {
+          "date": "2025-05",
+          "title": "Claude 4 发布",
+          "description": "Anthropic 发布 Claude 4 Opus/Sonnet，Claude Code 正式 GA。SWE-bench 72.7%。"
+        },
+        {
+          "date": "2025-07",
+          "title": "Grok-4 与 SuperGrok Heavy",
+          "description": "xAI 发布 Grok-4（AI 分析指数 #1）与 $300/月 SuperGrok Heavy 方案。"
+        },
+        {
+          "date": "2025-08",
+          "title": "GPT-5 发布",
+          "description": "OpenAI 发布 GPT-5，但遭遇史上最大规模用户差评。GPT-4o 被强制替换引发众怒。"
+        },
+        {
+          "date": "2025-09",
+          "title": "Claude Sonnet 4.5",
+          "description": "Anthropic 发布 Sonnet 4.5。SWE-bench 77.2%，AIME 100%（Python）。"
+        },
+        {
+          "date": "2025-11",
+          "title": "三巨头同期发布",
+          "description": "Claude Opus 4.5（SWE-bench 80.9%）、Gemini 3 Pro（GPQA 91.9%）、Grok 4.1（LMArena #1）几乎同时发布。"
+        },
+        {
+          "date": "2025-11",
+          "title": "Claude Code 达到 $1B ARR",
+          "description": "上线仅 6 个月即达到 10 亿美元年化收入——AI 产品增长最快记录之一。"
+        },
+        {
+          "date": "2025-12",
+          "title": "GPT-5.2 + Gemini 3 Flash",
+          "description": "OpenAI 发布 GPT-5.2（基准满分但口碑更差），Google 发布 Gemini 3 Flash（SWE-bench 78%）。"
+        },
+        {
+          "date": "2025-12",
+          "title": "SoftBank 完成 $400 亿 OpenAI 投资",
+          "description": "软银完成对 OpenAI 的 400 亿美元投资，估值约 5000 亿美元。"
+        },
+        {
+          "date": "2026-01",
+          "title": "xAI E 轮 $200 亿",
+          "description": "xAI 完成 200 亿美元 E 轮融资，投资方包括 Nvidia、Cisco、Fidelity。"
+        },
+        {
+          "date": "2026-02",
+          "title": "SpaceX 收购 xAI",
+          "description": "SpaceX 以约 1.25 万亿美元合并估值收购 xAI。目标：太空数据中心。"
+        },
+        {
+          "date": "2026-02",
+          "title": "Claude Opus 4.6 发布",
+          "description": "Anthropic 发布 Opus 4.6：1M 上下文窗口、自适应思维、Agent Teams。Terminal-Bench #1。"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "市场格局与竞争态势",
+      "level": 2,
+      "content": "四家公司在不同维度上各有护城河，市场正从「赢者通吃」走向「多极分化」。"
+    },
+    {
+      "type": "chart",
+      "chartType": "doughnut",
+      "title": "全球 LLM 使用市场份额（2026 年 1 月）",
+      "data": {
+        "labels": ["ChatGPT (68%)", "Gemini (18.2%)", "Claude (8%)", "Grok (3.5%)", "其他 (2.3%)"],
+        "datasets": [
+          {
+            "data": [68, 18.2, 8, 3.5, 2.3],
+            "backgroundColor": [
+              "rgba(16, 163, 127, 0.85)",
+              "rgba(66, 133, 244, 0.85)",
+              "rgba(204, 119, 34, 0.85)",
+              "rgba(120, 120, 120, 0.85)",
+              "rgba(200, 200, 200, 0.85)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "企业 AI 市场份额对比（2025 Q3）",
+      "data": {
+        "labels": ["Claude / Anthropic", "ChatGPT / OpenAI", "Gemini / Google", "Grok / xAI"],
+        "datasets": [
+          {
+            "label": "企业市场份额 (%)",
+            "data": [32, 28, 20, 5],
+            "backgroundColor": [
+              "rgba(204, 119, 34, 0.8)",
+              "rgba(16, 163, 127, 0.8)",
+              "rgba(66, 133, 244, 0.8)",
+              "rgba(120, 120, 120, 0.8)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "table",
+      "caption": "公司财务与规模对比",
+      "headers": ["维度", "OpenAI", "Anthropic", "Google DeepMind", "xAI"],
+      "rows": [
+        ["估值", "~$5000-8300 亿", "~$600 亿+", "Google 子公司", "~$2300-2500 亿"],
+        ["2025 年收入", "~$130 亿 ARR", "~$50 亿 ARR", "内嵌 Google 财报", "~$5 亿"],
+        [
+          "总融资",
+          "$400 亿+ (SoftBank)",
+          "$130 亿 (Series F)",
+          "Google 母公司",
+          "$200 亿 (Series E)"
+        ],
+        ["企业客户", "Fortune 500 广泛", "30 万+ 企业", "Workspace 全量", "Grok Business 起步"],
+        [
+          "关键合作",
+          "Microsoft / Apple",
+          "Amazon / Google Cloud",
+          "Google 全生态",
+          "SpaceX / Tesla"
+        ],
+        ["IPO 计划", "2026-2027", "未公布", "N/A", "N/A (SpaceX 合并)"]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "选型建议",
+      "level": 2,
+      "content": "没有一个模型能在所有场景下胜出。以下根据不同使用场景给出推荐。"
+    },
+    {
+      "type": "accordion",
+      "items": [
+        {
+          "title": "软件工程 / 编码",
+          "content": "**首选：Claude（Opus 4.5/4.6 + Claude Code）**\n\nClaude 在代码生成领域以 42% 市占率遥遥领先。SWE-bench Verified 80.9% 为行业最高。Claude Code 已成为 Netflix、Spotify、Salesforce 等企业的标配工具。\n\n备选：Gemini 3 Flash（SWE-bench 78%，免费 tier 极慷慨）、Grok 4.1 Fast（2M 上下文 + $0.20/$0.50 超低价格，适合大型代码库分析）。"
+        },
+        {
+          "title": "科学研究 / 学术推理",
+          "content": "**首选：Gemini 3 Pro（GPQA 91.9%）**\n\nGemini 在科学推理上领先所有竞争对手近 4 个百分点。Deep Research 功能可自动进行迭代式文献调研。1M 上下文窗口可处理完整论文集。\n\n备选：GPT-5.2（GPQA 90.3%）、Claude Opus 4.5（HLE 43.2%，SOTA）。"
+        },
+        {
+          "title": "数学竞赛 / 推理密集型任务",
+          "content": "**首选：OpenAI o3（AIME 96.7%）**\n\no3 和 o4-mini 在数学推理上表现卓越，o4-mini 使用 Python 解释器时 AIME 达到 99.5%。\n\n备选：Gemini 3 Pro（AIME 95.0%）、Grok-3 Think（AIME 93.3%）。"
+        },
+        {
+          "title": "创意写作 / 情感交互",
+          "content": "**首选：Grok 4.1（EQ-Bench3 #1，LMArena Elo #1）**\n\nGrok 在对话智能和情感理解上独占鳌头，适合需要创意、幽默和人格化交互的场景。\n\n备选：ChatGPT（最成熟的对话体验）、Claude（指令遵循最可靠）。"
+        },
+        {
+          "title": "企业部署 / 大规模集成",
+          "content": "**看你的生态**：\n- 已用 Google Workspace → **Gemini**（原生集成 Gmail/Docs/Sheets，$14/用户/月）\n- 已用 Microsoft 365 → **ChatGPT**（Azure OpenAI Service 深度集成）\n- 需要安全合规 → **Claude**（业界最低误拒率和不当行为率，88% 企业留存率）\n- 需要实时社交数据 → **Grok**（独家 X 数据流）"
+        },
+        {
+          "title": "预算敏感 / 高吞吐场景",
+          "content": "**首选：Gemini 2.5 Flash-Lite（$0.10/$0.40）或 Grok 4.1 Fast（$0.20/$0.50）**\n\n两者都提供了极其低廉的定价和超长上下文窗口（1M 和 2M）。Gemini 还提供无限免费 tier + Batch API 50% 折扣。对于需要大规模处理的场景，这两个是最佳选择。"
+        }
+      ],
+      "allowMultiple": true
+    },
+    {
+      "type": "text",
+      "heading": "趋势与展望",
+      "level": 2,
+      "content": "透过四大平台的竞争格局，可以清晰看到 2026 年 AI 行业的几个关键趋势：\n\n### 1. 基准测试失去意义\nGPT-5.2 取得完美基准分数却被用户骂为「退步」——这标志着合成基准已无法区分前沿模型。行业需要更贴近真实场景的评估体系（如 SWE-bench、Terminal-Bench）。\n\n### 2. Agent 化是核心战场\n四家公司都在从「聊天机器人」向「自主 Agent」转型。Claude Code 的 $2B ARR 证明了编码 Agent 的巨大商业价值。Grok 的 Agent Tools API、Gemini 的 Deep Research、OpenAI 的 Agents SDK 都在加速这一转变。\n\n### 3. 上下文窗口军备竞赛\n从 128K 到 2M——上下文窗口在一年内扩大了 15 倍。Grok 4.1 Fast 和 Gemini 3 Pro 已达到百万级，这意味着 AI 可以一次性处理整个代码库、整本书或数小时的会议记录。\n\n### 4. 价格战加剧\nGemini 2.5 Flash-Lite 的 $0.10/$0.40 和 Grok 4.1 Fast 的 $0.20/$0.50 将旗舰级能力的价格压到了极低水平。Google 的免费 tier 更是激进到提供「无限 token」。\n\n### 5. 生态为王\n纯模型能力的差距正在缩小。真正的护城河是生态——Google 有 Search/Workspace/Android，OpenAI 有 ChatGPT 的 8 亿周活跃用户，Anthropic 有 Claude Code 的开发者生态，xAI 有 X 的实时数据。未来的竞争将越来越不是模型本身，而是模型被嵌入的产品和工作流。"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "数据说明",
+      "content": "本报告数据来源包括各公司官方公告、Artificial Analysis、LMArena、Backlinko、SimilarWeb 等第三方分析。基准测试分数可能因评测设置（推理模式、温度、工具使用等）而有差异。所有定价和规格以各平台官方文档为准。部分 Gemini 3 系列模型仍为预览版，规格可能在正式发布时调整。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "报告声明",
+      "content": "本报告由 Prism 基于公开信息自动生成。数据截至 2026 年 2 月 7 日。报告内容仅供技术参考，不构成投资或采购建议。"
+    }
+  ]
+}
