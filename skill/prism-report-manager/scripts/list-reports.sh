@@ -1,3 +1,3 @@
 #!/bin/bash
-echo "Run the real scripts from ~/Projects/prism-a2report/scripts/"
-echo "Usage: ~/Projects/prism-a2report/scripts/list-reports.sh"
+# Wrapper: delegates to the real list script in the project
+exec ~/Projects/prism-a2report/scripts/list-reports.sh "$@"
