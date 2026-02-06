@@ -308,17 +308,17 @@
       "columns": 3,
       "images": [
         {
-          "src": "https://placehold.co/600x400/1e3a8a/e0e7ff?text=%E3%80%8A%E5%B0%8F%E6%AD%A6%E3%80%8B",
+          "src": "https://image.tmdb.org/t/p/w500/cAhJeNYIARl0T6mHISxfiWThvIT.jpg",
           "alt": "贾樟柯《小武》海报",
           "caption": "贾樟柯《小武》(1998)：第六代独立电影的里程碑，至今未在国内公映"
         },
         {
-          "src": "https://placehold.co/600x400/881337/fce7f3?text=%E3%80%8A%E9%A2%90%E5%92%8C%E5%9B%AD%E3%80%8B",
+          "src": "https://image.tmdb.org/t/p/w500/kr0UdRRdjZigVfdYoik9kPy97hk.jpg",
           "alt": "娄烨《颐和园》海报",
           "caption": "娄烨《颐和园》(2006)：未经审查参展戛纳，导演被禁拍 5 年"
         },
         {
-          "src": "https://placehold.co/600x400/065f46/d1fae5?text=%E3%80%8A%E5%A4%A7%E8%B1%A1%E5%B8%AD%E5%9C%B0%E8%80%8C%E5%9D%90%E3%80%8B",
+          "src": "https://image.tmdb.org/t/p/w500/3qr9wpaa5dA7AGr5ndgYiioavIn.jpg",
           "alt": "胡波《大象席地而坐》海报",
           "caption": "胡波《大象席地而坐》(2018)：导演遗作，获金马奖最佳剧情片"
         }
@@ -576,8 +576,8 @@
     },
     {
       "type": "embed",
-      "src": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      "title": "中国电影资料馆宣传片（示例）",
+      "src": "https://www.youtube.com/embed/llMELk8Xpus",
+      "title": "Xiao Jia Going Home - 贾樟柯返乡纪录片 (2008)",
       "aspectRatio": "16:9"
     },
     {
