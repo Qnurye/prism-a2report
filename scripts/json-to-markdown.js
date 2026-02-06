@@ -121,6 +121,30 @@ function renderSection(lines, section) {
     case "accordion":
       renderAccordion(lines, section);
       break;
+    case "comparison":
+      renderComparison(lines, section);
+      break;
+    case "progress":
+      renderProgress(lines, section);
+      break;
+    case "metrics-grid":
+      renderMetricsGrid(lines, section);
+      break;
+    case "steps":
+      renderSteps(lines, section);
+      break;
+    case "diff":
+      renderDiff(lines, section);
+      break;
+    case "embed":
+      renderEmbed(lines, section);
+      break;
+    case "gallery":
+      renderGallery(lines, section);
+      break;
+    case "source-list":
+      renderSourceList(lines, section);
+      break;
   }
 }
 
@@ -168,6 +192,127 @@ function renderAccordion(lines, s) {
     lines.push(item.content);
     lines.push("");
   }
+}
+
+function renderComparison(lines, s) {
+  if (s.title) {
+    lines.push(`### ${s.title}`);
+    lines.push("");
+  }
+  for (const item of s.items) {
+    const variantLabel =
+      item.variant === "positive" ? " (+)" : item.variant === "negative" ? " (-)" : "";
+    lines.push(`**${item.label}**${variantLabel}`);
+    lines.push("");
+    for (const h of item.highlights) {
+      lines.push(`- ${h}`);
+    }
+    lines.push("");
+  }
+}
+
+function renderProgress(lines, s) {
+  const mode = s.mode || "bar";
+  if (mode === "bar") {
+    const value = s.value || 0;
+    const max = s.max || 100;
+    const percent = Math.round((value / max) * 100);
+    if (s.label) {
+      lines.push(`**${s.label}**: ${value}/${max} (${percent}%)`);
+    } else {
+      lines.push(`**Completion**: ${value}/${max} (${percent}%)`);
+    }
+  } else {
+    const parts = (s.items || []).map((item) => {
+      if (item.completed) return `\u2713 ${item.label}`;
+      if (item.current) return `\u25CF ${item.label}`;
+      return `\u25CB ${item.label}`;
+    });
+    lines.push(parts.join(" \u2192 "));
+  }
+  lines.push("");
+}
+
+function renderMetricsGrid(lines, s) {
+  const trendArrows = { up: "\u2191", down: "\u2193", neutral: "\u2192" };
+  for (const metric of s.metrics) {
+    let line = `**${metric.label}**: ${metric.value}`;
+    if (metric.trend && metric.trendValue) {
+      line += ` ${trendArrows[metric.trend] || ""} ${metric.trendValue}`;
+    }
+    lines.push(line);
+  }
+  lines.push("");
+}
+
+function renderSteps(lines, s) {
+  const currentStep = s.currentStep;
+  s.steps.forEach((step, index) => {
+    let marker;
+    if (currentStep !== undefined && index < currentStep) {
+      marker = "\u2713";
+    } else if (currentStep !== undefined && index === currentStep) {
+      marker = "\u2192";
+    } else {
+      marker = " ";
+    }
+    let line = `${index + 1}. [${marker}] ${step.title}`;
+    if (step.description) {
+      line += ` \u2014 ${step.description}`;
+    }
+    lines.push(line);
+  });
+  lines.push("");
+}
+
+function renderDiff(lines, s) {
+  if (s.title) {
+    lines.push(`### ${s.title}`);
+    lines.push("");
+  }
+  lines.push("**Before:**");
+  lines.push("");
+  lines.push(`\`\`\`${s.language || ""}`);
+  lines.push(s.before);
+  lines.push("```");
+  lines.push("");
+  lines.push("**After:**");
+  lines.push("");
+  lines.push(`\`\`\`${s.language || ""}`);
+  lines.push(s.after);
+  lines.push("```");
+  lines.push("");
+}
+
+function renderEmbed(lines, s) {
+  const label = s.title || "Embedded content";
+  lines.push(`[${label}](${s.src})`);
+  lines.push("");
+}
+
+function renderGallery(lines, s) {
+  for (const image of s.images) {
+    lines.push(`![${image.alt}](${image.src})`);
+    if (image.caption) {
+      lines.push(`*${image.caption}*`);
+    }
+    lines.push("");
+  }
+}
+
+function renderSourceList(lines, s) {
+  if (s.title) {
+    lines.push(`### ${s.title}`);
+    lines.push("");
+  }
+  s.sources.forEach((source, index) => {
+    let line = `${index + 1}. [${source.id}] **${source.title}**`;
+    if (source.author) line += ` \u2014 ${source.author}`;
+    if (source.date) line += ` (${source.date})`;
+    if (source.url) line += ` ${source.url}`;
+    lines.push(line);
+  });
+  lines.push("");
 }
 
 export function convertToMarkdown(report) {

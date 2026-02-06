@@ -32,7 +32,15 @@
         { "$ref": "#/definitions/TimelineSection" },
         { "$ref": "#/definitions/FigureSection" },
         { "$ref": "#/definitions/QuoteSection" },
-        { "$ref": "#/definitions/AccordionSection" }
+        { "$ref": "#/definitions/AccordionSection" },
+        { "$ref": "#/definitions/ComparisonSection" },
+        { "$ref": "#/definitions/ProgressSection" },
+        { "$ref": "#/definitions/MetricsGridSection" },
+        { "$ref": "#/definitions/StepsSection" },
+        { "$ref": "#/definitions/DiffSection" },
+        { "$ref": "#/definitions/EmbedSection" },
+        { "$ref": "#/definitions/GallerySection" },
+        { "$ref": "#/definitions/SourceListSection" }
       ]
     },
     "TextSection": {
@@ -115,7 +123,15 @@
         { "$ref": "#/definitions/TimelineSection" },
         { "$ref": "#/definitions/FigureSection" },
         { "$ref": "#/definitions/QuoteSection" },
-        { "$ref": "#/definitions/AccordionSection" }
+        { "$ref": "#/definitions/AccordionSection" },
+        { "$ref": "#/definitions/ComparisonSection" },
+        { "$ref": "#/definitions/ProgressSection" },
+        { "$ref": "#/definitions/MetricsGridSection" },
+        { "$ref": "#/definitions/StepsSection" },
+        { "$ref": "#/definitions/DiffSection" },
+        { "$ref": "#/definitions/EmbedSection" },
+        { "$ref": "#/definitions/GallerySection" },
+        { "$ref": "#/definitions/SourceListSection" }
       ]
     },
     "TabsSection": {
@@ -202,6 +218,162 @@
         "allowMultiple": { "type": "boolean" }
       },
       "required": ["type", "items"]
+    },
+    "ComparisonSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "comparison" },
+        "title": { "type": "string" },
+        "layout": { "enum": ["side-by-side", "stacked"], "default": "side-by-side" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "highlights": { "type": "array", "items": { "type": "string" } },
+              "variant": { "enum": ["positive", "negative", "neutral"] }
+            },
+            "required": ["label", "highlights"]
+          },
+          "minItems": 2
+        }
+      },
+      "required": ["type", "items"]
+    },
+    "ProgressSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "progress" },
+        "mode": { "enum": ["bar", "milestones"], "default": "bar" },
+        "label": { "type": "string" },
+        "value": { "type": "number" },
+        "max": { "type": "number", "default": 100 },
+        "showPercent": { "type": "boolean" },
+        "variant": { "enum": ["default", "success", "warning", "error"] },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "completed": { "type": "boolean" },
+              "current": { "type": "boolean" }
+            },
+            "required": ["label"]
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "MetricsGridSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "metrics-grid" },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 6, "default": 3 },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "oneOf": [{ "type": "string" }, { "type": "number" }] },
+              "trend": { "enum": ["up", "down", "neutral"] },
+              "trendValue": { "type": "string" }
+            },
+            "required": ["label", "value"]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "metrics"]
+    },
+    "StepsSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "steps" },
+        "orientation": { "enum": ["horizontal", "vertical"], "default": "horizontal" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "required": ["title"]
+          },
+          "minItems": 1
+        },
+        "currentStep": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["type", "steps"]
+    },
+    "DiffSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "diff" },
+        "language": { "type": "string" },
+        "title": { "type": "string" },
+        "before": { "type": "string" },
+        "after": { "type": "string" }
+      },
+      "required": ["type", "before", "after"]
+    },
+    "EmbedSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "embed" },
+        "src": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "aspectRatio": { "type": "string", "default": "16:9" },
+        "allowFullscreen": { "type": "boolean", "default": true }
+      },
+      "required": ["type", "src"]
+    },
+    "GallerySection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "gallery" },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 6, "default": 3 },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "src": { "type": "string" },
+              "alt": { "type": "string" },
+              "caption": { "type": "string" }
+            },
+            "required": ["src", "alt"]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "images"]
+    },
+    "SourceListSection": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "source-list" },
+        "title": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "url": { "type": "string" },
+              "author": { "type": "string" },
+              "date": { "type": "string" }
+            },
+            "required": ["id", "title"]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "sources"]
     }
   }
 }

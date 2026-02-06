@@ -1,0 +1,298 @@
+{
+  "title": "A2UI Component Showcase",
+  "author": "Prism AI",
+  "date": "2026-02-07",
+  "slug": "a2ui-showcase",
+  "metadata": {
+    "tags": ["showcase", "components", "a2ui"],
+    "category": "demo"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "New A2UI Components",
+      "level": 1,
+      "content": "This report demonstrates all **8 new section types** added to the A2UI report system. Each section below showcases a different component with realistic data."
+    },
+    {
+      "type": "comparison",
+      "title": "React vs Vue vs Svelte",
+      "layout": "side-by-side",
+      "items": [
+        {
+          "label": "React",
+          "variant": "positive",
+          "highlights": [
+            "Largest ecosystem and community",
+            "Backed by Meta, battle-tested at scale",
+            "Rich third-party library support",
+            "Strong job market demand"
+          ]
+        },
+        {
+          "label": "Vue",
+          "variant": "neutral",
+          "highlights": [
+            "Gentle learning curve",
+            "Excellent documentation",
+            "Single-file components are intuitive",
+            "Growing enterprise adoption"
+          ]
+        },
+        {
+          "label": "Svelte",
+          "variant": "positive",
+          "highlights": [
+            "No virtual DOM — compiles to vanilla JS",
+            "Smallest bundle size",
+            "Less boilerplate code",
+            "Built-in animations and transitions"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Progress Tracking",
+      "level": 2,
+      "content": "The **Progress** component supports two modes: a percentage bar and a milestone tracker."
+    },
+    {
+      "type": "progress",
+      "mode": "bar",
+      "label": "Project Completion",
+      "value": 73,
+      "max": 100,
+      "showPercent": true,
+      "variant": "success"
+    },
+    {
+      "type": "progress",
+      "mode": "milestones",
+      "items": [
+        { "label": "Research", "completed": true },
+        { "label": "Design", "completed": true },
+        { "label": "Development", "current": true },
+        { "label": "Testing" },
+        { "label": "Launch" }
+      ]
+    },
+    {
+      "type": "metrics-grid",
+      "columns": 4,
+      "metrics": [
+        { "label": "Monthly Active Users", "value": 128500, "trend": "up", "trendValue": "+12.3%" },
+        { "label": "Revenue (MRR)", "value": "$2.4M", "trend": "up", "trendValue": "+8.7%" },
+        { "label": "Churn Rate", "value": "3.2%", "trend": "down", "trendValue": "-0.5%" },
+        { "label": "NPS Score", "value": 72, "trend": "up", "trendValue": "+4" },
+        { "label": "Avg Response Time", "value": "142ms", "trend": "down", "trendValue": "-23ms" },
+        { "label": "Uptime (30d)", "value": "99.97%", "trend": "neutral", "trendValue": "stable" },
+        { "label": "Deploy Frequency", "value": "4.2/day", "trend": "up", "trendValue": "+0.8" },
+        { "label": "Open Issues", "value": 37, "trend": "down", "trendValue": "-12" }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "CI/CD Pipeline",
+      "level": 2,
+      "content": "The **Steps** component visualizes sequential processes. Here's a typical deployment pipeline:"
+    },
+    {
+      "type": "steps",
+      "orientation": "horizontal",
+      "currentStep": 3,
+      "steps": [
+        { "title": "Commit", "description": "Push to main branch" },
+        { "title": "Build", "description": "Compile & bundle" },
+        { "title": "Test", "description": "Unit + integration" },
+        { "title": "Stage", "description": "Deploy to staging" },
+        { "title": "Production", "description": "Release to users" }
+      ]
+    },
+    {
+      "type": "steps",
+      "orientation": "vertical",
+      "currentStep": 2,
+      "steps": [
+        {
+          "title": "Requirements Gathering",
+          "description": "Interview stakeholders and document needs"
+        },
+        { "title": "Architecture Design", "description": "Define system components and data flow" },
+        { "title": "Implementation", "description": "Build features incrementally with CI/CD" },
+        { "title": "Quality Assurance", "description": "Automated testing and manual review" },
+        {
+          "title": "Deployment & Monitoring",
+          "description": "Ship to production and observe metrics"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "Code Diff",
+      "level": 2,
+      "content": "The **Diff** component shows before/after code changes side by side."
+    },
+    {
+      "type": "diff",
+      "title": "Refactor: Replace callback with async/await",
+      "language": "javascript",
+      "before": "function fetchUser(id, callback) {\n  db.query('SELECT * FROM users WHERE id = ?', [id], (err, rows) => {\n    if (err) {\n      callback(err, null);\n      return;\n    }\n    callback(null, rows[0]);\n  });\n}",
+      "after": "async function fetchUser(id) {\n  const rows = await db.query(\n    'SELECT * FROM users WHERE id = ?',\n    [id]\n  );\n  return rows[0];\n}"
+    },
+    {
+      "type": "text",
+      "heading": "Embedded Content",
+      "level": 2,
+      "content": "The **Embed** component wraps external content in a responsive iframe."
+    },
+    {
+      "type": "embed",
+      "src": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "title": "Video Demo",
+      "aspectRatio": "16:9",
+      "allowFullscreen": true
+    },
+    {
+      "type": "text",
+      "heading": "Image Gallery",
+      "level": 2,
+      "content": "The **Gallery** component displays images in a responsive grid with a lightbox viewer."
+    },
+    {
+      "type": "gallery",
+      "columns": 3,
+      "images": [
+        {
+          "src": "https://picsum.photos/seed/prism1/600/400",
+          "alt": "Abstract gradient in blue and purple tones",
+          "caption": "Generative Art #1"
+        },
+        {
+          "src": "https://picsum.photos/seed/prism2/600/400",
+          "alt": "Mountain landscape at sunset",
+          "caption": "Landscape Photography"
+        },
+        {
+          "src": "https://picsum.photos/seed/prism3/600/400",
+          "alt": "City skyline at night with reflections",
+          "caption": "Urban Night Scene"
+        },
+        {
+          "src": "https://picsum.photos/seed/prism4/600/400",
+          "alt": "Close-up of water droplets on glass",
+          "caption": "Macro Photography"
+        },
+        {
+          "src": "https://picsum.photos/seed/prism5/600/400",
+          "alt": "Forest path in autumn with golden leaves",
+          "caption": "Autumn Forest"
+        },
+        {
+          "src": "https://picsum.photos/seed/prism6/600/400",
+          "alt": "Ocean waves crashing on rocky shore",
+          "caption": "Coastal Landscape"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "References",
+      "level": 2,
+      "content": "The **SourceList** component renders academic-style citations with optional links."
+    },
+    {
+      "type": "source-list",
+      "title": "Bibliography",
+      "sources": [
+        {
+          "id": "1",
+          "title": "Designing Data-Intensive Applications",
+          "author": "Martin Kleppmann",
+          "date": "2017",
+          "url": "https://dataintensive.net"
+        },
+        {
+          "id": "2",
+          "title": "A Philosophy of Software Design",
+          "author": "John Ousterhout",
+          "date": "2018"
+        },
+        {
+          "id": "3",
+          "title": "The Pragmatic Programmer",
+          "author": "David Thomas & Andrew Hunt",
+          "date": "2019",
+          "url": "https://pragprog.com/titles/tpp20"
+        },
+        {
+          "id": "4",
+          "title": "Clean Architecture",
+          "author": "Robert C. Martin",
+          "date": "2017"
+        }
+      ]
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "Comparison",
+          "sections": [
+            {
+              "type": "comparison",
+              "title": "SQL vs NoSQL",
+              "layout": "side-by-side",
+              "items": [
+                {
+                  "label": "SQL (PostgreSQL)",
+                  "variant": "positive",
+                  "highlights": ["ACID transactions", "Complex joins", "Mature tooling"]
+                },
+                {
+                  "label": "NoSQL (MongoDB)",
+                  "variant": "neutral",
+                  "highlights": ["Flexible schema", "Horizontal scaling", "Document model"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Metrics",
+          "sections": [
+            {
+              "type": "metrics-grid",
+              "columns": 3,
+              "metrics": [
+                {
+                  "label": "Latency (p99)",
+                  "value": "45ms",
+                  "trend": "down",
+                  "trendValue": "-8ms"
+                },
+                { "label": "Throughput", "value": "12k req/s", "trend": "up", "trendValue": "+2k" },
+                { "label": "Error Rate", "value": "0.02%", "trend": "down", "trendValue": "-0.01%" }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Steps",
+          "sections": [
+            {
+              "type": "steps",
+              "orientation": "vertical",
+              "currentStep": 1,
+              "steps": [
+                { "title": "Plan", "description": "Define scope" },
+                { "title": "Build", "description": "Write code" },
+                { "title": "Ship", "description": "Deploy" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

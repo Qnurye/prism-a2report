@@ -1,0 +1,48 @@
+---
+interface Props {
+  title?: string;
+  sources: Array<{
+    id: string;
+    title: string;
+    url?: string;
+    author?: string;
+    date?: string;
+  }>;
+}
+
+const { title, sources } = Astro.props;
+const sourceListId = `source-list-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="my-6" id={sourceListId}>
+  {title && <h3 class="font-ui font-semibold text-lg mb-3">{title}</h3>}
+  <ol class="list-none space-y-3">
+    {
+      sources.map((source) => (
+        <li class="flex gap-3 text-sm">
+          <span class="font-mono text-xs text-muted-foreground shrink-0 mt-0.5">[{source.id}]</span>
+          <div>
+            {source.url ? (
+              <a
+                href={source.url}
+                class="font-semibold text-primary hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {source.title}
+              </a>
+            ) : (
+              <span class="font-semibold">{source.title}</span>
+            )}
+            {(source.author || source.date) && (
+              <span class="text-muted-foreground">
+                {source.author && <span> &mdash; {source.author}</span>}
+                {source.date && <span> ({source.date})</span>}
+              </span>
+            )}
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</div>

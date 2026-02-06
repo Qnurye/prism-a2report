@@ -284,4 +284,244 @@ describe("convertToMarkdown", () => {
     expect(output).toContain("```python");
     expect(output).toContain("print('hello')");
   });
+
+  it("renders comparison with title and variants", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "comparison",
+          title: "Options",
+          items: [
+            { label: "Plan A", highlights: ["Fast", "Scalable"], variant: "positive" },
+            { label: "Plan B", highlights: ["Cheap"], variant: "negative" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### Options");
+    expect(output).toContain("**Plan A** (+)");
+    expect(output).toContain("- Fast");
+    expect(output).toContain("- Scalable");
+    expect(output).toContain("**Plan B** (-)");
+    expect(output).toContain("- Cheap");
+  });
+
+  it("renders comparison without title or variant", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "comparison",
+          items: [
+            { label: "A", highlights: ["x"] },
+            { label: "B", highlights: ["y"] },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).not.toContain("###");
+    expect(output).toContain("**A**\n");
+    expect(output).toContain("**B**\n");
+  });
+
+  it("renders progress bar mode", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "progress", mode: "bar", label: "Upload", value: 75, max: 100 }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("**Upload**: 75/100 (75%)");
+  });
+
+  it("renders progress bar without label", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "progress", value: 50 }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("**Completion**: 50/100 (50%)");
+  });
+
+  it("renders progress milestones mode", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "progress",
+          mode: "milestones",
+          items: [
+            { label: "Research", completed: true },
+            { label: "Review", current: true },
+            { label: "Publish" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("\u2713 Research");
+    expect(output).toContain("\u25CF Review");
+    expect(output).toContain("\u25CB Publish");
+  });
+
+  it("renders metrics-grid", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "metrics-grid",
+          metrics: [
+            { label: "Users", value: 1200, trend: "up", trendValue: "+5%" },
+            { label: "Revenue", value: "$50k" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("**Users**: 1200 \u2191 +5%");
+    expect(output).toContain("**Revenue**: $50k");
+  });
+
+  it("renders steps with currentStep", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "steps",
+          currentStep: 1,
+          steps: [
+            { title: "Research", description: "Gather data" },
+            { title: "Analyze" },
+            { title: "Publish" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("1. [\u2713] Research \u2014 Gather data");
+    expect(output).toContain("2. [\u2192] Analyze");
+    expect(output).toContain("3. [ ] Publish");
+  });
+
+  it("renders steps without currentStep", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "steps", steps: [{ title: "Step 1" }, { title: "Step 2" }] }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("1. [ ] Step 1");
+    expect(output).toContain("2. [ ] Step 2");
+  });
+
+  it("renders diff with title and language", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "diff",
+          title: "Fix",
+          language: "js",
+          before: "const x = 1;",
+          after: "const x = 2;",
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### Fix");
+    expect(output).toContain("**Before:**");
+    expect(output).toContain("```js\nconst x = 1;\n```");
+    expect(output).toContain("**After:**");
+    expect(output).toContain("```js\nconst x = 2;\n```");
+  });
+
+  it("renders diff without title or language", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "diff", before: "old", after: "new" }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).not.toContain("###");
+    expect(output).toContain("```\nold\n```");
+    expect(output).toContain("```\nnew\n```");
+  });
+
+  it("renders embed with title", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "embed", src: "https://example.com", title: "Demo" }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("[Demo](https://example.com)");
+  });
+
+  it("renders embed without title", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "embed", src: "https://example.com" }],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("[Embedded content](https://example.com)");
+  });
+
+  it("renders gallery with captions", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "gallery",
+          images: [
+            { src: "a.jpg", alt: "Photo A", caption: "First photo" },
+            { src: "b.jpg", alt: "Photo B" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("![Photo A](a.jpg)");
+    expect(output).toContain("*First photo*");
+    expect(output).toContain("![Photo B](b.jpg)");
+  });
+
+  it("renders source-list with all fields", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "source-list",
+          title: "References",
+          sources: [
+            {
+              id: "1",
+              title: "Paper One",
+              author: "Smith",
+              date: "2025",
+              url: "https://example.com",
+            },
+            { id: "2", title: "Paper Two" },
+          ],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).toContain("### References");
+    expect(output).toContain("1. [1] **Paper One** \u2014 Smith (2025) https://example.com");
+    expect(output).toContain("2. [2] **Paper Two**");
+  });
+
+  it("renders source-list without title", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "source-list",
+          sources: [{ id: "a", title: "Source" }],
+        },
+      ],
+    };
+    const output = convertToMarkdown(report);
+    expect(output).not.toContain("###");
+    expect(output).toContain("1. [a] **Source**");
+  });
 });

@@ -1,0 +1,197 @@
+---
+import { diffLines } from "diff";
+import { createHighlighter } from "shiki";
+
+interface Props {
+  language?: string;
+  title?: string;
+  before: string;
+  after: string;
+}
+
+const { language = "text", title, before, after } = Astro.props;
+const diffId = `diff-${Math.random().toString(36).slice(2, 9)}`;
+
+// Compute actual line-level diff
+const changes = diffLines(before, after);
+
+// Syntax-highlight both versions with Shiki
+const highlighter = await createHighlighter({
+  themes: ["one-light", "one-dark-pro"],
+  langs: [language],
+});
+
+function highlightCode(code: string) {
+  return highlighter.codeToHtml(code, {
+    lang: language,
+    themes: { light: "one-light", dark: "one-dark-pro" },
+    defaultColor: false,
+  });
+}
+
+// Extract individual <span class="line"> elements from Shiki HTML
+function extractLines(html: string): string[] {
+  const matches = html.match(/<span class="line">(.*?)<\/span>/gs) || [];
+  return matches.map((m) => {
+    const inner = m.replace(/^<span class="line">/, "").replace(/<\/span>$/, "");
+    return inner;
+  });
+}
+
+const beforeHighlighted = extractLines(highlightCode(before));
+const afterHighlighted = extractLines(highlightCode(after));
+
+// Build unified diff lines with syntax highlighting
+interface DiffLine {
+  type: "added" | "removed" | "unchanged";
+  content: string; // highlighted HTML
+  indicator: string;
+}
+
+const diffLines_: DiffLine[] = [];
+let beforeIdx = 0;
+let afterIdx = 0;
+
+for (const change of changes) {
+  const lineCount = change.value.replace(/\n$/, "").split("\n").length;
+
+  if (change.removed) {
+    for (let i = 0; i < lineCount; i++) {
+      diffLines_.push({
+        type: "removed",
+        content: beforeHighlighted[beforeIdx + i] || "",
+        indicator: "\u2212",
+      });
+    }
+    beforeIdx += lineCount;
+  } else if (change.added) {
+    for (let i = 0; i < lineCount; i++) {
+      diffLines_.push({
+        type: "added",
+        content: afterHighlighted[afterIdx + i] || "",
+        indicator: "+",
+      });
+    }
+    afterIdx += lineCount;
+  } else {
+    for (let i = 0; i < lineCount; i++) {
+      diffLines_.push({
+        type: "unchanged",
+        content: beforeHighlighted[beforeIdx + i] || "",
+        indicator: " ",
+      });
+    }
+    beforeIdx += lineCount;
+    afterIdx += lineCount;
+  }
+}
+
+// Compute stats
+const added = diffLines_.filter((l) => l.type === "added").length;
+const removed = diffLines_.filter((l) => l.type === "removed").length;
+---
+
+<div class="my-6" id={diffId}>
+  {title && <h3 class="font-ui font-semibold text-lg mb-3">{title}</h3>}
+  <figure class="rounded-lg overflow-hidden border border-border">
+    <div
+      class="diff-header bg-secondary px-4 py-2 text-xs text-muted-foreground font-mono border-b border-border flex items-center gap-3"
+    >
+      {language !== "text" && <span class="text-muted-foreground/70">{language}</span>}
+      <span class="ml-auto flex items-center gap-2">
+        {removed > 0 && <span class="text-red-600 dark:text-red-400">−{removed}</span>}
+        {added > 0 && <span class="text-green-600 dark:text-green-400">+{added}</span>}
+      </span>
+    </div>
+    <div class="diff-view overflow-x-auto">
+      <table class="w-full text-sm font-mono leading-relaxed border-collapse">
+        <tbody>
+          {
+            diffLines_.map((line, i) => (
+              <tr
+                class:list={[
+                  "diff-line",
+                  line.type === "removed" && "diff-removed",
+                  line.type === "added" && "diff-added",
+                ]}
+              >
+                <td class="diff-indicator select-none text-center w-[1.5em] px-1 sticky left-0">
+                  {line.indicator}
+                </td>
+                <td class="diff-gutter select-none text-right w-[3em] px-2 text-muted-foreground/40">
+                  {i + 1}
+                </td>
+                <td class="diff-content px-4 py-0 whitespace-pre">
+                  <span set:html={line.content} />
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </figure>
+</div>
+
+<style is:global>
+  .diff-view .shiki,
+  .diff-view .shiki span {
+    color: var(--shiki-light);
+    background-color: transparent !important;
+  }
+
+  :root.dark .diff-view .shiki,
+  :root.dark .diff-view .shiki span {
+    color: var(--shiki-dark);
+    background-color: transparent !important;
+  }
+
+  .diff-line td {
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+
+  .diff-removed {
+    background-color: oklch(0.95 0.02 25);
+  }
+  .diff-removed .diff-indicator {
+    color: oklch(0.55 0.2 25);
+    background-color: oklch(0.92 0.04 25);
+  }
+  .diff-removed .diff-gutter {
+    background-color: oklch(0.92 0.04 25);
+  }
+
+  .diff-added {
+    background-color: oklch(0.95 0.02 145);
+  }
+  .diff-added .diff-indicator {
+    color: oklch(0.5 0.2 145);
+    background-color: oklch(0.92 0.04 145);
+  }
+  .diff-added .diff-gutter {
+    background-color: oklch(0.92 0.04 145);
+  }
+
+  :root.dark .diff-removed {
+    background-color: oklch(0.25 0.04 25);
+  }
+  :root.dark .diff-removed .diff-indicator {
+    color: oklch(0.75 0.15 25);
+    background-color: oklch(0.22 0.06 25);
+  }
+  :root.dark .diff-removed .diff-gutter {
+    background-color: oklch(0.22 0.06 25);
+  }
+
+  :root.dark .diff-added {
+    background-color: oklch(0.25 0.04 150);
+  }
+  :root.dark .diff-added .diff-indicator {
+    color: oklch(0.75 0.15 150);
+    background-color: oklch(0.22 0.06 150);
+  }
+  :root.dark .diff-added .diff-gutter {
+    background-color: oklch(0.22 0.06 150);
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+interface Props {
+  title?: string;
+  layout?: "side-by-side" | "stacked";
+  items: Array<{
+    label: string;
+    highlights: string[];
+    variant?: "positive" | "negative" | "neutral";
+  }>;
+}
+
+const { title, layout = "side-by-side", items } = Astro.props;
+const comparisonId = `comparison-${Math.random().toString(36).slice(2, 9)}`;
+
+const variantStyles = {
+  positive: "border-green-500/50 dark:border-green-400/50",
+  negative: "border-red-500/50 dark:border-red-400/50",
+  neutral: "border-border",
+};
+
+const variantBadge = {
+  positive: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  negative: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  neutral: "bg-secondary text-secondary-foreground",
+};
+---
+
+<div class="my-6" id={comparisonId}>
+  {title && <h3 class="font-ui font-semibold text-lg mb-3">{title}</h3>}
+  <div
+    class:list={[
+      "grid gap-4",
+      layout === "side-by-side" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1",
+    ]}
+  >
+    {
+      items.map((item) => {
+        const variant = item.variant || "neutral";
+        return (
+          <div
+            class={`border-2 rounded-lg p-4 bg-secondary/20 a2r-animate ${variantStyles[variant]}`}
+            data-comparison-item
+          >
+            <div class="flex items-center gap-2 mb-3">
+              <h4 class="font-ui font-semibold text-sm">{item.label}</h4>
+              {item.variant && (
+                <span class={`text-xs px-2 py-0.5 rounded-full font-ui ${variantBadge[variant]}`}>
+                  {variant}
+                </span>
+              )}
+            </div>
+            <ul class="space-y-1.5">
+              {item.highlights.map((h) => (
+                <li class="text-sm flex items-start gap-2">
+                  <span class="text-muted-foreground mt-0.5 shrink-0">•</span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })
+    }
+  </div>
+</div>
+
+<script>
+  function initComparisons() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const container = entry.target as HTMLElement;
+            container
+              .querySelectorAll<HTMLElement>("[data-comparison-item]")
+              .forEach((item, index) => {
+                item.classList.add("a2r-visible");
+                item.style.animation = `a2r-scale-in 0.4s ease ${index * 100}ms forwards`;
+              });
+            observer.unobserve(container);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='comparison-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  initComparisons();
+</script>

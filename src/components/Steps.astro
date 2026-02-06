@@ -1,0 +1,128 @@
+---
+interface Props {
+  orientation?: "horizontal" | "vertical";
+  steps: Array<{ title: string; description?: string }>;
+  currentStep?: number;
+}
+
+const { orientation = "horizontal", steps, currentStep } = Astro.props;
+const stepsId = `steps-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="my-6" id={stepsId}>
+  {
+    orientation === "horizontal" ? (
+      <div class="flex items-start overflow-x-auto py-2">
+        {steps.map((step, index) => {
+          const isCompleted = currentStep !== undefined && index < currentStep;
+          const isCurrent = currentStep !== undefined && index === currentStep;
+          return (
+            <>
+              <div class="flex flex-col items-center shrink-0 min-w-[100px]">
+                <div
+                  class:list={[
+                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-ui font-bold border-2 transition-all",
+                    isCompleted
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : isCurrent
+                        ? "border-primary text-primary animate-pulse"
+                        : "border-border text-muted-foreground",
+                  ]}
+                >
+                  {isCompleted ? (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="3"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    <span>{index + 1}</span>
+                  )}
+                </div>
+                <p
+                  class:list={[
+                    "text-xs font-ui font-semibold mt-2 text-center",
+                    isCurrent ? "text-foreground" : "text-muted-foreground",
+                  ]}
+                >
+                  {step.title}
+                </p>
+                {step.description && (
+                  <p class="text-xs text-muted-foreground text-center mt-0.5 max-w-[120px]">
+                    {step.description}
+                  </p>
+                )}
+              </div>
+              {index < steps.length - 1 && (
+                <div
+                  class:list={[
+                    "h-0.5 flex-1 min-w-[24px] mt-5",
+                    isCompleted ? "bg-primary" : "bg-border",
+                  ]}
+                />
+              )}
+            </>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="relative ml-5">
+        {steps.map((step, index) => {
+          const isCompleted = currentStep !== undefined && index < currentStep;
+          const isCurrent = currentStep !== undefined && index === currentStep;
+          return (
+            <div class="relative flex gap-4 pb-8 last:pb-0">
+              {index < steps.length - 1 && (
+                <div
+                  class:list={[
+                    "absolute left-[15px] top-10 w-0.5 h-[calc(100%-2rem)]",
+                    isCompleted ? "bg-primary" : "bg-border",
+                  ]}
+                />
+              )}
+              <div
+                class:list={[
+                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-ui font-bold border-2 shrink-0 relative z-10 bg-background",
+                  isCompleted
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : isCurrent
+                      ? "border-primary text-primary animate-pulse"
+                      : "border-border text-muted-foreground",
+                ]}
+              >
+                {isCompleted ? (
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="3"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <span>{index + 1}</span>
+                )}
+              </div>
+              <div class="pt-0.5">
+                <p
+                  class:list={[
+                    "font-ui text-sm font-semibold",
+                    isCurrent ? "text-foreground" : "text-muted-foreground",
+                  ]}
+                >
+                  {step.title}
+                </p>
+                {step.description && (
+                  <p class="text-sm text-muted-foreground mt-0.5">{step.description}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )
+  }
+</div>

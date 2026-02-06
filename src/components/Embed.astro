@@ -1,0 +1,30 @@
+---
+interface Props {
+  src: string;
+  title?: string;
+  aspectRatio?: string;
+  allowFullscreen?: boolean;
+}
+
+const { src, title, aspectRatio = "16:9", allowFullscreen = true } = Astro.props;
+const embedId = `embed-${Math.random().toString(36).slice(2, 9)}`;
+
+const [w, h] = aspectRatio.split(":").map(Number);
+const ratio = w && h ? `${w}/${h}` : "16/9";
+---
+
+<div class="my-6" id={embedId}>
+  {title && <h3 class="font-ui font-semibold text-lg mb-3">{title}</h3>}
+  <div class="rounded-lg border border-border overflow-hidden bg-secondary/20">
+    <div style={`aspect-ratio: ${ratio}`}>
+      <iframe
+        src={src}
+        title={title || "Embedded content"}
+        loading="lazy"
+        sandbox="allow-scripts allow-same-origin allow-popups"
+        class="w-full h-full border-0"
+        allow={allowFullscreen ? "fullscreen" : undefined}
+        allowfullscreen={allowFullscreen}></iframe>
+    </div>
+  </div>
+</div>

@@ -9,6 +9,14 @@ import Timeline from "./Timeline.astro";
 import Figure from "./Figure.astro";
 import Quote from "./Quote.astro";
 import Accordion from "./Accordion.astro";
+import Comparison from "./Comparison.astro";
+import Progress from "./Progress.astro";
+import MetricsGrid from "./MetricsGrid.astro";
+import Steps from "./Steps.astro";
+import Diff from "./Diff.astro";
+import Embed from "./Embed.astro";
+import Gallery from "./Gallery.astro";
+import SourceList from "./SourceList.astro";
 
 interface Section {
   type: string;
@@ -107,6 +115,52 @@ const tabsId = `tabs-${Math.random().toString(36).slice(2, 9)}`;
             )}
             {section.type === "accordion" && (
               <Accordion items={section.items} allowMultiple={section.allowMultiple} />
+            )}
+            {section.type === "comparison" && (
+              <Comparison items={section.items} title={section.title} layout={section.layout} />
+            )}
+            {section.type === "progress" && (
+              <Progress
+                mode={section.mode}
+                label={section.label}
+                value={section.value}
+                max={section.max}
+                showPercent={section.showPercent}
+                variant={section.variant}
+                items={section.items}
+              />
+            )}
+            {section.type === "metrics-grid" && (
+              <MetricsGrid metrics={section.metrics} columns={section.columns} />
+            )}
+            {section.type === "steps" && (
+              <Steps
+                steps={section.steps}
+                orientation={section.orientation}
+                currentStep={section.currentStep}
+              />
+            )}
+            {section.type === "diff" && (
+              <Diff
+                before={section.before}
+                after={section.after}
+                language={section.language}
+                title={section.title}
+              />
+            )}
+            {section.type === "embed" && (
+              <Embed
+                src={section.src}
+                title={section.title}
+                aspectRatio={section.aspectRatio}
+                allowFullscreen={section.allowFullscreen}
+              />
+            )}
+            {section.type === "gallery" && (
+              <Gallery images={section.images} columns={section.columns} />
+            )}
+            {section.type === "source-list" && (
+              <SourceList sources={section.sources} title={section.title} />
             )}
           </>
         ))}

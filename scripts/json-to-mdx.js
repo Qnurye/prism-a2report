@@ -104,6 +104,73 @@ function renderAccordion(lines, s) {
   lines.push("");
 }
 
+function renderComparison(lines, s) {
+  const props = [`items={${JSON.stringify(s.items)}}`];
+  if (s.title) props.push(`title=${JSON.stringify(s.title)}`);
+  if (s.layout) props.push(`layout="${s.layout}"`);
+  lines.push(`<Comparison ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderProgress(lines, s) {
+  const props = [];
+  if (s.mode) props.push(`mode="${s.mode}"`);
+  if (s.label) props.push(`label=${JSON.stringify(s.label)}`);
+  if (s.value !== undefined) props.push(`value={${s.value}}`);
+  if (s.max !== undefined) props.push(`max={${s.max}}`);
+  if (s.showPercent) props.push(`showPercent={true}`);
+  if (s.variant) props.push(`variant="${s.variant}"`);
+  if (s.items) props.push(`items={${JSON.stringify(s.items)}}`);
+  lines.push(`<Progress ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderMetricsGrid(lines, s) {
+  const props = [`metrics={${JSON.stringify(s.metrics)}}`];
+  if (s.columns !== undefined) props.push(`columns={${s.columns}}`);
+  lines.push(`<MetricsGrid ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderSteps(lines, s) {
+  const props = [`steps={${JSON.stringify(s.steps)}}`];
+  if (s.orientation) props.push(`orientation="${s.orientation}"`);
+  if (s.currentStep !== undefined) props.push(`currentStep={${s.currentStep}}`);
+  lines.push(`<Steps ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderDiff(lines, s) {
+  const props = [`before={${JSON.stringify(s.before)}}`, `after={${JSON.stringify(s.after)}}`];
+  if (s.language) props.push(`language="${s.language}"`);
+  if (s.title) props.push(`title=${JSON.stringify(s.title)}`);
+  lines.push(`<Diff ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderEmbed(lines, s) {
+  const props = [`src=${JSON.stringify(s.src)}`];
+  if (s.title) props.push(`title=${JSON.stringify(s.title)}`);
+  if (s.aspectRatio) props.push(`aspectRatio="${s.aspectRatio}"`);
+  if (s.allowFullscreen !== undefined) props.push(`allowFullscreen={${s.allowFullscreen}}`);
+  lines.push(`<Embed ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderGallery(lines, s) {
+  const props = [`images={${JSON.stringify(s.images)}}`];
+  if (s.columns !== undefined) props.push(`columns={${s.columns}}`);
+  lines.push(`<Gallery ${props.join(" ")} />`);
+  lines.push("");
+}
+
+function renderSourceList(lines, s) {
+  const props = [`sources={${JSON.stringify(s.sources)}}`];
+  if (s.title) props.push(`title=${JSON.stringify(s.title)}`);
+  lines.push(`<SourceList ${props.join(" ")} />`);
+  lines.push("");
+}
+
 export function convertToMdx(report) {
   const lines = [];
 
@@ -126,6 +193,14 @@ export function convertToMdx(report) {
   lines.push("import Figure from '../../components/Figure.astro'");
   lines.push("import Quote from '../../components/Quote.astro'");
   lines.push("import Accordion from '../../components/Accordion.astro'");
+  lines.push("import Comparison from '../../components/Comparison.astro'");
+  lines.push("import Progress from '../../components/Progress.astro'");
+  lines.push("import MetricsGrid from '../../components/MetricsGrid.astro'");
+  lines.push("import Steps from '../../components/Steps.astro'");
+  lines.push("import Diff from '../../components/Diff.astro'");
+  lines.push("import Embed from '../../components/Embed.astro'");
+  lines.push("import Gallery from '../../components/Gallery.astro'");
+  lines.push("import SourceList from '../../components/SourceList.astro'");
   lines.push("");
 
   // Sections
@@ -163,6 +238,30 @@ export function convertToMdx(report) {
         break;
       case "accordion":
         renderAccordion(lines, section);
+        break;
+      case "comparison":
+        renderComparison(lines, section);
+        break;
+      case "progress":
+        renderProgress(lines, section);
+        break;
+      case "metrics-grid":
+        renderMetricsGrid(lines, section);
+        break;
+      case "steps":
+        renderSteps(lines, section);
+        break;
+      case "diff":
+        renderDiff(lines, section);
+        break;
+      case "embed":
+        renderEmbed(lines, section);
+        break;
+      case "gallery":
+        renderGallery(lines, section);
+        break;
+      case "source-list":
+        renderSourceList(lines, section);
         break;
     }
   }

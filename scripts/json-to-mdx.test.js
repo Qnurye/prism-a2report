@@ -188,4 +188,177 @@ describe("convertToMdx", () => {
     const output = convertToMdx(report);
     expect(output).toContain("defaultTab={1}");
   });
+
+  it("includes new component imports", () => {
+    const report = { title: "T", sections: [{ type: "text", content: "Hi" }] };
+    const output = convertToMdx(report);
+    expect(output).toContain("import Comparison from '../../components/Comparison.astro'");
+    expect(output).toContain("import Progress from '../../components/Progress.astro'");
+    expect(output).toContain("import MetricsGrid from '../../components/MetricsGrid.astro'");
+    expect(output).toContain("import Steps from '../../components/Steps.astro'");
+    expect(output).toContain("import Diff from '../../components/Diff.astro'");
+    expect(output).toContain("import Embed from '../../components/Embed.astro'");
+    expect(output).toContain("import Gallery from '../../components/Gallery.astro'");
+    expect(output).toContain("import SourceList from '../../components/SourceList.astro'");
+  });
+
+  it("renders comparison sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "comparison",
+          title: "Compare",
+          layout: "stacked",
+          items: [
+            { label: "A", highlights: ["Fast"], variant: "positive" },
+            { label: "B", highlights: ["Cheap"] },
+          ],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Comparison");
+    expect(output).toContain("items={[");
+    expect(output).toContain('title="Compare"');
+    expect(output).toContain('layout="stacked"');
+  });
+
+  it("renders progress bar sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        { type: "progress", mode: "bar", label: "Upload", value: 75, max: 100, showPercent: true },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Progress");
+    expect(output).toContain('mode="bar"');
+    expect(output).toContain("value={75}");
+    expect(output).toContain("max={100}");
+    expect(output).toContain("showPercent={true}");
+  });
+
+  it("renders progress milestones sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "progress",
+          mode: "milestones",
+          items: [{ label: "Start", completed: true }, { label: "End" }],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Progress");
+    expect(output).toContain('mode="milestones"');
+    expect(output).toContain("items={");
+  });
+
+  it("renders metrics-grid sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "metrics-grid",
+          columns: 4,
+          metrics: [{ label: "Users", value: 100, trend: "up", trendValue: "+5%" }],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<MetricsGrid");
+    expect(output).toContain("metrics={");
+    expect(output).toContain("columns={4}");
+  });
+
+  it("renders steps sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "steps",
+          orientation: "vertical",
+          currentStep: 1,
+          steps: [{ title: "Plan" }, { title: "Execute" }],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Steps");
+    expect(output).toContain("steps={");
+    expect(output).toContain('orientation="vertical"');
+    expect(output).toContain("currentStep={1}");
+  });
+
+  it("renders diff sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        { type: "diff", before: "x = 1", after: "x = 2", language: "python", title: "Change" },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Diff");
+    expect(output).toContain("before={");
+    expect(output).toContain("after={");
+    expect(output).toContain('language="python"');
+    expect(output).toContain('title="Change"');
+  });
+
+  it("renders embed sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "embed",
+          src: "https://example.com",
+          title: "Demo",
+          aspectRatio: "4:3",
+          allowFullscreen: false,
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Embed");
+    expect(output).toContain('src="https://example.com"');
+    expect(output).toContain('title="Demo"');
+    expect(output).toContain('aspectRatio="4:3"');
+    expect(output).toContain("allowFullscreen={false}");
+  });
+
+  it("renders gallery sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "gallery",
+          columns: 2,
+          images: [{ src: "a.jpg", alt: "Photo A", caption: "Caption" }],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<Gallery");
+    expect(output).toContain("images={");
+    expect(output).toContain("columns={2}");
+  });
+
+  it("renders source-list sections", () => {
+    const report = {
+      title: "T",
+      sections: [
+        {
+          type: "source-list",
+          title: "References",
+          sources: [{ id: "1", title: "Paper", url: "https://example.com", author: "Smith" }],
+        },
+      ],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<SourceList");
+    expect(output).toContain("sources={");
+    expect(output).toContain('title="References"');
+  });
 });

@@ -1,0 +1,130 @@
+---
+interface Props {
+  mode?: "bar" | "milestones";
+  label?: string;
+  value?: number;
+  max?: number;
+  showPercent?: boolean;
+  variant?: "default" | "success" | "warning" | "error";
+  items?: Array<{ label: string; completed?: boolean; current?: boolean }>;
+}
+
+const {
+  mode = "bar",
+  label,
+  value = 0,
+  max = 100,
+  showPercent = false,
+  variant = "default",
+  items = [],
+} = Astro.props;
+const progressId = `progress-${Math.random().toString(36).slice(2, 9)}`;
+const percent = Math.round((value / max) * 100);
+
+const variantColors = {
+  default: "bg-primary",
+  success: "bg-green-500",
+  warning: "bg-yellow-500",
+  error: "bg-red-500",
+};
+---
+
+<div class="my-6" id={progressId}>
+  {
+    mode === "bar" ? (
+      <div>
+        {label && (
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-ui text-sm font-medium">{label}</span>
+            {showPercent && <span class="font-mono text-sm text-muted-foreground">{percent}%</span>}
+          </div>
+        )}
+        <div class="h-3 bg-secondary rounded-full overflow-hidden">
+          <div
+            class={`h-full rounded-full transition-all duration-1000 ease-out ${variantColors[variant]}`}
+            data-progress-bar
+            data-target-width={percent}
+            style="width: 0%"
+          />
+        </div>
+      </div>
+    ) : (
+      <div class="flex items-center gap-0 overflow-x-auto py-2">
+        {items.map((item, index) => (
+          <>
+            <div class="flex flex-col items-center shrink-0">
+              <div
+                class:list={[
+                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-ui font-bold border-2 transition-all",
+                  item.completed
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : item.current
+                      ? "border-primary text-primary animate-pulse"
+                      : "border-border text-muted-foreground",
+                ]}
+              >
+                {item.completed ? (
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="3"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <span>{index + 1}</span>
+                )}
+              </div>
+              <span
+                class:list={[
+                  "text-xs font-ui mt-1.5 text-center max-w-[80px]",
+                  item.current ? "font-semibold text-foreground" : "text-muted-foreground",
+                ]}
+              >
+                {item.label}
+              </span>
+            </div>
+            {index < items.length - 1 && (
+              <div
+                class:list={[
+                  "h-0.5 w-8 shrink-0 mx-1 mt-[-1rem]",
+                  item.completed ? "bg-primary" : "bg-border",
+                ]}
+              />
+            )}
+          </>
+        ))}
+      </div>
+    )
+  }
+</div>
+
+<script>
+  function initProgress() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const bar = el.querySelector<HTMLElement>("[data-progress-bar]");
+            if (bar) {
+              const target = bar.dataset.targetWidth || "0";
+              requestAnimationFrame(() => {
+                bar.style.width = `${target}%`;
+              });
+            }
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.3 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='progress-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  initProgress();
+</script>

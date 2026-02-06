@@ -1,0 +1,119 @@
+---
+interface Props {
+  columns?: number;
+  metrics: Array<{
+    label: string;
+    value: string | number;
+    trend?: "up" | "down" | "neutral";
+    trendValue?: string;
+  }>;
+}
+
+const { columns = 3, metrics } = Astro.props;
+const gridId = `metrics-grid-${Math.random().toString(36).slice(2, 9)}`;
+
+const trendColors = {
+  up: "text-green-600 dark:text-green-400",
+  down: "text-red-600 dark:text-red-400",
+  neutral: "text-muted-foreground",
+};
+
+const trendArrows = {
+  up: "\u2191",
+  down: "\u2193",
+  neutral: "\u2192",
+};
+---
+
+<div class="my-6" id={gridId}>
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2" style={`--grid-cols: ${columns}`}>
+    {
+      metrics.map((metric, index) => {
+        const isNumeric = typeof metric.value === "number";
+        return (
+          <div
+            class="border border-border rounded-lg p-4 bg-secondary/30 a2r-animate md:[grid-column:span_1]"
+            data-metric-card
+            data-target-value={isNumeric ? metric.value : undefined}
+            style={`--delay: ${index * 80}ms`}
+          >
+            <p class="text-muted-foreground text-xs font-ui">{metric.label}</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="font-ui font-bold text-2xl" data-value>
+                {metric.value}
+              </span>
+              {metric.trend && (
+                <span class={`text-xs font-ui font-medium ${trendColors[metric.trend]}`}>
+                  {trendArrows[metric.trend]} {metric.trendValue}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</div>
+
+<style>
+  @media (min-width: 768px) {
+    div[style*="--grid-cols"] > :global(.grid) {
+      grid-template-columns: repeat(var(--grid-cols), 1fr);
+    }
+  }
+</style>
+
+<script>
+  function initMetricsGrids() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const container = entry.target as HTMLElement;
+            container.querySelectorAll<HTMLElement>("[data-metric-card]").forEach((card) => {
+              const delay = card.style.getPropertyValue("--delay");
+              card.classList.add("a2r-visible");
+              card.style.animation = `a2r-scale-in 0.4s ease ${delay} forwards`;
+
+              const target = parseFloat(card.dataset.targetValue || "");
+              if (!isNaN(target)) {
+                animateMetricValue(card.querySelector("[data-value]") as HTMLElement, target);
+              }
+            });
+            observer.unobserve(container);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='metrics-grid-']").forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  function animateMetricValue(el: HTMLElement, target: number) {
+    const duration = 800;
+    const start = performance.now();
+    const isInteger = Number.isInteger(target);
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+
+      el.textContent = isInteger ? Math.round(current).toString() : current.toFixed(1);
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        el.textContent = isInteger ? target.toString() : target.toFixed(1);
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  initMetricsGrids();
+</script>

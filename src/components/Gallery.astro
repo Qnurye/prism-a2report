@@ -1,0 +1,117 @@
+---
+interface Props {
+  columns?: number;
+  images: Array<{ src: string; alt: string; caption?: string }>;
+}
+
+const { columns = 3, images } = Astro.props;
+const galleryId = `gallery-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="my-6" id={galleryId}>
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2" style={`--gallery-cols: ${columns}`}>
+    {
+      images.map((image, index) => (
+        <figure
+          class="a2r-animate cursor-pointer group"
+          data-gallery-item
+          data-gallery-src={image.src}
+          data-gallery-alt={image.alt}
+          style={`--delay: ${index * 80}ms`}
+        >
+          <div class="rounded-lg border border-border overflow-hidden">
+            <img
+              src={image.src}
+              alt={image.alt}
+              loading="lazy"
+              class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+          {image.caption && (
+            <figcaption class="text-muted-foreground text-xs text-center font-ui mt-1.5">
+              {image.caption}
+            </figcaption>
+          )}
+        </figure>
+      ))
+    }
+  </div>
+</div>
+
+<div
+  id={`${galleryId}-lightbox`}
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-8"
+  data-gallery-lightbox
+>
+  <button
+    class="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-light leading-none"
+    data-lightbox-close>&times;</button
+  >
+  <img class="max-w-full max-h-full object-contain rounded-lg" data-lightbox-img />
+</div>
+
+<style>
+  @media (min-width: 768px) {
+    div[style*="--gallery-cols"] > :global(.grid) {
+      grid-template-columns: repeat(var(--gallery-cols), 1fr);
+    }
+  }
+</style>
+
+<script>
+  function initGalleries() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const container = entry.target as HTMLElement;
+            container.querySelectorAll<HTMLElement>("[data-gallery-item]").forEach((item) => {
+              const delay = item.style.getPropertyValue("--delay");
+              item.classList.add("a2r-visible");
+              item.style.animation = `a2r-fade-in 0.5s ease ${delay} forwards`;
+            });
+            observer.unobserve(container);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    document.querySelectorAll<HTMLElement>("[id^='gallery-']").forEach((el) => {
+      if (el.dataset.galleryLightbox !== undefined) return;
+      observer.observe(el);
+
+      const lightbox = document.getElementById(`${el.id}-lightbox`);
+      if (!lightbox) return;
+
+      const img = lightbox.querySelector<HTMLImageElement>("[data-lightbox-img]")!;
+      const closeBtn = lightbox.querySelector("[data-lightbox-close]")!;
+
+      el.querySelectorAll<HTMLElement>("[data-gallery-item]").forEach((item) => {
+        item.addEventListener("click", () => {
+          img.src = item.dataset.gallerySrc || "";
+          img.alt = item.dataset.galleryAlt || "";
+          lightbox.classList.remove("hidden");
+          lightbox.classList.add("flex");
+        });
+      });
+
+      const closeLightbox = () => {
+        lightbox.classList.add("hidden");
+        lightbox.classList.remove("flex");
+      };
+
+      closeBtn.addEventListener("click", closeLightbox);
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !lightbox.classList.contains("hidden")) {
+          closeLightbox();
+        }
+      });
+    });
+  }
+
+  initGalleries();
+</script>
