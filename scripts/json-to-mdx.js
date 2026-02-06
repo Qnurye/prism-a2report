@@ -21,7 +21,6 @@ lines.push("---");
 lines.push(`title: "${report.title}"`);
 if (report.author) lines.push(`author: "${report.author}"`);
 if (report.date) lines.push(`date: "${report.date}"`);
-lines.push("layout: ../../layouts/ReportLayout.astro");
 lines.push("---");
 lines.push("");
 
