@@ -1,4 +1,6 @@
 ---
+import { marked } from "marked";
+
 interface Props {
   text: string;
   author: string;
@@ -17,7 +19,7 @@ const quoteId = `quote-${Math.random().toString(36).slice(2, 9)}`;
     >&ldquo;</span
   >
   <blockquote class="font-serif text-lg italic -mt-6 ml-2">
-    <p>{text}</p>
+    <Fragment set:html={marked.parse(text)} />
   </blockquote>
   <figcaption class="font-ui text-sm text-muted-foreground mt-3 ml-2">
     &mdash; {author}{role && <span>, {role}</span>}

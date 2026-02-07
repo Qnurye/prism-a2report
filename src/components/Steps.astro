@@ -1,4 +1,6 @@
 ---
+import { marked } from "marked";
+
 interface Props {
   orientation?: "horizontal" | "vertical";
   steps: Array<{ title: string; description?: string }>;
@@ -51,9 +53,10 @@ const stepsId = `steps-${Math.random().toString(36).slice(2, 9)}`;
                   {step.title}
                 </p>
                 {step.description && (
-                  <p class="text-xs text-muted-foreground text-center mt-0.5 max-w-[120px]">
-                    {step.description}
-                  </p>
+                  <p
+                    class="text-xs text-muted-foreground text-center mt-0.5 max-w-[120px]"
+                    set:html={marked.parseInline(step.description)}
+                  />
                 )}
               </div>
               {index < steps.length - 1 && (
@@ -116,7 +119,10 @@ const stepsId = `steps-${Math.random().toString(36).slice(2, 9)}`;
                   {step.title}
                 </p>
                 {step.description && (
-                  <p class="text-sm text-muted-foreground mt-0.5">{step.description}</p>
+                  <p
+                    class="text-sm text-muted-foreground mt-0.5"
+                    set:html={marked.parseInline(step.description)}
+                  />
                 )}
               </div>
             </div>

@@ -89,7 +89,7 @@ const tabsId = `tabs-${Math.random().toString(36).slice(2, 9)}`;
             )}
             {section.type === "callout" && (
               <Callout variant={section.variant} title={section.title}>
-                {section.content}
+                <Fragment set:html={marked.parse(section.content)} />
               </Callout>
             )}
             {section.type === "statcard" && (

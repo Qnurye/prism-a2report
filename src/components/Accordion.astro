@@ -1,4 +1,6 @@
 ---
+import { marked } from "marked";
+
 interface Props {
   items: Array<{ title: string; content: string }>;
   allowMultiple?: boolean;
@@ -40,7 +42,10 @@ const accordionId = `accordion-${Math.random().toString(36).slice(2, 9)}`;
           data-accordion-content
         >
           <div class="overflow-hidden">
-            <div class="px-4 pb-3 pt-0 text-sm leading-relaxed">{item.content}</div>
+            <div
+              class="px-4 pb-3 pt-0 text-sm leading-relaxed"
+              set:html={marked.parse(item.content)}
+            />
           </div>
         </div>
       </div>
