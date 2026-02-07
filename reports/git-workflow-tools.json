@@ -12,7 +12,7 @@
       "type": "text",
       "heading": "执行摘要",
       "level": 2,
-      "content": "本报告深入分析了当前主流的 Git 工作流增强工具，涵盖从虚拟分支管理到堆栈式 PR 等多种创新工作流模式。\n\n**核心发现**：\n\n- **GitButler** 通过虚拟分支技术实现了真正的多任务并行开发\n- **Graphite** 将堆栈式 PR（Stacked PRs）工作流带给 GitHub 用户\n- **Jujutsu (jj)** 是新一代 Git 兼容的 VCS，融合了多个版本控制系统的优秀理念\n- **Sapling** 是 Meta 开源的可扩展源代码管理系统，兼容 Git\n- **git-branchless** 提供高速度、monorepo 级别的无分支工作流\n- **Stacked Git (stgit)** 是经典的补丁栈管理工具\n- **git worktree** 是 Git 原生的多工作目录功能\n\n**注**：调研中未发现名为 \"Worktrunk\" 的独立工具，这可能指的是 trunk-based development 工作模式本身。"
+      "content": "本报告深入分析了当前主流的 Git 工作流增强工具，涵盖从虚拟分支管理到堆栈式 PR 等多种创新工作流模式。\n\n**核心发现**：\n\n- **Worktrunk** 专为 AI agent 并行工作流设计的 git worktree 管理工具\n- **GitButler** 通过虚拟分支技术实现了真正的多任务并行开发\n- **Graphite** 将堆栈式 PR（Stacked PRs）工作流带给 GitHub 用户\n- **Jujutsu (jj)** 是新一代 Git 兼容的 VCS，融合了多个版本控制系统的优秀理念\n- **Sapling** 是 Meta 开源的可扩展源代码管理系统，兼容 Git\n- **git-branchless** 提供高速度、monorepo 级别的无分支工作流\n- **Stacked Git (stgit)** 是经典的补丁栈管理工具\n- **git worktree** 是 Git 原生的多工作目录功能"
     },
     {
       "type": "callout",
@@ -23,7 +23,7 @@
     {
       "type": "statcard",
       "label": "调研工具数量",
-      "value": "7",
+      "value": "8",
       "description": "主流 Git 工作流增强工具"
     },
     {
@@ -37,6 +37,7 @@
       "caption": "Git 工作流增强工具功能对比",
       "headers": ["工具", "核心理念", "Git 兼容性", "学习曲线", "适用场景", "活跃度"],
       "rows": [
+        ["Worktrunk", "AI agent 并行工作流", "✅ 完全兼容", "⭐⭐", "AI 编程助手", "🔥 活跃"],
         ["GitButler", "虚拟分支并行开发", "✅ 完全兼容", "⭐⭐⭐", "个人/小团队", "🔥 活跃"],
         ["Graphite", "堆栈式 PR", "✅ 完全兼容", "⭐⭐", "团队协作", "🔥 活跃"],
         ["Jujutsu (jj)", "新一代 VCS", "✅ Git 后端", "⭐⭐⭐⭐", "任意规模", "🔥 非常活跃"],
@@ -64,6 +65,26 @@
     {
       "type": "tabs",
       "tabs": [
+        {
+          "label": "Worktrunk",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 核心功能\n\nWorktrunk 是专为 **AI agent 并行工作流** 设计的 git worktree 管理工具。它让 Claude Code、Codex 等 AI 编程助手能够在多个独立的工作目录中同时处理不同任务，互不干扰。\n\n### 设计理念\n\n- **AI agent 优先**：专为运行多个 AI 编程助手设计\n- **worktree 简化**：将 git worktree 的复杂命令简化为简单的 CLI\n- **分支名即地址**：通过分支名定位 worktree，路径自动计算\n- **hooks 系统**：支持 create、pre-merge、post-merge 等钩子\n\n### 核心优势\n\n- 创建 worktree 只需 `wt switch -c feature`\n- 自动启动 Claude Code：`wt switch -x claude -c feature`\n- 一键合并并清理：`wt merge main`\n- LLM 自动生成提交消息"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "当你需要同时运行 5-10 个 AI agent 处理不同任务时，Worktrunk 能让每个 agent 都有独立的工作目录，避免互相覆盖代码。"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nbrew install worktrunk && wt config shell install\n\n# 创建 worktree 并启动 Claude\nwt switch -x claude -c feature-a -- 'Add user authentication'\nwt switch -x claude -c feature-b -- 'Fix the pagination bug'\nwt switch -x claude -c feature-c -- 'Write tests for the API'\n\n# 查看所有 worktree 状态\nwt list\n# 输出:\n# Branch         Status HEAD± main↕ Message\n# @ feature-a    +      +53   0e631a Initial commit\n# ^ main         ^⇡     ⇡1    0e631a Initial commit\n\n# 合并并清理（自动生成提交消息）\nwt merge main\n\n# 对比传统 git worktree：\n# git worktree add -b feat ../repo.feat && cd ../repo.feat && claude\n# worktrunk: wt switch -x claude -c feat"
+            }
+          ]
+        },
         {
           "label": "GitButler",
           "sections": [
@@ -464,6 +485,10 @@
       "type": "accordion",
       "items": [
         {
+          "title": "Worktrunk 快速入门",
+          "content": "**安装**：\n\n```bash\n# macOS/Linux\nbrew install worktrunk && wt config shell install\n\n# Cargo\ncargo install worktrunk && wt config shell install\n\n# Windows (使用 git-wt 避免与 Windows Terminal 冲突)\nwinget install max-sixty.worktrunk\ngit-wt config shell install\n```\n\n**首次使用**：\n\n```bash\n# 创建 worktree 并切换\nwt switch --create feature-auth\n\n# 创建 worktree 并启动 Claude Code\nwt switch -x claude -c feature-auth -- 'Add authentication'\n\n# 列出所有 worktree\nwt list\n\n# 合并到 main（自动生成提交消息、rebase、清理）\nwt merge main\n\n# 删除 worktree\nwt remove\n```\n\n**高级功能**：\n\n- [Hooks](https://worktrunk.dev/hook/) — 创建/合并时自动运行命令\n- [LLM 提交消息](https://worktrunk.dev/llm-commits/) — 自动生成提交消息\n- [Claude Code 集成](https://worktrunk.dev/claude-code/) — 深度集成\n\n**学习资源**：\n\n- [官方文档](https://worktrunk.dev)\n- [GitHub](https://github.com/max-sixty/worktrunk)\n- [Anthropic 最佳实践](https://www.anthropic.com/engineering/claude-code-best-practices)"
+        },
+        {
           "title": "GitButler 快速入门",
           "content": "**安装**（macOS/Windows/Linux）：\n\n从 [官网](https://gitbutler.com) 下载桌面应用，或：\n\n```bash\n# macOS\nbrew install gitbutler\n\n# 其他平台请下载安装包\n```\n\n**首次使用**：\n\n1. 打开 GitButler 应用\n2. 选择或克隆一个 Git 仓库\n3. 在 UI 中创建虚拟分支\n4. 修改文件后，拖拽更改到不同的虚拟分支\n5. 单独 push 某个虚拟分支的更改\n\n**学习资源**：\n\n- [官方文档](https://docs.gitbutler.com)\n- 特别推荐阅读 [Virtual Branches](https://docs.gitbutler.com/features/branch-management/virtual-branches) 概念说明"
         },
@@ -695,6 +720,11 @@
       "sources": [
         {
           "id": "1",
+          "title": "Worktrunk Official Site",
+          "url": "https://worktrunk.dev"
+        },
+        {
+          "id": "2",
           "title": "GitButler GitHub Repository",
           "url": "https://github.com/gitbutlerapp/gitbutler"
         },
