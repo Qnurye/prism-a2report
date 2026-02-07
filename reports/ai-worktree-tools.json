@@ -1,0 +1,299 @@
+{
+  "title": "AI Agent 并行工作流工具生态：Worktrunk 及其替代方案",
+  "author": "Prism",
+  "date": "2026-02-07",
+  "slug": "ai-worktree-tools",
+  "metadata": {
+    "tags": ["Git", "AI Agent", "工作流", "并行开发", "Claude Code"],
+    "category": "技术研究"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "引言",
+      "level": 2,
+      "content": "随着 AI 编程助手（Claude Code、Codex、Cursor 等）的普及，开发者开始探索**并行运行多个 AI agent** 的工作模式。传统的 `git stash` + `git checkout` 工作流在这种场景下捉襟见肘：多个 agent 无法同时在同一个工作目录中工作。\n\n**Git worktree** 成为解决方案——每个 agent 拥有独立的工作目录，互不干扰。然而，原生 `git worktree` 命令繁琐难用：\n\n```bash\n# 传统方式：创建 worktree 并启动 Claude\ngit worktree add -b feature ../repo.feature origin/main\ncd ../repo.feature\nclaude\n```\n\n于是，一系列**专为 AI agent 并行工作流设计的 worktree 管理工具**应运而生。本报告深入调研这一新兴领域的主要工具。"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "为什么 AI Agent 需要 Worktree？",
+      "content": "AI 编程助手（如 Claude Code）在执行任务时会修改文件、运行测试、提交代码。如果多个 agent 共享同一个工作目录，它们的修改会相互冲突。Git worktree 让每个 agent 都有独立的「沙盒」，可以自由工作而不影响彼此。"
+    },
+    {
+      "type": "statcard",
+      "label": "调研工具数量",
+      "value": "6",
+      "description": "专为 AI agent 设计的 worktree 管理工具"
+    },
+    {
+      "type": "table",
+      "caption": "工具核心对比",
+      "headers": ["工具", "语言", "AI 集成", "tmux", "MCP", "特色功能"],
+      "rows": [
+        ["Worktrunk", "Rust", "✅ Claude Code", "—", "—", "LLM 提交消息、hooks 系统"],
+        ["CCManager", "Node.js", "✅✅ 8种 agent", "—", "—", "实时状态监控、会话复制"],
+        ["par", "Python", "✅", "✅", "—", "多仓库 workspace、全局控制"],
+        ["gwq", "Go", "✅", "✅", "—", "fuzzy finder、状态 dashboard"],
+        ["gtr", "Bash", "✅", "—", "—", "编辑器集成、轻量级"],
+        ["worktree-cli", "Node.js", "✅", "—", "✅", "MCP 协议、AI 自主管理"]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "详细工具介绍",
+      "level": 2,
+      "content": "以下是各工具的详细介绍，包括核心功能、安装方式和典型工作流。"
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "Worktrunk",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## Worktrunk\n\n**官网**: [worktrunk.dev](https://worktrunk.dev)  \n**GitHub**: [max-sixty/worktrunk](https://github.com/max-sixty/worktrunk)  \n**语言**: Rust  \n**作者**: max-sixty (PRQL 作者)\n\n### 设计理念\n\nWorktrunk 的核心目标是让 git worktree 的体验**像分支一样简单**。它通过分支名定位 worktree，路径自动计算，极大简化了命令。\n\n### 核心功能\n\n- **三条核心命令**: `wt switch`、`wt list`、`wt remove`\n- **执行器 (-x)**: 创建 worktree 后自动启动命令（如 Claude）\n- **Hooks 系统**: post-start、pre-merge、post-merge 等钩子\n- **LLM 提交消息**: 自动从 diff 生成提交消息\n- **一键合并**: `wt merge main` 自动 squash、rebase、merge、清理"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nbrew install worktrunk && wt config shell install\n\n# 创建 worktree 并启动 Claude\nwt switch -x claude -c feature-auth -- 'Add authentication'\n\n# 同时启动多个 agent\nwt switch -x claude -c feature-a -- 'Add user auth'\nwt switch -x claude -c feature-b -- 'Fix pagination'\nwt switch -x claude -c feature-c -- 'Write API tests'\n\n# 查看所有 worktree 状态\nwt list\n\n# 合并并清理（自动生成提交消息）\nwt merge main"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "需要快速启动多个 Claude Code agent 并行处理不同任务，且希望工具尽量简洁不侵入的用户。"
+            }
+          ]
+        },
+        {
+          "label": "CCManager",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## CCManager\n\n**GitHub**: [kbwo/ccmanager](https://github.com/kbwo/ccmanager)  \n**语言**: Node.js  \n**支持的 Agent**: Claude Code、Gemini CLI、Codex CLI、Cursor Agent、Copilot CLI、Cline CLI、OpenCode、Kimi CLI\n\n### 设计理念\n\nCCManager 是**多 AI agent 会话管理器**，不仅管理 worktree，还提供实时的 agent 状态监控。它的核心价值是让你知道「哪个 agent 正在等待输入」。\n\n### 核心功能\n\n- **状态指示器**: Waiting（等待输入）、Busy（处理中）、Idle（空闲）\n- **支持 8 种 AI agent**: 几乎覆盖所有主流编程助手\n- **会话复制**: 在 worktree 间复制 Claude Code 会话数据，保持对话上下文\n- **自动审批（实验性）**: 使用 AI 验证自动批准安全的 prompt\n- **Devcontainer 集成**: 支持容器化开发环境"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nnpm install -g ccmanager\n\n# 启动（TUI 界面）\nccmanager\n\n# 或直接运行\nnpx ccmanager"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "需要同时管理多种不同 AI agent（Claude + Gemini + Codex），且需要实时监控每个 agent 状态的用户。"
+            }
+          ]
+        },
+        {
+          "label": "par",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## par (Parallel Worktree & Session Manager)\n\n**GitHub**: [coplane/par](https://github.com/coplane/par)  \n**语言**: Python  \n**依赖**: tmux\n\n### 设计理念\n\npar 将 Git worktree 和 tmux session **深度绑定**，每个 worktree 对应一个持久化的 tmux 会话。它还支持**多仓库 workspace**，可以跨多个 repo 统一管理开发上下文。\n\n### 核心功能\n\n- **全局 label 系统**: 从任意位置访问任意 worktree\n- **tmux 集成**: 每个 worktree 有独立的 tmux session\n- **远程执行**: `par send all \"git status\"` 向所有 session 发命令\n- **Control Center**: 全局监控面板\n- **多仓库 Workspace**: 跨 frontend、backend 等多 repo 统一管理\n- **IDE 集成**: 自动生成 VSCode/Cursor workspace 配置"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nuv tool install par-cli\n\n# 创建 worktree + tmux session\npar start feature-auth\n\n# 从任意位置创建（指定路径）\npar start bugfix-login --path ~/projects/my-app\n\n# 向所有 session 发命令\npar send all \"git status\"\n\n# 打开控制中心\npar control-center\n\n# 多仓库 workspace\npar workspace start feature-auth --repos frontend,backend\npar workspace code feature-auth  # 用 VSCode 打开"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "重度 tmux 用户，或需要跨多个仓库协调开发的用户（如前后端分离项目）。"
+            }
+          ]
+        },
+        {
+          "label": "gwq",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## gwq (Git Worktree Manager)\n\n**GitHub**: [d-kuro/gwq](https://github.com/d-kuro/gwq)  \n**语言**: Go  \n**灵感**: 类似 ghq 管理 repo clone，gwq 管理 worktree\n\n### 设计理念\n\ngwq 提供**交互式 fuzzy finder** 界面，让 worktree 选择像用 fzf 一样直观。它还支持**全局 worktree 管理**，可以跨 repo 查看和操作所有 worktree。\n\n### 核心功能\n\n- **Fuzzy Finder**: 交互式选择分支和 worktree\n- **全局管理**: `gwq list -g` 查看所有仓库的 worktree\n- **状态 Dashboard**: `gwq status --watch` 实时监控\n- **tmux 集成**: 在 tmux session 中运行长任务\n- **路径获取**: `cd $(gwq get feature)` 快速跳转"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nbrew install d-kuro/tap/gwq\n\n# 创建 worktree\ngwq add -b feature/authentication\n\n# 交互式选择（fuzzy finder）\ngwq add -i\n\n# 在 worktree 中启动 Claude\ncd $(gwq get auth) && claude\n\n# 实时监控所有 worktree\ngwq status --watch\n\n# 在 worktree 中执行命令\ngwq exec feature -- npm test\n\n# 全局查看\ngwq list -g"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "喜欢 fzf 风格交互的用户，或需要管理大量 worktree 并快速跳转的用户。"
+            }
+          ]
+        },
+        {
+          "label": "gtr",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## gtr (Git Worktree Runner)\n\n**GitHub**: [coderabbitai/git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner)  \n**语言**: Bash  \n**来自**: CodeRabbit AI\n\n### 设计理念\n\ngtr 是**纯 Bash 实现**的轻量级工具，专注于**编辑器和 AI 工具的集成**。它可以自动复制配置文件、安装依赖、配置 workspace。\n\n### 核心功能\n\n- **编辑器集成**: 自动用 Cursor/VSCode 打开 worktree\n- **AI 工具集成**: 自动启动 Claude 等 AI 工具\n- **配置复制**: 自动复制 .env 等配置文件\n- **依赖安装**: 创建后自动 npm install / pip install\n- **合并清理**: `git gtr clean --merged` 清理已合并的 worktree"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\ngit clone https://github.com/coderabbitai/git-worktree-runner.git\ncd git-worktree-runner && ./install.sh\n\n# 配置默认编辑器和 AI 工具\ngit gtr config set gtr.editor.default cursor\ngit gtr config set gtr.ai.default claude\n\n# 创建 worktree 并启动 AI\ngit gtr new my-feature --ai\n\n# 创建 worktree 并打开编辑器\ngit gtr new my-feature --editor\n\n# 两者都要\ngit gtr new my-feature -e -a\n\n# 清理已合并的 worktree（需要 gh CLI）\ngit gtr clean --merged"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "追求轻量级、纯 Bash 实现的用户，或需要强编辑器集成的用户。"
+            }
+          ]
+        },
+        {
+          "label": "worktree-cli",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## worktree-cli\n\n**GitHub**: [fnebenfuehr/worktree-cli](https://github.com/fnebenfuehr/worktree-cli)  \n**npm**: [@fnebenfuehr/worktree-cli](https://www.npmjs.com/package/@fnebenfuehr/worktree-cli)  \n**语言**: Node.js\n\n### 设计理念\n\nworktree-cli 的独特之处是**支持 MCP (Model Context Protocol)**。这意味着 AI 助手（如 Claude Code）可以**自己调用** worktree 管理功能，而不需要用户手动操作。\n\n### 核心功能\n\n- **MCP 集成**: AI 可以直接创建/切换/删除 worktree\n- **Hooks 系统**: post_create、pre_remove、post_remove\n- **文件复制**: 自动复制 .env 等配置\n- **PR 集成**: `worktree pr <number>` 直接 checkout PR\n- **智能 checkout**: 自动判断本地/远程分支"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nnpm install -g @fnebenfuehr/worktree-cli\n\n# 转换现有 repo 为 worktree 结构\ncd your-project && worktree setup\n\n# 创建 worktree\nworktree create feat/new-feature\n\n# Checkout PR\nworktree pr 123\n\n# 交互式切换\nworktree switch"
+            },
+            {
+              "type": "code",
+              "language": "json",
+              "filename": "claude_desktop_config.json",
+              "code": "{\n  \"mcpServers\": {\n    \"worktree\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@fnebenfuehr/worktree-cli\", \"mcp\"]\n    }\n  }\n}"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "最适合的场景",
+              "content": "希望 AI 能够自主管理 worktree（无需用户干预）的用户，或使用 MCP 协议的 AI 应用开发者。"
+            }
+          ]
+        }
+      ],
+      "defaultTab": 0
+    },
+    {
+      "type": "text",
+      "heading": "工作流模式对比",
+      "level": 2,
+      "content": "不同工具适合不同的工作流模式。以下对比帮助你选择最合适的工具。"
+    },
+    {
+      "type": "accordion",
+      "items": [
+        {
+          "title": "模式 1：快速启动多个 Claude Code agent",
+          "content": "**需求**: 同时启动 3-5 个 Claude Code 处理不同任务，完成后合并。\n\n**推荐工具**: **Worktrunk** 或 **gtr**\n\n```bash\n# Worktrunk\nwt switch -x claude -c feat-a -- 'Add auth'\nwt switch -x claude -c feat-b -- 'Fix bug'\nwt switch -x claude -c feat-c -- 'Write tests'\n\n# gtr\ngit gtr new feat-a --ai\ngit gtr new feat-b --ai\ngit gtr new feat-c --ai\n```\n\n**理由**: 这两个工具的 `-x` / `--ai` 参数专为这种场景设计，一条命令完成创建+启动。"
+        },
+        {
+          "title": "模式 2：监控多个 agent 的状态",
+          "content": "**需求**: 知道哪个 agent 正在等待输入、哪个正在工作、哪个已完成。\n\n**推荐工具**: **CCManager** 或 **gwq**\n\n```bash\n# CCManager（TUI 界面，实时显示状态）\nccmanager\n\n# gwq（命令行 watch 模式）\ngwq status --watch\n```\n\n**理由**: CCManager 提供最详细的 agent 状态（Waiting/Busy/Idle），gwq 提供轻量的命令行监控。"
+        },
+        {
+          "title": "模式 3：跨多个仓库协调开发",
+          "content": "**需求**: 前后端分离项目，需要在多个 repo 中同时开发同一个功能。\n\n**推荐工具**: **par**\n\n```bash\n# 创建跨 repo workspace\npar workspace start feature-auth --repos frontend,backend,shared\n\n# 用 VSCode 打开多 repo workspace\npar workspace code feature-auth\n\n# 向所有 repo 发命令\npar send all \"git status\"\n```\n\n**理由**: par 是唯一原生支持多仓库 workspace 的工具。"
+        },
+        {
+          "title": "模式 4：让 AI 自主管理 worktree",
+          "content": "**需求**: 希望 Claude 能够自己创建/切换 worktree，无需用户手动操作。\n\n**推荐工具**: **worktree-cli**\n\n配置 MCP 后，Claude 可以使用以下工具：\n- `worktree_create` - 创建新 worktree\n- `worktree_switch` - 切换到指定 worktree\n- `worktree_list` - 列出所有 worktree\n- `worktree_pr` - Checkout 指定 PR\n\n**理由**: worktree-cli 是目前唯一支持 MCP 协议的 worktree 管理工具。"
+        },
+        {
+          "title": "模式 5：tmux 重度用户的工作流",
+          "content": "**需求**: 习惯用 tmux 管理终端会话，希望 worktree 和 tmux session 深度绑定。\n\n**推荐工具**: **par** 或 **gwq**\n\n```bash\n# par（每个 worktree 自动创建 tmux session）\npar start feature-auth\npar open feature-auth  # attach 到 tmux session\n\n# gwq（在 tmux 中运行命令）\ngwq exec feature -- npm run dev\n```\n\n**理由**: 这两个工具都原生支持 tmux 集成。"
+        }
+      ],
+      "allowMultiple": true
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "工具功能覆盖度",
+      "data": {
+        "labels": ["Worktrunk", "CCManager", "par", "gwq", "gtr", "worktree-cli"],
+        "datasets": [
+          {
+            "label": "AI 集成深度 (1-5)",
+            "data": [4, 5, 3, 3, 4, 4],
+            "backgroundColor": "rgba(99, 102, 241, 0.7)"
+          },
+          {
+            "label": "易用性 (1-5)",
+            "data": [5, 4, 3, 4, 4, 4],
+            "backgroundColor": "rgba(34, 197, 94, 0.7)"
+          },
+          {
+            "label": "功能丰富度 (1-5)",
+            "data": [4, 4, 5, 4, 3, 4],
+            "backgroundColor": "rgba(251, 191, 36, 0.7)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "heading": "安装速查表",
+      "level": 2,
+      "content": "各工具的快速安装命令："
+    },
+    {
+      "type": "table",
+      "caption": "安装命令速查",
+      "headers": ["工具", "Homebrew", "npm/pip/cargo", "其他"],
+      "rows": [
+        ["Worktrunk", "`brew install worktrunk`", "`cargo install worktrunk`", "winget"],
+        ["CCManager", "—", "`npm install -g ccmanager`", "npx ccmanager"],
+        ["par", "—", "`uv tool install par-cli`", "pip install par-cli"],
+        [
+          "gwq",
+          "`brew install d-kuro/tap/gwq`",
+          "`go install github.com/d-kuro/gwq/cmd/gwq@latest`",
+          "—"
+        ],
+        ["gtr", "—", "—", "git clone + ./install.sh"],
+        ["worktree-cli", "—", "`npm install -g @fnebenfuehr/worktree-cli`", "npx worktree-cli"]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Shell 集成提醒",
+      "content": "大多数工具需要 shell 集成才能实现目录切换。安装后记得运行相应的配置命令：\n\n- Worktrunk: `wt config shell install`\n- gwq: 无需配置，使用 `cd $(gwq get <branch>)`\n- par: 无需配置，使用 `par open`"
+    },
+    {
+      "type": "text",
+      "heading": "选择建议",
+      "level": 2,
+      "content": "根据你的使用场景选择合适的工具："
+    },
+    {
+      "type": "table",
+      "caption": "场景化推荐",
+      "headers": ["你的情况", "推荐工具", "理由"],
+      "rows": [
+        ["只用 Claude Code，追求简洁", "Worktrunk", "专为 Claude Code 设计，命令最简洁"],
+        ["同时用多种 AI agent", "CCManager", "支持 8 种 agent，状态监控最完善"],
+        ["重度 tmux 用户", "par", "tmux 深度集成，多仓库支持"],
+        ["喜欢交互式选择", "gwq", "fuzzy finder 体验最好"],
+        ["追求轻量/纯 Bash", "gtr", "无依赖，编辑器集成好"],
+        ["希望 AI 自主管理", "worktree-cli", "MCP 协议支持"]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "未来展望",
+      "level": 2,
+      "content": "这个领域正在快速发展。我们可以预见的趋势：\n\n1. **MCP 成为标准**: 更多工具将支持 MCP 协议，让 AI 能够自主管理开发环境\n2. **状态同步**: 工具将提供更好的 agent 状态同步和通知机制\n3. **云端协作**: 多人协作场景下的 worktree 管理\n4. **IDE 深度集成**: 与 VSCode/Cursor 等 IDE 的更紧密集成\n5. **工具融合**: 不同工具的优秀特性会相互借鉴（如 CCManager 的状态监控 + Worktrunk 的简洁命令）\n\n随着 AI 编程助手能力的提升，**并行 agent 工作流**将成为主流开发模式，这类工具的重要性会持续增加。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "总结",
+      "content": "如果你是 Worktrunk 用户，现在有更多选择：\n\n- **想要更多 agent 支持** → CCManager\n- **想要 tmux 集成** → par 或 gwq\n- **想要 AI 自主管理** → worktree-cli\n- **想要更轻量** → gtr\n\n这些工具并不互斥，你可以根据不同场景组合使用。"
+    }
+  ]
+}
