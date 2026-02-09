@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { convertToMdx } from "./json-to-mdx.js";
+import { convertToMdx, escapeMdxContent } from "./json-to-mdx.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixture = (name) =>
@@ -360,5 +360,89 @@ describe("convertToMdx", () => {
     expect(output).toContain("<SourceList");
     expect(output).toContain("sources={");
     expect(output).toContain('title="References"');
+  });
+
+  it("escapes curly braces in text content", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "text", content: "Use {expr} here" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("Use \\{expr\\} here");
+  });
+
+  it("escapes < in non-tag context in text content", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "text", content: "Performance <2%" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("Performance &lt;2%");
+  });
+
+  it("escapes special chars in text heading", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "text", heading: "Results {x} <2%", content: "body" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("## Results \\{x\\} &lt;2%");
+  });
+
+  it("escapes special chars in callout content", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "callout", variant: "info", content: "Config {key} and <5% threshold" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("Config \\{key\\} and &lt;5% threshold");
+  });
+
+  it("preserves valid HTML tags in text content", () => {
+    const report = {
+      title: "T",
+      sections: [{ type: "text", content: "Has <em>emphasis</em> and <br> and </div>" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain("<em>emphasis</em>");
+    expect(output).toContain("<br>");
+    expect(output).toContain("</div>");
+  });
+
+  it("escapes special chars from fixture", () => {
+    const report = fixture("mdx-special-chars-report.json");
+    const output = convertToMdx(report);
+    // Section 0: heading and content should have escaped braces and <
+    expect(output).toContain("\\{x\\}");
+    expect(output).toContain("&lt;2%");
+    // Section 1: valid HTML tags should remain
+    expect(output).toContain("<em>valid HTML</em>");
+    expect(output).toContain("<br>");
+    // Section 2 (callout): should have escaped content
+    expect(output).toContain("&lt;5%");
+    expect(output).toContain("\\{key: value\\}");
+  });
+});
+
+describe("escapeMdxContent", () => {
+  it("escapes curly braces", () => {
+    expect(escapeMdxContent("{value}")).toBe("\\{value\\}");
+  });
+
+  it("escapes < not followed by letter or /", () => {
+    expect(escapeMdxContent("x <2")).toBe("x &lt;2");
+    expect(escapeMdxContent("a < b")).toBe("a &lt; b");
+  });
+
+  it("preserves valid HTML tags", () => {
+    expect(escapeMdxContent("<em>text</em>")).toBe("<em>text</em>");
+    expect(escapeMdxContent("<br>")).toBe("<br>");
+    expect(escapeMdxContent("</div>")).toBe("</div>");
+  });
+
+  it("handles mixed content", () => {
+    expect(escapeMdxContent("Loss <2%, use {x}, and <em>bold</em>")).toBe(
+      "Loss &lt;2%, use \\{x\\}, and <em>bold</em>",
+    );
   });
 });

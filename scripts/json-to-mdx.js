@@ -4,13 +4,17 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+export function escapeMdxContent(text) {
+  return text.replace(/[{}]/g, (ch) => `\\${ch}`).replace(/<(?![a-zA-Z/])/g, "&lt;");
+}
+
 function renderText(lines, s) {
   const level = s.level || 2;
   if (s.heading) {
-    lines.push(`${"#".repeat(level)} ${s.heading}`);
+    lines.push(`${"#".repeat(level)} ${escapeMdxContent(s.heading)}`);
     lines.push("");
   }
-  lines.push(s.content);
+  lines.push(escapeMdxContent(s.content));
   lines.push("");
 }
 
@@ -42,7 +46,7 @@ function renderCallout(lines, s) {
     attrs.push(`title=${JSON.stringify(s.title)}`);
   }
   lines.push(`<Callout ${attrs.join(" ")}>`);
-  lines.push(s.content);
+  lines.push(escapeMdxContent(s.content));
   lines.push("</Callout>");
   lines.push("");
 }
