@@ -17,6 +17,11 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta property="og:image" content="https://prism.qnury.es/og.png" />
+    <meta property="og:title" content={title} />
+    <meta property="og:type" content="website" />
 
     <!-- Dark mode: prevent FOUC -->
     <script is:inline>
