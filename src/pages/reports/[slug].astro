@@ -1,6 +1,8 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection } from "astro:content";
 import ReportLayout from "../../layouts/ReportLayout.astro";
+import SectionRenderer from "../../components/SectionRenderer.astro";
+import { extractHeadings } from "../../lib/extract-headings";
 
 export async function getStaticPaths() {
   const reports = await getCollection("reports");
@@ -11,9 +13,9 @@ export async function getStaticPaths() {
 }
 
 const { report } = Astro.props;
-const { Content, headings } = await render(report);
+const headings = extractHeadings(report.data.sections);
 ---
 
 <ReportLayout title={report.data.title} lang={report.data.lang} tocHeadings={headings}>
-  <Content />
+  <SectionRenderer sections={report.data.sections} />
 </ReportLayout>

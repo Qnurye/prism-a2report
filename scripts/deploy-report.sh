@@ -13,26 +13,8 @@ fi
 echo "Validating report..."
 node scripts/validate-report.js "$REPORT_JSON"
 
-echo "Generating MDX..."
-node scripts/json-to-mdx.js "$REPORT_JSON" "$SLUG"
-
-echo "Generating Markdown (AI-readable)..."
-node scripts/json-to-markdown.js "$REPORT_JSON" "$SLUG"
-
-echo "Packing skill tarball..."
-tar -czf public/skill.tar.gz -C skill/ prism-report-manager/
-
 echo "Building site..."
 pnpm run build
-
-echo "Copying AI-readable markdown to dist..."
-for md in src/content/reports/*/index.md; do
-  if [ -f "$md" ]; then
-    slug_dir=$(basename "$(dirname "$md")")
-    mkdir -p "dist/reports/$slug_dir"
-    cp "$md" "dist/reports/$slug_dir/index.md"
-  fi
-done
 
 echo "Deploying to Cloudflare Pages..."
 OUTPUT=$(wrangler pages deploy dist --project-name=prism-a2report 2>&1)

@@ -5,7 +5,7 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      include: ["scripts/**/*.js", "functions/**/*.ts"],
+      include: ["scripts/**/*.js", "functions/**/*.ts", "src/lib/**/*.ts", "src/loaders/**/*.ts"],
       exclude: ["**/*.test.*", "**/__fixtures__/**"],
     },
   },

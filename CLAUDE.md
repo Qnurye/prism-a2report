@@ -21,34 +21,42 @@ pnpm test:coverage    # Run tests with coverage
 
 # Report pipeline
 node scripts/validate-report.js <report.json>        # Validate JSON against schema
-node scripts/json-to-mdx.js <report.json> <slug>     # Generate MDX for Astro
-node scripts/json-to-markdown.js <report.json> <slug> # Generate AI-readable Markdown
-./scripts/deploy-report.sh <report.json> [slug]       # Full pipeline: validate → convert → build → deploy
+node scripts/json-to-markdown.js <report.json> <slug> # Generate AI-readable Markdown (standalone CLI)
+./scripts/deploy-report.sh <report.json> [slug]       # Full pipeline: validate → build → deploy
 ./scripts/list-reports.sh                              # List deployed reports
-./scripts/generate-all-reports.sh                      # Generate all reports from reports/*.json
-./scripts/copy-markdown-to-dist.sh                     # Copy AI-readable Markdown into dist/
 ```
 
 ## Architecture
 
-### Report Pipeline (JSON → dual output)
+### Report Pipeline (JSON → dual output via content loader)
 
-Reports are authored as JSON conforming to `schema/report.schema.json`, then converted into two formats:
+Reports are authored as JSON conforming to `schema/report.schema.json`. A custom Astro content loader (`src/loaders/report-loader.ts`) reads `reports/*.json` directly — no intermediate files are generated.
 
-1. **MDX** (`src/content/reports/<slug>.mdx`) — Rendered by Astro into interactive HTML with Chart.js charts, styled tables, syntax-highlighted code (Shiki), and callout boxes
-2. **Markdown** (`src/content/reports/<slug>/index.md`) — Plain Markdown for AI consumption, copied into `dist/` during build
+1. **HTML** — The loader stores report data (title, sections, metadata) in Astro's content collection. `SectionRenderer.astro` programmatically renders sections into interactive HTML with Chart.js charts, styled tables, syntax-highlighted code (Shiki), and callout boxes.
+2. **Markdown** — An Astro static endpoint (`src/pages/reports/[slug]/index.md.ts`) generates plain Markdown for AI consumption at build time, output to `dist/reports/<slug>/index.md`.
 
-The JSON schema supports eleven section types: `text`, `chart`, `table`, `code`, `callout`, `statcard`, `tabs`, `timeline`, `figure`, `quote`, `accordion`.
-
-**Generated report content is gitignored** — `src/content/reports/` is in `.gitignore`. Reports are generated at build/deploy time.
+The JSON schema supports nineteen section types: `text`, `chart`, `table`, `code`, `callout`, `statcard`, `tabs`, `timeline`, `figure`, `quote`, `accordion`, `comparison`, `progress`, `metrics-grid`, `steps`, `diff`, `embed`, `gallery`, `source-list`.
 
 ### Content Collection
 
-Astro content collection (`src/content.config.ts`) uses glob loader to find `**/*.mdx` under `src/content/reports/`. Each MDX file uses frontmatter fields: `title` (required), `author`, `date`.
+Astro content collection (`src/content.config.ts`) uses a custom `reportLoader` that reads `reports/*.json`, detects CJK language, and populates the store. Schema validates `title`, `author`, `date`, `lang`, `sections[]`, and `metadata`. In dev mode, the loader watches `reports/` for hot reload.
+
+### Key Source Files
+
+| File                                   | Purpose                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `src/loaders/report-loader.ts`         | Custom Astro content loader — reads JSON, detects CJK, populates collection |
+| `src/components/SectionRenderer.astro` | Renders `sections[]` → Astro components (all 19 types)                      |
+| `src/lib/extract-headings.ts`          | Extracts TOC headings from sections array                                   |
+| `src/lib/slugify.ts`                   | Heading → URL-safe slug (CJK-safe, matches github-slugger)                  |
+| `src/lib/cjk.ts`                       | CJK language detection (zh/ja/ko)                                           |
+| `src/lib/convert-to-markdown.ts`       | Sections → plain Markdown (used by endpoint)                                |
+| `src/pages/reports/[slug].astro`       | Report HTML page                                                            |
+| `src/pages/reports/[slug]/index.md.ts` | Report Markdown endpoint                                                    |
 
 ### Components (src/components/)
 
-All components are Astro components used within MDX reports:
+All components are Astro components rendered by `SectionRenderer`:
 
 - **Chart.astro** — Client-side Chart.js rendering (line/bar/pie/doughnut), dark-mode aware
 - **Table.astro** — Responsive data table with Tailwind styling
@@ -57,7 +65,7 @@ All components are Astro components used within MDX reports:
 - **StatCard.astro** — Metric display with optional trend indicator and count-up animation
 - **Figure.astro** — Image with optional caption, lazy loading
 - **Quote.astro** — Styled blockquote with author/role attribution
-- **Tabs.astro** — WAI-ARIA tabbed content panels
+- **Tabs.astro** — WAI-ARIA tabbed content panels (delegates to SectionRenderer for nested sections)
 - **Timeline.astro** — Vertical chronological event display with staggered animations
 - **Accordion.astro** — Expandable/collapsible sections, single or multi-open mode
 
@@ -69,7 +77,7 @@ Tailwind CSS v4 with class-based dark mode (`.dark` class on `<html>`). Theme to
 
 CJK (Chinese, Japanese, Korean) typography is handled via a dedicated `@layer cjk-typography` in `global.css`. Key features:
 
-- **Automatic language detection**: `scripts/json-to-mdx.js` detects CJK content (>30% CJK characters) and sets `lang` attribute in frontmatter
+- **Automatic language detection**: `src/lib/cjk.ts` detects CJK content (>30% CJK characters) and sets `lang` attribute via the content loader
 - **Modern CSS properties**: `text-autospace`, `text-spacing-trim`, `hanging-punctuation`, `line-break: strict` with graceful degradation
 - **Font features**: OpenType features (`halt`, `chws`) for punctuation spacing
 - **Justification**: `text-justify: inter-character` for Chinese/Japanese, `inter-word` for Korean
@@ -83,12 +91,12 @@ CJK (Chinese, Japanese, Korean) typography is handled via a dedicated `@layer cj
 ### CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) — Runs lint, format check, and build on pull requests to `main`.
-- **Deploy** (`.github/workflows/deploy.yml`) — On push to `main` or manual dispatch: generates all reports, builds the site, copies Markdown into `dist/`, and deploys to Cloudflare Pages.
+- **Deploy** (`.github/workflows/deploy.yml`) — On push to `main` or manual dispatch: builds the site (loader reads JSON, endpoint generates Markdown) and deploys to Cloudflare Pages.
 - Report JSON source files live in `reports/` and are committed to the repo.
 
 ### Testing
 
-Vitest with v8 coverage (`vitest.config.js`). Tests cover schema validation, Markdown conversion, MDX conversion, and Cloudflare middleware. Fixtures in `scripts/__fixtures__/`.
+Vitest with v8 coverage (`vitest.config.js`). Tests cover schema validation, Markdown conversion, and Cloudflare middleware. Fixtures in `scripts/__fixtures__/`.
 
 ## Conventions
 

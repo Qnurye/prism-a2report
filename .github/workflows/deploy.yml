@@ -30,9 +30,6 @@ jobs:
       - name: Build site
         run: pnpm run build
 
-      - name: Copy markdown to dist
-        run: ./scripts/copy-markdown-to-dist.sh
-
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateReport, loadSchema, checkMdxContent } from "./validate-report.js";
+import { validateReport, loadSchema } from "./validate-report.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixture = (name) =>
@@ -172,88 +172,5 @@ describe("validateReport", () => {
     };
     const { valid } = validateReport(report, schema);
     expect(valid).toBe(false);
-  });
-});
-
-describe("checkMdxContent", () => {
-  it("detects curly braces in text content", () => {
-    const report = {
-      title: "T",
-      sections: [{ type: "text", content: "Use {value} here" }],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0].match).toBe("{");
-    expect(warnings[0].sectionIndex).toBe(0);
-    expect(warnings[0].field).toBe("content");
-  });
-
-  it("detects < in non-tag context", () => {
-    const report = {
-      title: "T",
-      sections: [{ type: "text", content: "Performance <2%" }],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0].match).toBe("<");
-  });
-
-  it("does not warn for valid HTML tags", () => {
-    const report = {
-      title: "T",
-      sections: [{ type: "text", content: "Has <em>emphasis</em> and <br> tags" }],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(0);
-  });
-
-  it("returns empty array for clean report", () => {
-    const report = {
-      title: "T",
-      sections: [
-        { type: "text", content: "Normal content" },
-        { type: "chart", chartType: "bar", data: { labels: [] } },
-      ],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(0);
-  });
-
-  it("reports correct section index and field for heading", () => {
-    const report = {
-      title: "T",
-      sections: [
-        { type: "text", content: "clean" },
-        { type: "text", heading: "Values {x}", content: "also clean" },
-      ],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0].sectionIndex).toBe(1);
-    expect(warnings[0].field).toBe("heading");
-  });
-
-  it("detects special chars in callout content", () => {
-    const report = {
-      title: "T",
-      sections: [{ type: "callout", variant: "info", content: "Limit <5%" }],
-    };
-    const warnings = checkMdxContent(report);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0].sectionIndex).toBe(0);
-    expect(warnings[0].field).toBe("content");
-  });
-
-  it("detects special chars from fixture", () => {
-    const report = fixture("mdx-special-chars-report.json");
-    const warnings = checkMdxContent(report);
-    expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings.some((w) => w.sectionIndex === 0 && w.field === "heading")).toBe(true);
-    expect(warnings.some((w) => w.sectionIndex === 0 && w.field === "content")).toBe(true);
-    expect(warnings.some((w) => w.sectionIndex === 2 && w.field === "content")).toBe(true);
-    // Section 1 has valid HTML tags only — no warning
-    expect(warnings.some((w) => w.sectionIndex === 1)).toBe(false);
-    // Section 3 is clean — no warning
-    expect(warnings.some((w) => w.sectionIndex === 3)).toBe(false);
   });
 });

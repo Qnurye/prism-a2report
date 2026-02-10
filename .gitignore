@@ -2,8 +2,7 @@
 dist/
 # generated types
 .astro/
-# generated report content
-src/content/reports/
+# generated artifacts
 public/reports/
 public/skill.tar.gz
 

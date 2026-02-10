@@ -18,31 +18,6 @@ export function validateReport(report, schema) {
   return { valid, errors: validate.errors || [] };
 }
 
-export function checkMdxContent(report) {
-  const warnings = [];
-  const MDX_SPECIAL = /[{}]|<(?![a-zA-Z/])/;
-
-  report.sections.forEach((section, index) => {
-    if (section.type === "text" || section.type === "callout") {
-      for (const field of ["content", "heading"]) {
-        const value = section[field];
-        if (typeof value !== "string") continue;
-        const match = value.match(MDX_SPECIAL);
-        if (match) {
-          warnings.push({
-            sectionIndex: index,
-            field,
-            match: match[0],
-            message: `Section ${index} field "${field}" contains MDX-special character "${match[0]}" — will be auto-escaped during MDX conversion`,
-          });
-        }
-      }
-    }
-  });
-
-  return warnings;
-}
-
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const jsonPath = process.argv[2];
   if (!jsonPath) {
@@ -56,13 +31,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
   if (valid) {
     console.log("Valid report.");
-    const mdxWarnings = checkMdxContent(report);
-    if (mdxWarnings.length > 0) {
-      console.log("\nMDX content warnings:");
-      for (const w of mdxWarnings) {
-        console.log(`  ${w.message}`);
-      }
-    }
     process.exit(0);
   } else {
     console.error("Validation errors:");

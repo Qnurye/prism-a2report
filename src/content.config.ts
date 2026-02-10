@@ -1,13 +1,20 @@
 import { defineCollection, z } from "astro:content";
-import { glob } from "astro/loaders";
+import { reportLoader } from "./loaders/report-loader";
 
 const reports = defineCollection({
-  loader: glob({ pattern: "**/*.mdx", base: "./src/content/reports" }),
+  loader: reportLoader({ reportsDir: "./reports" }),
   schema: z.object({
     title: z.string(),
     author: z.string().optional(),
     date: z.string().optional(),
     lang: z.string().optional(),
+    sections: z.array(z.object({ type: z.string() }).passthrough()),
+    metadata: z
+      .object({
+        tags: z.array(z.string()).optional(),
+        category: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 
