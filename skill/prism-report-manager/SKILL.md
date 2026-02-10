@@ -43,6 +43,10 @@ Charts, tables, statcards, and timelines exist to present structured data visual
 
 Sections should connect to each other. A text section after a chart should interpret the data, not just restate it. A text section before a table should set up why the comparison matters.
 
+### CJK text tips
+
+When writing in Chinese, Japanese, or Korean, use fullwidth quotation marks `「」`（single）and `『』`（double）instead of `""`. Curly/straight double quotes inside a JSON string value require escaping (`\"`), which is error-prone and hard to read. CJK brackets are unambiguous, need no escaping, and are typographically correct.
+
 ### Example
 
 **Fragmented (avoid):**
