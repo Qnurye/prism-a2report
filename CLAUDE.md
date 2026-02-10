@@ -65,6 +65,17 @@ All components are Astro components used within MDX reports:
 
 Tailwind CSS v4 with class-based dark mode (`.dark` class on `<html>`). Theme tokens defined as CSS custom properties in `src/styles/global.css` using OKLCH color space. Four font families: `sans` (Inter + LXGW Neo XiHei), `serif` (Baskervville + GenRyuMin2), `mono` (Maple Mono CN), `ui` (IBM Plex Sans). CJK fonts are sliced at build time by `vite-plugin-font`.
 
+#### CJK Typography
+
+CJK (Chinese, Japanese, Korean) typography is handled via a dedicated `@layer cjk-typography` in `global.css`. Key features:
+
+- **Automatic language detection**: `scripts/json-to-mdx.js` detects CJK content (>30% CJK characters) and sets `lang` attribute in frontmatter
+- **Modern CSS properties**: `text-autospace`, `text-spacing-trim`, `hanging-punctuation`, `line-break: strict` with graceful degradation
+- **Font features**: OpenType features (`halt`, `chws`) for punctuation spacing
+- **Justification**: `text-justify: inter-character` for Chinese/Japanese, `inter-word` for Korean
+- **Optimized spacing**: Increased line-height (1.9 for zh/ja, 1.8 for ko) and letter-spacing adjustments
+- **Component overrides**: `whitespace-nowrap` removed from Table cells, `italic` disabled for CJK blockquotes
+
 ### Agent Skill
 
 `skill/prism-report-manager/` is an installable Claude Code skill package. It gets tarred into `public/skill.tar.gz` during prebuild and is downloadable from the deployed site. The skill contains its own copies of scripts, schema, and reference docs.

@@ -20,10 +20,10 @@
 /* --- Theme Tokens --- */
 
 @theme inline {
-  --font-sans: "Inter", "LXGW Neo XiHei", sans-serif;
+  --font-sans: "Inter", "LXGW Neo XiHei", system-ui, sans-serif;
   --font-serif: "Baskervville", "GenRyuMin2 TC R", "Songti SC", serif;
-  --font-mono: "Maple Mono CN", "Maple Mono", monospace;
-  --font-ui: "IBM Plex Sans", sans-serif;
+  --font-mono: "Maple Mono CN", "Maple Mono", "Courier New", monospace;
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -94,32 +94,170 @@
   --chart-5: oklch(0.645 0.246 16.439);
 }
 
+/* --- CJK Typography Layer ---
+ *
+ * Scoped styles for Chinese (zh), Japanese (ja), and Korean (ko) content.
+ * Activated via lang attribute on <html> element.
+ *
+ * Modern CSS properties with progressive enhancement:
+ * - text-autospace: Automatic spacing between CJK and Latin/numbers (Chrome 123+, Safari 17.4+)
+ * - text-spacing-trim: Remove extra space at line start (Chrome 123+, experimental)
+ * - hanging-punctuation: Hang opening/closing punctuation outside text block (Safari only)
+ * - line-break: strict: Strict CJK line-breaking rules (well-supported)
+ * - text-justify: inter-character/inter-word: Justification algorithm (well-supported)
+ * - font-feature-settings: OpenType features for punctuation spacing (well-supported)
+ *
+ * All properties degrade gracefully in unsupported browsers.
+ */
+
+@layer cjk-typography {
+  /* Chinese Typography */
+  [lang^="zh"] .prose {
+    text-autospace: ideograph-alpha ideograph-numeric;
+    text-spacing-trim: trim-start;
+    hanging-punctuation: first last;
+    line-break: strict;
+    word-break: normal;
+    overflow-wrap: break-word;
+    font-feature-settings: "chws" 1;
+    letter-spacing: 0.02em;
+  }
+
+  [lang^="zh"] .prose p {
+    text-align: justify;
+    text-justify: inter-character;
+    text-wrap: pretty;
+    line-height: 1.9;
+  }
+
+  [lang^="zh"] .prose h1,
+  [lang^="zh"] .prose h2,
+  [lang^="zh"] .prose h3,
+  [lang^="zh"] .prose h4 {
+    text-wrap: balance;
+  }
+
+  /* Japanese Typography */
+  [lang^="ja"] .prose {
+    text-autospace: ideograph-alpha ideograph-numeric;
+    text-spacing-trim: trim-start;
+    hanging-punctuation: first last;
+    line-break: strict;
+    word-break: normal;
+    overflow-wrap: break-word;
+    font-feature-settings:
+      "chws" 1,
+      "jp90" 1;
+    letter-spacing: 0.02em;
+  }
+
+  [lang^="ja"] .prose p {
+    text-align: justify;
+    text-justify: inter-character;
+    text-wrap: pretty;
+    line-height: 1.9;
+  }
+
+  [lang^="ja"] .prose h1,
+  [lang^="ja"] .prose h2,
+  [lang^="ja"] .prose h3,
+  [lang^="ja"] .prose h4 {
+    text-wrap: balance;
+  }
+
+  /* Korean Typography */
+  [lang^="ko"] .prose {
+    text-autospace: ideograph-alpha ideograph-numeric;
+    line-break: strict;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    letter-spacing: -0.01em;
+  }
+
+  [lang^="ko"] .prose p {
+    text-align: justify;
+    text-justify: inter-word;
+    text-wrap: pretty;
+    line-height: 1.8;
+  }
+
+  [lang^="ko"] .prose h1,
+  [lang^="ko"] .prose h2,
+  [lang^="ko"] .prose h3,
+  [lang^="ko"] .prose h4 {
+    text-wrap: balance;
+  }
+
+  /* CJK blockquotes: disable faux italic */
+  [lang^="zh"] .prose blockquote,
+  [lang^="ja"] .prose blockquote,
+  [lang^="ko"] .prose blockquote {
+    font-style: normal;
+  }
+}
+
 /* --- Base Styles --- */
 
 body {
   @apply bg-background text-foreground font-sans antialiased;
 }
 
-/* --- Prose Typography --- */
+/* --- Prose Typography ---
+ *
+ * Spacing values based on Tailwind Typography (@tailwindcss/typography)
+ * and W3C CLReq/JLREQ recommendations. Uses em units so spacing
+ * scales proportionally with font size.
+ *
+ * Pattern: large gap BEFORE headings (section break), tight gap AFTER
+ * headings (h* + * resets margin-top to couple heading with content).
+ */
 
 .prose h1 {
-  @apply font-black text-4xl font-serif mt-8;
+  @apply font-black text-4xl font-serif;
+  margin-top: 2.25em;
+  margin-bottom: 0.9em;
 }
 .prose h2 {
-  @apply font-semibold text-3xl font-serif mt-4;
+  @apply font-semibold text-3xl font-serif;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
 }
 .prose h3 {
-  @apply font-medium text-2xl font-serif mt-3;
+  @apply font-medium text-2xl font-serif;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
 }
 .prose h4 {
   @apply font-bold text-xl font-serif;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
 }
+
+/* Tight coupling: heading + first child share a visual group */
+.prose h1 + *,
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: 0;
+}
+
+/* No spurious margin at top/bottom of prose container */
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
 .prose p {
-  @apply leading-relaxed text-pretty;
+  @apply text-pretty;
+  line-height: 1.75;
+  margin-block: 1.25em;
 }
 
 .prose blockquote {
-  @apply border-l-4 border-gray-500 pl-4 italic text-gray-600 dark:text-gray-400 my-2;
+  @apply border-l-4 border-gray-500 pl-4 italic text-gray-600 dark:text-gray-400;
+  margin-block: 1.5em;
 }
 
 code {

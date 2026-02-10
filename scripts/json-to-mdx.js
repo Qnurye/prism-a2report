@@ -4,6 +4,29 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+export function detectCJKLang(text) {
+  const chinese = /[\u4e00-\u9fff]/g;
+  const japanese = /[\u3040-\u30ff]/g;
+  const korean = /[\uac00-\ud7af]/g;
+
+  const chineseCount = (text.match(chinese) || []).length;
+  const japaneseCount = (text.match(japanese) || []).length;
+  const koreanCount = (text.match(korean) || []).length;
+  const total = text.length;
+
+  if (total === 0) return null;
+
+  const cjkRatio = (chineseCount + japaneseCount + koreanCount) / total;
+
+  if (cjkRatio < 0.3) return null;
+
+  if (japaneseCount > chineseCount && japaneseCount > koreanCount) return "ja";
+  if (koreanCount > chineseCount && koreanCount > japaneseCount) return "ko";
+  if (chineseCount > 0) return "zh";
+
+  return null;
+}
+
 export function escapeMdxContent(text) {
   return text.replace(/[{}]/g, (ch) => `\\${ch}`).replace(/<(?![a-zA-Z/])/g, "&lt;");
 }
@@ -178,11 +201,21 @@ function renderSourceList(lines, s) {
 export function convertToMdx(report) {
   const lines = [];
 
+  // Detect CJK language from content
+  const contentSample =
+    report.title +
+    report.sections
+      .map((s) => s.content || s.text || "")
+      .join("")
+      .slice(0, 2000);
+  const detectedLang = detectCJKLang(contentSample);
+
   // YAML frontmatter
   lines.push("---");
   lines.push(`title: "${report.title}"`);
   if (report.author) lines.push(`author: "${report.author}"`);
   if (report.date) lines.push(`date: "${report.date}"`);
+  if (detectedLang) lines.push(`lang: "${detectedLang}"`);
   lines.push("---");
   lines.push("");
 

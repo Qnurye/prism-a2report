@@ -7,6 +7,7 @@ const reports = defineCollection({
     title: z.string(),
     author: z.string().optional(),
     date: z.string().optional(),
+    lang: z.string().optional(),
   }),
 });
 

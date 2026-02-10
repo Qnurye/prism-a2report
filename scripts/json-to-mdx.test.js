@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { convertToMdx, escapeMdxContent } from "./json-to-mdx.js";
+import { convertToMdx, escapeMdxContent, detectCJKLang } from "./json-to-mdx.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixture = (name) =>
@@ -421,6 +421,62 @@ describe("convertToMdx", () => {
     // Section 2 (callout): should have escaped content
     expect(output).toContain("&lt;5%");
     expect(output).toContain("\\{key: value\\}");
+  });
+});
+
+describe("detectCJKLang", () => {
+  it("returns null for English text", () => {
+    expect(detectCJKLang("This is a plain English report about technology")).toBeNull();
+  });
+
+  it("returns null for empty string", () => {
+    expect(detectCJKLang("")).toBeNull();
+  });
+
+  it("detects Chinese content", () => {
+    expect(detectCJKLang("中国独立电影发行市场分析报告")).toBe("zh");
+  });
+
+  it("detects Japanese content with kana", () => {
+    expect(detectCJKLang("これはテストです。日本語のレポート")).toBe("ja");
+  });
+
+  it("detects Korean content", () => {
+    expect(detectCJKLang("한국어 보고서 테스트입니다")).toBe("ko");
+  });
+
+  it("returns null for mixed text below 30% threshold", () => {
+    // ~20% CJK in a mostly English text
+    expect(detectCJKLang("This report discusses 中国 market trends in great detail")).toBeNull();
+  });
+
+  it("detects Chinese when CJK ratio exceeds threshold", () => {
+    // Majority Chinese with some English
+    expect(detectCJKLang("中国市场分析：独立电影的发行策略与未来趋势 Report")).toBe("zh");
+  });
+
+  it("prefers Japanese when kana count exceeds Chinese count", () => {
+    expect(detectCJKLang("テストテストテストこれはテスト漢字")).toBe("ja");
+  });
+});
+
+describe("convertToMdx CJK lang detection", () => {
+  it("adds lang frontmatter for Chinese reports", () => {
+    const report = {
+      title: "中国独立电影发行市场分析",
+      sections: [{ type: "text", content: "这是一份关于中国独立电影市场的分析报告" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).toContain('lang: "zh"');
+  });
+
+  it("does not add lang for English reports", () => {
+    const report = {
+      title: "Test Report",
+      sections: [{ type: "text", content: "This is an English report" }],
+    };
+    const output = convertToMdx(report);
+    expect(output).not.toContain("lang:");
   });
 });
 

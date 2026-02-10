@@ -14,6 +14,6 @@ const { report } = Astro.props;
 const { Content } = await render(report);
 ---
 
-<ReportLayout title={report.data.title}>
+<ReportLayout title={report.data.title} lang={report.data.lang}>
   <Content />
 </ReportLayout>

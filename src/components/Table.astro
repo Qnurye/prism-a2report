@@ -22,7 +22,7 @@ const { headers, rows, caption } = Astro.props;
         class="bg-secondary text-secondary-foreground text-xs uppercase tracking-wider font-ui"
       >
         <tr>
-          {headers.map((h) => <th class="px-4 py-3 font-semibold whitespace-nowrap">{h}</th>)}
+          {headers.map((h) => <th class="px-4 py-3 font-semibold">{h}</th>)}
         </tr>
       </thead>
       <tbody class="divide-y divide-border">
@@ -30,7 +30,7 @@ const { headers, rows, caption } = Astro.props;
           rows.map((row) => (
             <tr class="hover:bg-accent/50 transition-colors">
               {row.map((cell) => (
-                <td class="px-4 py-3 whitespace-nowrap">{cell}</td>
+                <td class="px-4 py-3">{cell}</td>
               ))}
             </tr>
           ))
