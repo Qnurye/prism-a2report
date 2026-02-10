@@ -27,6 +27,41 @@ Deploy AI-generated research reports as interactive web documents.
 - You want to read or reference a previously deployed report
 - You need to list, search, or manage existing reports
 
+## Content Composition
+
+The A2UI format gives you a rich palette of components — charts, tables, statcards, timelines, callouts, accordions — to present structured data. **Text sections are where you write the actual article.** They should read as connected prose: paragraphs that explain, analyze, and narrate.
+
+### Think article, not outline
+
+A text section should typically contain 2–5 paragraphs of prose. If you find yourself writing a one-sentence text section, it probably belongs as part of a larger section. Bullet lists and Markdown subheadings are tools for occasional emphasis within prose — not replacements for it.
+
+### Let components do the structuring
+
+Charts, tables, statcards, and timelines exist to present structured data visually. Text sections exist to provide narrative context, analysis, and transitions between them. Don't replicate what a component does with Markdown formatting inside text (e.g., don't use a Markdown table when a `table` section works better).
+
+### Flow and transitions
+
+Sections should connect to each other. A text section after a chart should interpret the data, not just restate it. A text section before a table should set up why the comparison matters.
+
+### Example
+
+**Fragmented (avoid):**
+
+```json
+{ "type": "text", "heading": "Overview", "content": "## Key Points\n\n- Revenue grew 15%\n- APAC led growth\n- North America stable" }
+{ "type": "text", "heading": "Revenue", "content": "Revenue was $200M in March." }
+```
+
+**Article-style (preferred):**
+
+```json
+{
+  "type": "text",
+  "heading": "Overview",
+  "content": "The first quarter of 2026 marked a turning point for the global market. Revenue climbed steadily from $100M in January to $200M by March, driven largely by accelerating demand in the Asia-Pacific region.\n\nThis growth didn't happen in a vacuum. A combination of regulatory tailwinds in Southeast Asia and aggressive pricing strategies from regional players created conditions for rapid expansion — conditions that North American incumbents have been slow to match."
+}
+```
+
 ## Prerequisites
 
 This skill operates on the local filesystem. Ensure:

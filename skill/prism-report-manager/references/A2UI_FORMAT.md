@@ -17,7 +17,7 @@ The A2UI (AI-to-UI) format is a JSON structure used to define research reports. 
 
 ### 1. Text Section
 
-Renders Markdown content with an optional heading.
+Renders Markdown content with an optional heading. The `content` field supports full Markdown (paragraphs, bold/italic, links, lists, blockquotes, etc.) and is best used for multi-paragraph prose that provides narrative context, analysis, and transitions between other section types.
 
 | Field     | Type     | Required | Description                    |
 | --------- | -------- | -------- | ------------------------------ |
@@ -33,7 +33,7 @@ Renders Markdown content with an optional heading.
   "type": "text",
   "heading": "Executive Summary",
   "level": 2,
-  "content": "This report analyzes market trends for Q1 2026..."
+  "content": "The first quarter of 2026 marked a significant shift in global market dynamics. Revenue grew steadily across all regions, reaching $200M by March — a 100% increase from the start of the year.\n\nAsia Pacific emerged as the primary growth engine, expanding 25% quarter-over-quarter. This acceleration was driven by a combination of regulatory tailwinds and aggressive adoption in emerging markets, a trend we expect to continue through Q2."
 }
 ```
 

@@ -11,7 +11,7 @@
     {
       "type": "text",
       "heading": "Executive Summary",
-      "content": "This report analyzes global market trends for Q1 2026, covering revenue performance across key regions and identifying growth drivers."
+      "content": "The first quarter of 2026 marked a turning point for the global market. After a sluggish close to 2025, revenue climbed steadily from $100M in January to $200M by March — a trajectory that caught many analysts off guard.\n\nThe story behind the numbers is one of regional divergence. While North America maintained its steady, predictable growth, Asia Pacific surged ahead at 25%, fueled by regulatory tailwinds and a wave of enterprise adoption in Southeast Asia. Europe held the middle ground, growing at a respectable 10% but facing headwinds from currency fluctuations and tighter data regulations.\n\nThis report breaks down the quarter's performance by region, identifies the key growth drivers, and offers a framework for thinking about Q2."
     },
     {
       "type": "chart",
@@ -28,6 +28,11 @@
       }
     },
     {
+      "type": "text",
+      "heading": "Reading the Revenue Curve",
+      "content": "The revenue trend tells a story of accelerating momentum. The $50M jump from January to February was notable, but the equal-sized jump from February to March is more significant — it suggests the growth rate held steady rather than tapering off, which is unusual this early in a recovery cycle.\n\nHistorically, Q1 growth tends to front-load as companies deploy budgets allocated in the prior year's planning cycle. The fact that March matched February's pace points to genuine demand rather than budget-flush spending."
+    },
+    {
       "type": "table",
       "caption": "Regional Breakdown",
       "headers": ["Region", "Revenue", "Growth"],
@@ -36,6 +41,11 @@
         ["Europe", "$60M", "+10%"],
         ["Asia Pacific", "$60M", "+25%"]
       ]
+    },
+    {
+      "type": "text",
+      "heading": "Regional Analysis",
+      "content": "The regional breakdown reveals a market in transition. Asia Pacific now matches Europe in absolute revenue at $60M, but its 25% growth rate signals that it will likely overtake Europe by Q3 if current trends hold.\n\nNorth America remains the largest market at $80M, and its 15% growth is healthy by any measure. But the region's dominance is narrowing — it accounted for 45% of total revenue this quarter, down from 52% a year ago. This isn't a decline story; it's a globalization story, as emerging markets build the infrastructure and regulatory frameworks needed to adopt at scale."
     },
     {
       "type": "code",
@@ -47,7 +57,7 @@
       "type": "callout",
       "variant": "info",
       "title": "Key Insight",
-      "content": "Asia Pacific showed the strongest growth at 25%, driven by increased adoption in emerging markets."
+      "content": "Asia Pacific showed the strongest growth at 25%, driven by increased adoption in emerging markets. If this trajectory holds, the region will surpass Europe in total revenue by Q3 2026."
     }
   ]
 }

@@ -7,12 +7,12 @@
     {
       "type": "text",
       "heading": "Introduction",
-      "content": "This is a minimal report demonstrating the A2UI format with just two text sections."
+      "content": "This report demonstrates the A2UI format at its most minimal: just a title and two text sections. Even a simple report benefits from prose that sets context and guides the reader.\n\nThe A2UI format supports eleven section types — charts, tables, statcards, timelines, and more — but a valid report only needs a title and at least one section. What matters most is that each section reads as part of a coherent narrative."
     },
     {
       "type": "text",
       "heading": "Conclusion",
-      "content": "The A2UI format supports many section types, but a valid report only requires a title and at least one section."
+      "content": "A minimal report can still be a good report. The key is to write text sections as connected prose rather than isolated fragments. Each paragraph should build on the last, and each section should flow naturally into the next.\n\nFrom here, you can enrich a report by adding structured components — a chart to visualize trends, a table to compare options, a callout to highlight a key insight — and using text sections to weave them into a story."
     }
   ]
 }
