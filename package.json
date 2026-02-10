@@ -3,8 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "predev": "./scripts/generate-all-reports.sh",
     "dev": "astro dev",
-    "prebuild": "tar -czf public/skill.tar.gz -C skill/ prism-report-manager/",
+    "prebuild": "./scripts/generate-all-reports.sh && tar -czf public/skill.tar.gz -C skill/ prism-report-manager/",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

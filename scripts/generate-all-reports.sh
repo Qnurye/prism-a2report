@@ -12,22 +12,18 @@ json_files=("$REPORTS_DIR"/*.json)
 shopt -u nullglob
 
 if [ ${#json_files[@]} -eq 0 ]; then
-  echo "No report JSON files found in reports/. Skipping."
+  echo "Compiled 0 report JSON files."
   exit 0
 fi
 
+compiled_count=0
+
 for json_file in "${json_files[@]}"; do
   slug="$(basename "$json_file" .json)"
-  echo "Processing $slug..."
-
-  echo "  Validating..."
-  node scripts/validate-report.js "$json_file"
-
-  echo "  Generating MDX..."
-  node scripts/json-to-mdx.js "$json_file" "$slug"
-
-  echo "  Generating Markdown..."
-  node scripts/json-to-markdown.js "$json_file" "$slug"
+  node scripts/validate-report.js "$json_file" >/dev/null
+  node scripts/json-to-mdx.js "$json_file" "$slug" >/dev/null
+  node scripts/json-to-markdown.js "$json_file" "$slug" >/dev/null
+  compiled_count=$((compiled_count + 1))
 done
 
-echo "All reports generated."
+echo "Compiled ${compiled_count} report JSON files."

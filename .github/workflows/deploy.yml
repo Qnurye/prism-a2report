@@ -27,9 +27,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Generate reports
-        run: ./scripts/generate-all-reports.sh
-
       - name: Build site
         run: pnpm run build
 
