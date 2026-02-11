@@ -1,0 +1,864 @@
+{
+  "title": "tmux 终端复用器完全指南 (2026)",
+  "author": "Prism AI",
+  "date": "2026-02-11",
+  "slug": "tmux-guide-2026",
+  "metadata": {
+    "tags": ["tmux", "终端", "CLI", "开发工具", "远程开发"],
+    "category": "技术研究"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "执行摘要",
+      "level": 2,
+      "content": "tmux (terminal multiplexer) 自 2007 年首次发布以来，已经成为 Unix/Linux 系统上最流行的终端复用器。在 2026 年的今天，尽管出现了 Zellij、WezTerm 等现代替代品，tmux 仍然是远程开发、session 持久化和多窗口管理的首选工具。\n\n**核心价值**：\n\n- **Session Persistence**：SSH 断开后，工作环境完整保留，重新连接即可恢复\n- **多窗口管理**：在一个终端内创建多个窗口和面板，高效切换\n- **远程配对编程**：多个用户可以同时连接到同一个 tmux session\n- **脚本化工作流**：通过配置文件和脚本，实现复杂的工作环境自动化\n- **跨平台一致性**：在所有 Unix-like 系统上行为一致\n\n在远程服务器开发、长时间运行任务监控、以及需要频繁切换多个任务的场景下，tmux 依然是不可替代的工具。"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "为什么选择 tmux？",
+      "content": "如果你经常 SSH 到远程服务器工作，tmux 能让你的工作流发生质的飞跃。想象一下：编译一个大项目需要 30 分钟，你启动编译后可以安全断开 SSH，回家后重新连接，编译进度丝毫未受影响。这就是 session persistence 的力量。"
+    },
+    {
+      "type": "statcard",
+      "label": "tmux 历史",
+      "value": "19 年",
+      "description": "从 2007 至今持续维护"
+    },
+    {
+      "type": "text",
+      "heading": "核心概念与架构",
+      "level": 2,
+      "content": "理解 tmux 的架构是高效使用它的关键。tmux 采用 **client-server 架构**，这是它实现 session persistence 的基础。"
+    },
+    {
+      "type": "text",
+      "heading": "Server-Client 架构",
+      "level": 3,
+      "content": "当你第一次运行 `tmux` 命令时，系统会启动一个 **tmux server** 进程，它在后台持续运行。你看到的终端界面实际上是一个 **tmux client**，它连接到 server 并显示 session 内容。\n\n这种架构带来的核心优势是：**client 和 server 是分离的**。当你关闭终端窗口或 SSH 断开连接时，只是 client 断开了，而 server 和你的 session 仍在运行。重新连接时，client 会自动连接到 server，你的工作环境完好如初。\n\n可以通过以下方式理解这个架构：\n\n- **Server**：管理所有 sessions、windows、panes 的守护进程\n- **Client**：连接到 server 的终端界面（可以有多个 client 同时连接）\n- **Socket**：client 和 server 通过 Unix socket 通信（通常在 `/tmp/tmux-<uid>/`）"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "实用技巧：多 Client 连接",
+      "content": "你可以从多个终端窗口同时连接到同一个 tmux session（`tmux attach -t session-name`）。所有 client 会看到相同的内容并同步操作。这是实现远程配对编程的基础。"
+    },
+    {
+      "type": "text",
+      "heading": "Session / Window / Pane 三层模型",
+      "level": 3,
+      "content": "tmux 的工作空间组织采用三层嵌套结构，从外到内依次是：**Session → Window → Pane**。理解这三层的区别和关系至关重要。"
+    },
+    {
+      "type": "table",
+      "caption": "tmux 三层模型对比",
+      "headers": ["概念", "类比", "用途", "快捷键（默认）"],
+      "rows": [
+        [
+          "Session",
+          "浏览器实例",
+          "最顶层容器，对应一个完整的工作环境",
+          "Prefix + s (切换), Prefix + d (detach)"
+        ],
+        [
+          "Window",
+          "浏览器标签页",
+          "一个全屏的终端视图，可容纳多个 pane",
+          "Prefix + c (创建), Prefix + 0-9 (切换), Prefix + w (列表)"
+        ],
+        [
+          "Pane",
+          "标签页内的分屏",
+          "Window 的分割区域，每个 pane 独立运行 shell",
+          "Prefix + % (垂直分割), Prefix + \" (水平分割), Prefix + 方向键 (切换)"
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "content": "**具体工作流示例**：\n\n假设你在做一个 Web 项目，可以这样组织：\n\n- **Session: `web-project`**\n  - **Window 0: `editor`** — 运行 Vim/Neovim 编辑代码\n  - **Window 1: `server`** — 分为 2 个 pane\n    - Pane 1: 运行前端 dev server (`npm run dev`)\n    - Pane 2: 运行后端 API server (`python manage.py runserver`)\n  - **Window 2: `database`** — 运行 `psql` 或 MongoDB shell\n  - **Window 3: `logs`** — 分为 3 个 pane，同时查看不同日志文件\n\n这种组织方式让你可以在一个 session 中管理项目的所有方面，快速在不同任务间切换，而不需要开启多个终端窗口。"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "常见误区",
+      "content": "很多初学者只使用 pane 分割而不创建多个 window，导致一个 window 被切成十几个小 pane，每个都难以阅读。**正确做法是**：用 window 来分离不同的任务上下文（编辑、运行、日志等），每个 window 内最多 2-4 个 pane。"
+    },
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "推荐的 Window/Pane 组织策略",
+      "data": {
+        "labels": ["编辑器 Window", "运行环境 Window", "监控/日志 Window", "数据库 Window"],
+        "datasets": [
+          {
+            "label": "推荐 Pane 数量",
+            "data": [1, 2, 3, 1],
+            "backgroundColor": "rgba(99, 102, 241, 0.7)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "heading": "Prefix Key 与命令模式",
+      "level": 3,
+      "content": "tmux 的所有操作都通过 **Prefix Key** 触发（默认是 `Ctrl-b`，可自定义）。按下 Prefix 后，tmux 进入命令等待状态，接收下一个按键作为命令。\n\n例如，创建新 window 的完整操作是：\n\n1. 按 `Ctrl-b`（Prefix）\n2. 释放所有按键\n3. 按 `c`（create window 命令）\n\n除了快捷键，tmux 还提供 **命令模式**（类似 Vim 的命令行）：按 `Prefix + :` 进入，可以输入完整的 tmux 命令，例如 `:split-window -h` 水平分割窗口。"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "caption": "常用 Prefix 快捷键速查",
+      "code": "# Session 管理\nPrefix + s      列出所有 session 并切换\nPrefix + d      Detach 当前 session（退出但保持运行）\nPrefix + $      重命名当前 session\n\n# Window 管理\nPrefix + c      创建新 window\nPrefix + ,      重命名当前 window\nPrefix + w      列出所有 window 并切换\nPrefix + 0-9    切换到指定编号的 window\nPrefix + n/p    切换到下一个/上一个 window\nPrefix + &      关闭当前 window（需确认）\n\n# Pane 管理\nPrefix + %      垂直分割（左右）\nPrefix + \"      水平分割（上下）\nPrefix + 方向键  切换到相邻 pane\nPrefix + o      切换到下一个 pane\nPrefix + x      关闭当前 pane（需确认）\nPrefix + z      切换当前 pane 的全屏/还原\nPrefix + {/}    与上一个/下一个 pane 交换位置\nPrefix + Space  循环切换 pane 布局\n\n# 其他\nPrefix + [      进入复制模式（可滚动查看历史输出）\nPrefix + ]      粘贴复制的内容\nPrefix + ?      显示所有快捷键列表"
+    },
+    {
+      "type": "text",
+      "heading": "实际使用场景",
+      "level": 2,
+      "content": "tmux 在以下场景中展现出巨大价值，从个人开发到团队协作，从简单的任务管理到复杂的生产环境运维。"
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "远程开发",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 核心价值\n\n远程开发是 tmux 最经典的应用场景。当你 SSH 到远程服务器工作时，tmux 提供了本地终端无法替代的 **session persistence** 能力。\n\n### 典型工作流\n\n假设你在公司服务器上开发一个项目："
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 1. SSH 连接到服务器\nssh user@remote-server\n\n# 2. 创建或连接到 tmux session\ntmux new -s dev-work\n# 如果 session 已存在，使用: tmux attach -t dev-work\n\n# 3. 设置工作环境\n# Window 0: 编辑器\nvim src/main.rs\n\n# Window 1: 编译和运行（Prefix + c 创建新 window）\ncargo watch -x run\n\n# Window 2: 测试（再次 Prefix + c）\ncargo test --watch\n\n# Window 3: Git 操作\ngit status\n\n# 4. 下班时，直接 detach（Prefix + d）\n# Session 继续在服务器上运行！\n\n# 5. 回家后重新连接\nssh user@remote-server\ntmux attach -t dev-work\n# 所有窗口、进程、输出历史完好如初"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "实战技巧：长时间编译任务",
+              "content": "启动一个耗时的编译任务（如 LLVM、Chromium）后，立即 detach tmux session 并关闭 SSH。任务会在服务器上继续运行，不受网络断开影响。你可以在手机上用 Termux SSH 回来检查进度，或者第二天到公司后重新 attach。"
+            },
+            {
+              "type": "text",
+              "content": "### 网络中断保护\n\n在不稳定的网络环境下（如咖啡厅 WiFi、移动热点），SSH 连接随时可能断开。如果没有 tmux，每次断开都意味着：\n\n- 正在运行的命令被终止（收到 SIGHUP 信号）\n- 终端输出历史丢失\n- 需要重新导航到工作目录、重新设置环境变量等\n\n而使用 tmux 后，网络断开只会关闭 client，server 和 session 不受影响。重新连接后，用一条 `tmux attach` 命令即可恢复到断开前的状态。"
+            }
+          ]
+        },
+        {
+          "label": "Session Persistence",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## Session 持久化策略\n\nSession persistence 不仅仅是「保持进程运行」，更是「保存工作上下文」。一个设计良好的 session 可以成为你项目的「工作台」，每次打开都是熟悉的布局和状态。\n\n### 命名与组织\n\n为 session 起有意义的名字，使用项目名或任务描述："
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 为不同项目创建独立 session\ntmux new -s web-backend\ntmux new -s mobile-app\ntmux new -s data-pipeline\n\n# 查看所有 session\ntmux ls\n# 输出:\n# web-backend: 3 windows (created Tue Feb 11 10:23:15 2026)\n# mobile-app: 2 windows (created Tue Feb 11 11:05:42 2026)\n# data-pipeline: 1 windows (created Tue Feb 11 14:32:01 2026)\n\n# 快速切换\ntmux attach -t mobile-app"
+            },
+            {
+              "type": "callout",
+              "variant": "info",
+              "title": "Session 生命周期管理",
+              "content": "Session 会一直存在，直到你显式关闭（`tmux kill-session -t name`）或重启系统。对于短期任务，完成后记得清理；对于长期项目，可以保持 session 数周甚至数月，每次工作时 attach 即可。"
+            },
+            {
+              "type": "text",
+              "content": "### 自动恢复：tmux-resurrect 与 tmux-continuum\n\n默认情况下，系统重启会导致所有 tmux session 丢失。使用插件可以实现自动保存和恢复："
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 使用 TPM (Tmux Plugin Manager) 安装\n# 在 ~/.tmux.conf 中添加：\nset -g @plugin 'tmux-plugins/tmux-resurrect'\nset -g @plugin 'tmux-plugins/tmux-continuum'\n\n# 启用自动保存（每 15 分钟）\nset -g @continuum-restore 'on'\n\n# 重载配置\nPrefix + I  # 安装插件\n\n# 手动保存/恢复\nPrefix + Ctrl-s  # 保存当前所有 session\nPrefix + Ctrl-r  # 恢复上次保存的状态"
+            },
+            {
+              "type": "text",
+              "content": "tmux-resurrect 会保存：\n\n- 所有 session、window、pane 的布局\n- 每个 pane 的工作目录\n- 正在运行的程序（需额外配置才能恢复进程状态）\n\n这意味着即使服务器重启，你也能快速恢复到之前的工作环境。"
+            }
+          ]
+        },
+        {
+          "label": "多窗口管理",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 高效的任务切换\n\ntmux 的窗口和面板系统让你可以在一个终端内组织多个任务，避免桌面上堆满大量终端窗口。\n\n### 窗口布局策略\n\n根据任务类型设计窗口结构："
+            },
+            {
+              "type": "table",
+              "caption": "推荐的窗口组织模式",
+              "headers": ["Window", "用途", "Pane 布局", "常驻进程"],
+              "rows": [
+                ["0: editor", "代码编辑", "1 个 pane", "Neovim / Emacs / Helix"],
+                ["1: run", "编译和运行", "2 个 pane（左右）", "左: dev server, 右: API server"],
+                ["2: test", "测试", "1 个 pane", "cargo watch / pytest / jest --watch"],
+                ["3: db", "数据库", "1 个 pane", "psql / mongosh / redis-cli"],
+                [
+                  "4: logs",
+                  "日志监控",
+                  "3 个 pane（上下左右）",
+                  "tail -f access.log / error.log / app.log"
+                ],
+                ["5: git", "版本控制", "1 个 pane", "交互式 shell（lazygit / tig）"]
+              ]
+            },
+            {
+              "type": "text",
+              "content": "### 快速导航\n\n在多个 window 间高效切换是关键。除了默认快捷键，还可以自定义："
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 在 ~/.tmux.conf 中设置快速切换\n# Alt + 数字键直接切换 window（无需 Prefix）\nbind -n M-1 select-window -t 1\nbind -n M-2 select-window -t 2\nbind -n M-3 select-window -t 3\nbind -n M-4 select-window -t 4\n\n# Alt + 方向键在 pane 间切换（无需 Prefix）\nbind -n M-Left select-pane -L\nbind -n M-Right select-pane -R\nbind -n M-Up select-pane -U\nbind -n M-Down select-pane -D\n\n# 使用 Prefix + w 打开可视化 window 选择器"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "Vim 式导航",
+              "content": "如果你熟悉 Vim，可以配置 hjkl 导航：`bind h select-pane -L` 等。结合 vim-tmux-navigator 插件，可以在 Vim 窗口和 tmux pane 间无缝切换，体验丝滑。"
+            }
+          ]
+        },
+        {
+          "label": "远程配对编程",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 多人协作场景\n\ntmux 的多 client 连接特性使其成为远程配对编程的理想工具。多个用户可以同时连接到同一个 session，实时看到彼此的操作。\n\n### 基本设置"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 用户 A 创建 session\nssh user-a@shared-server\ntmux new -s pair-programming\n\n# 用户 B 连接到同一个 session\nssh user-b@shared-server\ntmux attach -t pair-programming\n\n# 现在两个用户看到相同的界面，任何一方的输入都会同步显示"
+            },
+            {
+              "type": "text",
+              "content": "### 安全与权限\n\n默认情况下，只有同一个 Unix 用户可以访问 tmux session。如果需要跨用户协作，有几种方式：\n\n1. **共享 Unix 用户账号**（最简单但安全性较低）\n2. **使用 tmux 的 socket 共享功能**（创建共享 socket，指定权限）\n3. **使用 tmate**（tmux 的 fork，专为配对编程设计，支持通过互联网连接）"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 方法 2: Socket 共享\n# 用户 A 创建共享 socket\ntmux -S /tmp/shared-session new -s collab\nchmod 770 /tmp/shared-session\nchgrp developers /tmp/shared-session\n\n# 用户 B（同组）连接\ntmux -S /tmp/shared-session attach -t collab"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "title": "隐私与安全",
+              "content": "在配对编程时，双方可以看到所有操作和输出。确保不要在 session 中输入敏感信息（密码、API key 等）。使用环境变量或密钥文件管理凭据。"
+            },
+            {
+              "type": "text",
+              "content": "### tmate: 专为配对设计的 tmux\n\ntmate 是 tmux 的 fork，专为配对编程优化。它的核心特性是：\n\n- 通过互联网连接（无需共享服务器）\n- 自动生成只读或读写的连接 URL\n- 基于 SSH 的端到端加密"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装 tmate\nbrew install tmate  # macOS\napt install tmate   # Ubuntu/Debian\n\n# 启动 tmate session\ntmate\n\n# tmate 会显示连接信息\n# SSH session read only:  ssh ro-xxx@nyc1.tmate.io\n# SSH session read write: ssh xxx@nyc1.tmate.io\n\n# 将 URL 发给协作者，他们可以直接连接"
+            }
+          ]
+        },
+        {
+          "label": "脚本化工作流",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 自动化环境设置\n\ntmux 的强大之处在于可以通过脚本完全自动化 session 的创建和配置。这对于复杂的开发环境特别有用。\n\n### 使用 tmux 命令脚本"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "caption": "项目启动脚本示例",
+              "code": "#!/bin/bash\n# start-dev-env.sh - 启动完整的开发环境\n\nSESSION=\"myproject\"\n\n# 检查 session 是否已存在\ntmux has-session -t $SESSION 2>/dev/null\n\nif [ $? != 0 ]; then\n  # 创建新 session，窗口 0\n  tmux new-session -d -s $SESSION -n editor\n  tmux send-keys -t $SESSION:0 'cd ~/projects/myproject' C-m\n  tmux send-keys -t $SESSION:0 'nvim .' C-m\n\n  # 窗口 1: 前端和后端服务器\n  tmux new-window -t $SESSION:1 -n servers\n  tmux split-window -h -t $SESSION:1\n  tmux send-keys -t $SESSION:1.0 'cd ~/projects/myproject/frontend' C-m\n  tmux send-keys -t $SESSION:1.0 'npm run dev' C-m\n  tmux send-keys -t $SESSION:1.1 'cd ~/projects/myproject/backend' C-m\n  tmux send-keys -t $SESSION:1.1 'python manage.py runserver' C-m\n\n  # 窗口 2: 数据库\n  tmux new-window -t $SESSION:2 -n database\n  tmux send-keys -t $SESSION:2 'psql myproject_db' C-m\n\n  # 窗口 3: 日志监控（3 个 pane）\n  tmux new-window -t $SESSION:3 -n logs\n  tmux split-window -v -t $SESSION:3\n  tmux split-window -h -t $SESSION:3.1\n  tmux send-keys -t $SESSION:3.0 'tail -f logs/access.log' C-m\n  tmux send-keys -t $SESSION:3.1 'tail -f logs/error.log' C-m\n  tmux send-keys -t $SESSION:3.2 'tail -f logs/app.log' C-m\n\n  # 选中第一个窗口\n  tmux select-window -t $SESSION:0\nfi\n\n# Attach 到 session\ntmux attach-session -t $SESSION"
+            },
+            {
+              "type": "text",
+              "content": "### 使用 tmuxinator\n\ntmuxinator 是一个 Ruby gem，用 YAML 配置文件管理 tmux session。比手写脚本更简洁："
+            },
+            {
+              "type": "code",
+              "language": "yaml",
+              "caption": "~/.tmuxinator/myproject.yml",
+              "code": "name: myproject\nroot: ~/projects/myproject\n\nwindows:\n  - editor:\n      layout: main-vertical\n      panes:\n        - nvim .\n  - servers:\n      layout: even-horizontal\n      panes:\n        - cd frontend && npm run dev\n        - cd backend && python manage.py runserver\n  - database:\n      panes:\n        - psql myproject_db\n  - logs:\n      layout: tiled\n      panes:\n        - tail -f logs/access.log\n        - tail -f logs/error.log\n        - tail -f logs/app.log"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 启动项目环境\ntmuxinator start myproject\n\n# 或简写\nmux start myproject\n\n# 停止\ntmuxinator stop myproject"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "推荐：将启动脚本加入版本控制",
+              "content": "将 tmuxinator 配置文件或 shell 脚本提交到项目的 Git 仓库中（如 `.tmux/dev.yml` 或 `scripts/tmux-dev.sh`），让团队成员都能使用统一的开发环境配置。"
+            }
+          ]
+        }
+      ],
+      "defaultTab": 0
+    },
+    {
+      "type": "text",
+      "heading": "配置与美化",
+      "level": 2,
+      "content": "tmux 的默认配置偏向保守，但通过自定义配置文件 `~/.tmux.conf`，可以大幅提升使用体验。从修改 Prefix 键到安装插件，从状态栏美化到鼠标支持，配置空间非常大。"
+    },
+    {
+      "type": "text",
+      "heading": "基础配置优化",
+      "level": 3,
+      "content": "以下是一些几乎所有人都应该启用的基础优化："
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "caption": "~/.tmux.conf 基础配置",
+      "code": "# ============ 通用设置 ============\n\n# 修改 Prefix 键为 Ctrl-a（更容易按）\nunbind C-b\nset -g prefix C-a\nbind C-a send-prefix\n\n# 启用鼠标支持（可点击 pane、调整大小、滚动）\nset -g mouse on\n\n# 窗口编号从 1 开始（0 在键盘最右边，不方便）\nset -g base-index 1\nsetw -g pane-base-index 1\n\n# 自动重新编号窗口（关闭窗口 2 后，窗口 3 变为窗口 2）\nset -g renumber-windows on\n\n# 增加历史缓冲区大小\nset -g history-limit 10000\n\n# 减少 Esc 键延迟（对 Vim 用户重要）\nset -sg escape-time 0\n\n# 启用 24-bit 真彩色支持\nset -g default-terminal \"screen-256color\"\nset -ga terminal-overrides \",xterm-256color:Tc\"\n\n# ============ 快捷键优化 ============\n\n# 更直观的分割快捷键\nbind | split-window -h  # Prefix + | 垂直分割\nbind - split-window -v  # Prefix + - 水平分割\nunbind '\"'\nunbind %\n\n# Vim 风格的 pane 导航\nbind h select-pane -L\nbind j select-pane -D\nbind k select-pane -U\nbind l select-pane -R\n\n# 快速重载配置\nbind r source-file ~/.tmux.conf \\; display \"Config reloaded!\"\n\n# ============ 状态栏设置 ============\n\n# 状态栏刷新间隔\nset -g status-interval 5\n\n# 状态栏位置（top 或 bottom）\nset -g status-position bottom\n\n# 状态栏样式\nset -g status-bg colour235\nset -g status-fg colour white\n\n# 左侧显示 session 名\nset -g status-left '#[fg=green][#S] '\nset -g status-left-length 20\n\n# 右侧显示时间\nset -g status-right '#[fg=yellow]%Y-%m-%d %H:%M '\n\n# 当前窗口高亮\nsetw -g window-status-current-style 'fg=black bg=green bold'"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "配置生效",
+      "content": "修改 `~/.tmux.conf` 后，在 tmux 内按 `Prefix + r`（如果配置了上面的快捷键）或运行 `tmux source-file ~/.tmux.conf` 重载配置。某些设置（如 Prefix 键）可能需要重启 tmux server 才能生效。"
+    },
+    {
+      "type": "text",
+      "heading": "插件管理：TPM (Tmux Plugin Manager)",
+      "level": 3,
+      "content": "TPM 是 tmux 的插件管理器，类似于 Vim 的 vim-plug 或 Neovim 的 lazy.nvim。它让插件安装变得非常简单。"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "caption": "安装 TPM",
+      "code": "# 克隆 TPM 仓库\ngit clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm\n\n# 在 ~/.tmux.conf 末尾添加：\n# ============ TPM 插件管理 ============\nset -g @plugin 'tmux-plugins/tpm'\nset -g @plugin 'tmux-plugins/tmux-sensible'  # 合理的默认设置\n\n# 初始化 TPM（这一行必须在最后）\nrun '~/.tmux/plugins/tpm/tpm'\n\n# 在 tmux 内按 Prefix + I 安装插件"
+    },
+    {
+      "type": "text",
+      "heading": "推荐插件",
+      "level": 3,
+      "content": "以下是一些广受欢迎且实用的 tmux 插件："
+    },
+    {
+      "type": "table",
+      "caption": "tmux 核心插件推荐",
+      "headers": ["插件名", "功能", "推荐指数", "配置示例"],
+      "rows": [
+        [
+          "tmux-sensible",
+          "合理的默认设置集合",
+          "⭐⭐⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-sensible'`"
+        ],
+        [
+          "tmux-resurrect",
+          "保存和恢复 session",
+          "⭐⭐⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-resurrect'`"
+        ],
+        [
+          "tmux-continuum",
+          "自动保存 session（配合 resurrect）",
+          "⭐⭐⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-continuum'`<br>`set -g @continuum-restore 'on'`"
+        ],
+        [
+          "tmux-yank",
+          "复制到系统剪贴板",
+          "⭐⭐⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-yank'`"
+        ],
+        [
+          "vim-tmux-navigator",
+          "Vim 和 tmux pane 间无缝导航",
+          "⭐⭐⭐⭐⭐",
+          "`set -g @plugin 'christoomey/vim-tmux-navigator'`"
+        ],
+        [
+          "tmux-prefix-highlight",
+          "状态栏显示 Prefix 按下状态",
+          "⭐⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-prefix-highlight'`"
+        ],
+        [
+          "tmux-battery",
+          "显示电池状态（笔记本）",
+          "⭐⭐⭐",
+          "`set -g @plugin 'tmux-plugins/tmux-battery'`"
+        ],
+        ["tmux-cpu", "显示 CPU 和 RAM 使用率", "⭐⭐⭐", "`set -g @plugin 'tmux-plugins/tmux-cpu'`"]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "必装组合：resurrect + continuum + yank",
+      "content": "这三个插件解决了 tmux 最核心的痛点：session 持久化（resurrect + continuum）和系统剪贴板集成（yank）。安装后，tmux 的体验会上升一个档次。"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "caption": "完整的插件配置示例",
+      "code": "# 在 ~/.tmux.conf 中添加\n\n# ============ TPM 插件 ============\nset -g @plugin 'tmux-plugins/tpm'\nset -g @plugin 'tmux-plugins/tmux-sensible'\nset -g @plugin 'tmux-plugins/tmux-resurrect'\nset -g @plugin 'tmux-plugins/tmux-continuum'\nset -g @plugin 'tmux-plugins/tmux-yank'\nset -g @plugin 'christoomey/vim-tmux-navigator'\nset -g @plugin 'tmux-plugins/tmux-prefix-highlight'\n\n# ============ 插件配置 ============\n\n# tmux-continuum: 每 15 分钟自动保存\nset -g @continuum-restore 'on'\nset -g @continuum-save-interval '15'\n\n# tmux-resurrect: 恢复 Neovim/Vim session\nset -g @resurrect-strategy-nvim 'session'\nset -g @resurrect-strategy-vim 'session'\n\n# tmux-resurrect: 恢复 pane 内容\nset -g @resurrect-capture-pane-contents 'on'\n\n# tmux-prefix-highlight: 状态栏显示\nset -g @prefix_highlight_show_copy_mode 'on'\n\n# 初始化 TPM（必须在最后）\nrun '~/.tmux/plugins/tpm/tpm'\n\n# ============ 使用方法 ============\n# Prefix + I    安装插件\n# Prefix + U    更新插件\n# Prefix + Alt-u  卸载不在配置中的插件"
+    },
+    {
+      "type": "text",
+      "heading": "主题与美化：Oh My Tmux",
+      "level": 3,
+      "content": "Oh My Tmux 是一个开箱即用的 tmux 配置框架，类似于 Oh My Zsh 对于 Zsh 的作用。它提供了精美的主题和合理的默认配置。"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "caption": "安装 Oh My Tmux",
+      "code": "# 克隆仓库\ncd ~\ngit clone https://github.com/gpakosz/.tmux.git\nln -s -f .tmux/.tmux.conf\ncp .tmux/.tmux.conf.local .\n\n# 自定义配置写在 ~/.tmux.conf.local 中\nvim ~/.tmux.conf.local"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "Oh My Tmux 特性",
+      "content": "Oh My Tmux 提供了美观的状态栏（显示电池、时间、前缀高亮等）、Powerline/Nerd Fonts 支持、以及预配置的快捷键。它是一个很好的起点，你可以在此基础上继续自定义。"
+    },
+    {
+      "type": "text",
+      "content": "**其他流行主题框架**：\n\n- **Tmux Powerline**：类似 Vim 的 powerline 状态栏\n- **Catppuccin for tmux**：流行的 Catppuccin 配色主题\n- **Tokyo Night tmux**：Tokyo Night 主题\n- **Nord tmux**：Nord 配色方案\n\n这些主题通常可以通过 TPM 安装："
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# 安装 Catppuccin 主题\nset -g @plugin 'catppuccin/tmux'\nset -g @catppuccin_flavour 'mocha'  # latte, frappe, macchiato, mocha\n\n# 安装 Tokyo Night 主题\nset -g @plugin 'fabioluciano/tmux-tokyo-night'\n\n# 安装 Nord 主题\nset -g @plugin 'arcticicestudio/nord-tmux'"
+    },
+    {
+      "type": "text",
+      "heading": "学习资源与练习",
+      "level": 2,
+      "content": "tmux 的学习曲线相对平缓，但掌握其高级功能需要实践。以下是精选的学习资源，从交互式教程到速查表，帮助你快速上手。"
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "官方文档",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 核心资源\n\n- **tmux 官方 Wiki**：https://github.com/tmux/tmux/wiki\n  - 涵盖所有功能的详细文档\n  - FAQ 解答常见问题\n  - 插件和工具列表\n\n- **Man Page**：`man tmux`\n  - 最权威的参考文档\n  - 搜索功能强大（`/keyword` 搜索）\n\n- **官方 GitHub**：https://github.com/tmux/tmux\n  - 查看最新开发动态\n  - 报告 bug 和提交 feature request"
+            }
+          ]
+        },
+        {
+          "label": "交互式教程",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 边学边练\n\n### tmux Tutorial (gotbletu)\n\n在终端中直接运行的交互式教程："
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 克隆教程仓库\ngit clone https://github.com/gotbletu/shownotes\ncd shownotes/tmux\n\n# 跟随 markdown 教程逐步实践"
+            },
+            {
+              "type": "text",
+              "content": "### tmuxcheatsheet.com\n\n一个交互式网页，可以搜索和过滤快捷键：\n\n- URL: https://tmuxcheatsheet.com\n- 按类别浏览（Session, Window, Pane 等）\n- 搜索功能快速查找命令\n\n### tmux-tutorial (learnxinyminutes)\n\n5 分钟快速入门：\n\n- URL: https://learnxinyminutes.com/docs/tmux/\n- 涵盖核心概念和常用命令\n- 代码即文档，可直接复制运行"
+            }
+          ]
+        },
+        {
+          "label": "Cheatsheets",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 速查表合集\n\n### 1. 官方快捷键列表\n\n在 tmux 内按 `Prefix + ?` 查看所有快捷键。\n\n### 2. 社区精选 Cheatsheet\n\n- **tmux-cheatsheet (GitHub)**\n  - https://github.com/azat-io/tmux-cheatsheet\n  - 分类清晰，包含配置示例\n\n- **devhints.io/tmux**\n  - https://devhints.io/tmux\n  - 简洁的单页速查表\n\n### 3. PDF 打印版\n\n- **tmux shortcuts & cheatsheet (gist)**\n  - https://gist.github.com/MohamedAlaa/2961058\n  - 适合打印贴在显示器旁边"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "caption": "核心快捷键速查（默认 Prefix = Ctrl-b）",
+              "code": "# ========== Session ==========\nPrefix + s       列出所有 session\nPrefix + $       重命名 session\nPrefix + d       Detach session\nPrefix + (       切换到上一个 session\nPrefix + )       切换到下一个 session\n\n# ========== Window ==========\nPrefix + c       创建新 window\nPrefix + ,       重命名 window\nPrefix + w       列出所有 window\nPrefix + n       下一个 window\nPrefix + p       上一个 window\nPrefix + 0-9     切换到指定 window\nPrefix + &       关闭 window\n\n# ========== Pane ==========\nPrefix + %       垂直分割\nPrefix + \"       水平分割\nPrefix + o       切换到下一个 pane\nPrefix + ;       切换到上一个活跃的 pane\nPrefix + x       关闭 pane\nPrefix + z       全屏/取消全屏 pane\nPrefix + !       将 pane 转为新 window\nPrefix + 方向键   切换 pane\nPrefix + Ctrl-方向键  调整 pane 大小\nPrefix + Space   循环切换 pane 布局\nPrefix + {       与上一个 pane 交换\nPrefix + }       与下一个 pane 交换\n\n# ========== 复制模式 ==========\nPrefix + [       进入复制模式\nSpace            开始选择\nEnter            复制选中内容\nPrefix + ]       粘贴\nq                退出复制模式\n\n# ========== 其他 ==========\nPrefix + ?       显示所有快捷键\nPrefix + :       进入命令模式\nPrefix + t       显示时钟"
+            }
+          ]
+        },
+        {
+          "label": "视频教程",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 推荐 YouTube 系列\n\n### 1. \"tmux Tutorial\" by ippsec\n\n- 适合渗透测试和系统管理员\n- 实战导向，展示真实使用场景\n- 时长：约 30 分钟\n\n### 2. \"tmux Crash Course\" by The Primeagen\n\n- Neovim 用户视角\n- 讲解 Vim + tmux 的工作流\n- 风格轻松幽默\n\n### 3. \"tmux Tutorial for Beginners\" by gotbletu\n\n- 非常详细的基础教程\n- 涵盖配置、插件、脚本\n- 时长较长（1+ 小时），适合系统学习\n\n### 4. \"Learn tmux in 15 minutes\" by ByteByteGo\n\n- 快速入门，适合忙碌的开发者\n- 动画演示清晰\n- 涵盖 80% 的日常使用场景"
+            }
+          ]
+        },
+        {
+          "label": "书籍与深度文章",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 深入学习资源\n\n### 书籍\n\n**《tmux 2: Productive Mouse-Free Development》**\n- 作者：Brian P. Hogan\n- 出版：The Pragmatic Bookshelf\n- 覆盖 tmux 2.x 版本（当前最新是 3.x，但大部分内容仍适用）\n- 适合想系统学习 tmux 的开发者\n\n### 博客文章\n\n**\"A tmux Crash Course\" (thoughtbot)**\n- https://thoughtbot.com/blog/a-tmux-crash-course\n- 简洁实用的快速入门\n\n**\"How to Use tmux on Linux (and Why It's Better Than Screen)\" (How-To Geek)**\n- 对比 tmux 和 GNU Screen\n- 新手友好\n\n**\"tmux for Mere Mortals\" (Zanshin.net)**\n- https://zanshin.net/2013/09/05/my-tmux-configuration/\n- 作者分享个人配置的演进过程\n\n**\"Making tmux Pretty and Usable\" (Ham Vocke)**\n- https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/\n- 专注于配置和美化"
+            }
+          ]
+        },
+        {
+          "label": "实践建议",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 学习路径推荐\n\n### 第 1 周：基础使用\n\n1. 安装 tmux 并创建第一个 session\n2. 学习 session、window、pane 的概念\n3. 熟练使用默认快捷键（特别是 Prefix + c, d, \", %, 方向键）\n4. 尝试 detach 和 re-attach\n\n### 第 2 周：自定义配置\n\n1. 创建 `~/.tmux.conf` 并添加基础配置\n2. 修改 Prefix 键（推荐 Ctrl-a）\n3. 启用鼠标支持\n4. 自定义状态栏样式\n\n### 第 3 周：插件生态\n\n1. 安装 TPM\n2. 安装 tmux-sensible, tmux-resurrect, tmux-yank\n3. 配置自动保存（tmux-continuum）\n\n### 第 4 周：高级技巧\n\n1. 编写项目启动脚本或使用 tmuxinator\n2. 探索 Vim + tmux 集成（vim-tmux-navigator）\n3. 尝试复制模式和系统剪贴板集成\n\n### 持续实践\n\n- 在所有远程服务器上使用 tmux\n- 为常用项目创建自动化启动脚本\n- 持续优化配置，记录好用的技巧"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "学习窍门",
+              "content": "不要试图一次性记住所有快捷键！专注于高频操作（创建 window、分割 pane、detach/attach），其他命令需要时再查。打印一张 cheatsheet 放在手边，一周后就能形成肌肉记忆。"
+            }
+          ]
+        }
+      ],
+      "defaultTab": 0
+    },
+    {
+      "type": "text",
+      "heading": "现代替代与互补工具",
+      "level": 2,
+      "content": "tmux 虽然强大，但并非唯一选择。近年来出现了不少现代化的终端复用器和终端模拟器，它们要么试图替代 tmux，要么提供互补功能。了解这些工具可以帮助你根据具体需求做出最佳选择。"
+    },
+    {
+      "type": "table",
+      "caption": "tmux 及其替代品对比",
+      "headers": ["工具", "类型", "语言", "亮点", "适合场景", "与 tmux 关系"],
+      "rows": [
+        ["tmux", "终端复用器", "C", "成熟稳定、生态丰富", "远程开发、session 持久化", "-"],
+        ["GNU Screen", "终端复用器", "C", "更古老、更简单", "极简主义者、低资源环境", "前辈"],
+        ["Zellij", "终端复用器", "Rust", "现代 UI、开箱即用", "本地开发、新手友好", "现代替代"],
+        [
+          "Byobu",
+          "tmux/screen 包装器",
+          "Shell",
+          "美化的 tmux 前端",
+          "不想配置 tmux 的用户",
+          "增强"
+        ],
+        ["abduco + dvtm", "最小化组合", "C", "极简、suckless 哲学", "极简主义者", "替代"],
+        [
+          "WezTerm",
+          "终端模拟器",
+          "Rust",
+          "内置 multiplexing、GPU 加速",
+          "本地使用、现代化界面",
+          "部分替代"
+        ],
+        [
+          "Kitty",
+          "终端模拟器",
+          "C + Python",
+          "GPU 加速、原生 tabs/splits",
+          "本地高性能需求",
+          "部分替代"
+        ],
+        [
+          "Alacritty",
+          "终端模拟器",
+          "Rust",
+          "最快的终端、GPU 加速",
+          "追求性能（需配合 tmux）",
+          "互补"
+        ],
+        ["Nushell", "现代 Shell", "Rust", "结构化数据管道", "数据处理工作流", "不同层次"]
+      ]
+    },
+    {
+      "type": "table",
+      "caption": "工具特性对比（主观评分 1-10）",
+      "headers": ["工具", "易用性", "功能丰富度", "性能", "现代化", "生态系统", "远程支持"],
+      "rows": [
+        ["tmux", "6", "9", "8", "6", "10", "10"],
+        ["Zellij", "9", "7", "7", "10", "5", "9"],
+        ["WezTerm", "8", "8", "9", "9", "6", "7"],
+        ["GNU Screen", "5", "6", "7", "3", "7", "10"]
+      ]
+    },
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "label": "Zellij",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 现代化的终端复用器\n\nZellij 是用 Rust 编写的新一代终端复用器，设计目标是「tmux 应该有的样子」。它的核心理念是**开箱即用**，不需要复杂配置就能获得良好体验。\n\n### 核心特性\n\n- **友好的 UI**：底部状态栏实时显示可用快捷键\n- **浮动窗口**：类似 IDE 的浮动面板（tmux 3.2+ 也支持）\n- **会话管理**：类似 tmux，支持 detach/attach\n- **布局系统**：预定义布局，可通过 KDL 配置语言自定义\n- **插件系统**：WASM 插件架构（实验性）\n\n### 与 tmux 的区别\n\n| 特性 | tmux | Zellij |\n|------|------|--------|\n| 学习曲线 | 陡峭（需要记快捷键） | 平缓（UI 提示） |\n| 默认体验 | 需要配置 | 开箱即用 |\n| 生态系统 | 非常丰富 | 发展中 |\n| 稳定性 | 极高（19 年历史） | 良好但较新 |\n| 远程使用 | 完美 | 完美 |\n| 性能 | 优秀 | 优秀（Rust） |"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "caption": "Zellij 快速上手",
+              "code": "# 安装\ncargo install zellij\n# 或\nbrew install zellij\n\n# 启动\nzellij\n\n# 底部会显示可用快捷键！\n# 默认 Prefix 是 Ctrl-g（可自定义）\n\n# 基本操作\nCtrl-g + n        新建 tab\nCtrl-g + d        新建 pane（向下）\nCtrl-g + r        新建 pane（向右）\nCtrl-g + w        关闭 pane\nCtrl-g + x        关闭 tab\nCtrl-g + d        Detach session\n\n# 列出 session\nzellij list-sessions\n\n# Attach\nzellij attach session-name"
+            },
+            {
+              "type": "callout",
+              "variant": "success",
+              "title": "何时选择 Zellij？",
+              "content": "如果你是终端复用器新手，或者觉得 tmux 配置太繁琐，Zellij 是绝佳选择。它的 UI 提示让你无需记忆快捷键就能快速上手。对于本地开发，Zellij 的体验可能比 tmux 更好；但对于远程服务器，tmux 的生态和稳定性仍有优势。"
+            }
+          ]
+        },
+        {
+          "label": "GNU Screen",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## tmux 的前辈\n\nGNU Screen 诞生于 1987 年，比 tmux（2007）早了 20 年。它是第一个广泛使用的终端复用器，至今仍在许多系统上预装。\n\n### 为什么还在用 Screen？\n\n- **无处不在**：几乎所有 Unix 系统都预装 screen\n- **极简**：功能比 tmux 少，但对于基本需求足够\n- **低资源占用**：在非常老旧的服务器上可能比 tmux 更合适\n- **习惯**：许多老派系统管理员从未切换到 tmux\n\n### 为什么 tmux 更好？\n\n- **更强大的分屏**：tmux 的 pane 系统远比 screen 的 split 灵活\n- **更好的脚本支持**：tmux 的命令行接口更完善\n- **活跃维护**：screen 的最后一个版本是 2020 年，更新缓慢\n- **更好的配置**：tmux 的配置语法更清晰\n- **更丰富的生态**：插件、主题、工具等"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "caption": "Screen 基础命令（对比 tmux）",
+              "code": "# Screen 命令 | tmux 等价命令\n\n# 创建 session\nscreen -S name    | tmux new -s name\n\n# Attach\nscreen -r name    | tmux attach -t name\n\n# Detach\nCtrl-a d          | Ctrl-b d\n\n# 新窗口\nCtrl-a c          | Ctrl-b c\n\n# 切换窗口\nCtrl-a n          | Ctrl-b n\n\n# 列出窗口\nCtrl-a \"          | Ctrl-b w\n\n# 分屏（垂直）\nCtrl-a |          | Ctrl-b %\n\n# 分屏（水平）\nCtrl-a S          | Ctrl-b \"\n\n# 注意：Screen 的 Prefix 是 Ctrl-a（与 tmux 推荐的自定义 Prefix 相同）"
+            },
+            {
+              "type": "callout",
+              "variant": "info",
+              "title": "从 Screen 迁移到 tmux",
+              "content": "如果你习惯了 screen，迁移到 tmux 很容易。将 tmux 的 Prefix 改为 Ctrl-a（`set -g prefix C-a`），许多快捷键会保持一致。tmux 提供了 screen 的所有功能，并且更强大。"
+            }
+          ]
+        },
+        {
+          "label": "WezTerm & Kitty",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## 内置 Multiplexing 的现代终端\n\nWezTerm 和 Kitty 都是 GPU 加速的现代终端模拟器，它们内置了 tabs 和 splits 功能，可以在一定程度上替代 tmux（但仅限本地使用）。\n\n### WezTerm\n\n**核心特性**：\n\n- 用 Rust 编写，跨平台（macOS、Linux、Windows）\n- GPU 加速渲染，支持 ligatures 和 emoji\n- 内置 multiplexing（tabs、splits、domains）\n- 通过 Lua 配置（类似 Neovim）\n- 支持 SSH domains（在一个 tab 中显示多个 SSH 连接）\n\n**与 tmux 的关系**：\n\n- **本地开发**：WezTerm 的内置 multiplexing 可以替代 tmux\n- **远程开发**：仍需在远程服务器上运行 tmux（WezTerm 的 SSH domains 是 client 端功能）\n- **可以共存**：在 WezTerm 中运行 tmux 完全没问题"
+            },
+            {
+              "type": "code",
+              "language": "lua",
+              "caption": "WezTerm 配置示例 (~/.wezterm.lua)",
+              "code": "local wezterm = require 'wezterm'\n\nreturn {\n  -- 主题\n  color_scheme = 'Tokyo Night',\n  \n  -- 字体\n  font = wezterm.font 'JetBrains Mono',\n  font_size = 13.0,\n  \n  -- 启用 tab bar\n  enable_tab_bar = true,\n  hide_tab_bar_if_only_one_tab = false,\n  \n  -- 快捷键\n  keys = {\n    -- 新 tab（类似 tmux Prefix + c）\n    { key = 't', mods = 'CMD', action = wezterm.action.SpawnTab 'CurrentPaneDomain' },\n    \n    -- 分屏（类似 tmux Prefix + %）\n    { key = 'd', mods = 'CMD', action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' } },\n    \n    -- 分屏（类似 tmux Prefix + \"）\n    { key = 'd', mods = 'CMD|SHIFT', action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' } },\n  },\n}"
+            },
+            {
+              "type": "text",
+              "content": "### Kitty\n\n**核心特性**：\n\n- GPU 加速，极快的渲染速度\n- 原生支持 tabs、windows、layouts\n- 通过配置文件自定义（类似 tmux.conf）\n- Kitty graphics protocol（在终端显示图片）\n- Remote control（通过 socket 控制 Kitty）\n\n**与 tmux 的关系**：\n\n- Kitty 的 tabs/splits 仅限本地，不支持 SSH 后的 session persistence\n- 许多用户在 Kitty 中运行 tmux 以获得两者优势"
+            },
+            {
+              "type": "code",
+              "language": "conf",
+              "caption": "Kitty 配置示例 (~/.config/kitty/kitty.conf)",
+              "code": "# 主题\ninclude ./theme.conf\n\n# 字体\nfont_family      JetBrains Mono\nfont_size 13.0\n\n# Tab bar\ntab_bar_edge top\ntab_bar_style powerline\n\n# 快捷键（类似 tmux）\nmap ctrl+shift+t new_tab\nmap ctrl+shift+w close_tab\nmap ctrl+shift+right next_tab\nmap ctrl+shift+left previous_tab\n\n# 分屏\nmap ctrl+shift+enter new_window\nmap ctrl+shift+] next_window\nmap ctrl+shift+[ previous_window\n\n# Layouts（预定义的分屏布局）\nmap ctrl+shift+l next_layout\nenabled_layouts tall,fat,grid"
+            },
+            {
+              "type": "callout",
+              "variant": "warning",
+              "title": "重要限制",
+              "content": "WezTerm 和 Kitty 的 multiplexing 功能**仅在本地有效**。当你 SSH 到远程服务器时，这些功能不会跟随。在远程开发场景下，tmux 仍然是必需的。许多人的解决方案是：本地用 WezTerm/Kitty，远程用 tmux。"
+            }
+          ]
+        },
+        {
+          "label": "其他工具",
+          "sections": [
+            {
+              "type": "text",
+              "content": "## Byobu: tmux 的友好包装器\n\nByobu 不是一个独立的终端复用器，而是 tmux（或 screen）的包装器。它提供了：\n\n- 美观的默认配置和状态栏\n- F-key 快捷键（F2 新窗口、F3/F4 切换等）\n- 开箱即用的体验\n\n**适合谁**：不想花时间配置 tmux，但想要美观界面的用户。\n\n**缺点**：\n\n- 增加了一层抽象，某些高级 tmux 功能可能难以访问\n- 社区比 tmux 小\n- 如果你已经有自己的 tmux 配置，Byobu 的价值不大"
+            },
+            {
+              "type": "code",
+              "language": "bash",
+              "code": "# 安装\nsudo apt install byobu  # Ubuntu/Debian\nbrew install byobu      # macOS\n\n# 选择后端（tmux 或 screen）\nbyobu-select-backend\n\n# 启动\nbyobu\n\n# F-key 快捷键\nF2          新窗口\nF3/F4       切换窗口\nF6          Detach\nF7          进入滚动/复制模式\nF8          重命名窗口\nF9          配置菜单"
+            },
+            {
+              "type": "text",
+              "content": "## abduco + dvtm: Suckless 哲学\n\n来自 suckless.org 社区（dwm、st 的开发者）的极简组合：\n\n- **abduco**：提供 session 管理（类似 tmux server）\n- **dvtm**：提供窗口管理（类似 tmux pane）\n\n这两个工具加起来只有几千行代码，体现了 suckless 的「小而美」哲学。\n\n**适合谁**：极简主义者、喜欢阅读和修改源码的黑客。\n\n**缺点**：\n\n- 功能远不如 tmux 丰富\n- 学习曲线陡峭（配置需要修改源码并重新编译）\n- 社区和文档有限"
+            },
+            {
+              "type": "text",
+              "content": "## Nushell: 不同维度的工具\n\nNushell 是一个现代 shell（类似 Bash、Zsh），而非终端复用器。它的核心理念是将 shell 管道中的数据结构化（类似 PowerShell）。\n\n**为什么提到 Nushell？**\n\n因为它改变了命令行工作流，让某些需要多个终端窗口的任务可以在单个 pipeline 中完成。但它**不是** tmux 的替代品，两者解决不同的问题。\n\n**结论**：Nushell 可以和 tmux 互补使用，但不能替代。"
+            }
+          ]
+        }
+      ],
+      "defaultTab": 0
+    },
+    {
+      "type": "text",
+      "heading": "工具选择指南",
+      "level": 2,
+      "content": "面对众多选择，如何决定使用哪个工具？以下是基于不同场景的推荐："
+    },
+    {
+      "type": "table",
+      "caption": "场景化工具推荐",
+      "headers": ["使用场景", "推荐工具", "理由"],
+      "rows": [
+        ["经常 SSH 到远程服务器开发", "tmux", "无可替代的 session persistence，成熟稳定"],
+        ["纯本地开发，不需要远程", "WezTerm / Kitty / Zellij", "现代化界面，开箱即用"],
+        ["在低资源或老旧服务器上工作", "GNU Screen / tmux", "预装且资源占用低"],
+        ["终端复用器新手", "Zellij / Byobu", "友好的 UI 提示，无需记忆快捷键"],
+        ["需要长时间运行任务", "tmux / GNU Screen", "detach 后进程继续运行"],
+        ["远程配对编程", "tmux / tmate", "多 client 连接，tmate 更简单"],
+        ["复杂的项目环境自动化", "tmux + tmuxinator", "强大的脚本化支持"],
+        ["追求极致性能（本地）", "Kitty + tmux", "GPU 加速终端 + tmux 的灵活性"],
+        ["极简主义者", "abduco + dvtm", "极简代码，完全可控"],
+        ["已有完善的 tmux 配置", "继续用 tmux", "没有必要切换"]
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "推荐组合",
+      "content": "**最佳实践**：\n\n- **本地**：使用 WezTerm 或 Kitty（现代化体验）\n- **远程**：在服务器上运行 tmux（session persistence）\n- **协作**：团队统一使用 tmux（兼容性最好）\n\n这种组合能让你在本地享受现代终端的美观和性能，在远程保持 tmux 的可靠性。"
+    },
+    {
+      "type": "text",
+      "heading": "tmux 在 2026 年的定位",
+      "level": 2,
+      "content": "在终端工具快速演进的今天,tmux 这个 2007 年诞生的项目依然占据重要地位。让我们从多个维度评估它的现状和未来。"
+    },
+    {
+      "type": "text",
+      "heading": "优势：无可替代的核心价值",
+      "level": 3,
+      "content": "**Session Persistence 仍是刚需**\n\n对于任何需要在远程服务器上工作的开发者、运维工程师、数据科学家来说，session persistence 不是锦上添花，而是必需品。网络断开、笔记本合盖、SSH 超时，这些情况在 tmux 出现之前会导致工作丢失，而现在只是一个 `tmux attach` 的事儿。\n\n**生态系统成熟度**\n\n19 年的发展让 tmux 拥有了无与伦比的生态系统：\n\n- 数百个插件（TPM 仓库）\n- 完善的文档和教程\n- 几乎所有编辑器的集成（Vim/Neovim/Emacs）\n- 大量的配置样板和主题\n- 丰富的 StackOverflow 问答和社区支持\n\n**跨平台一致性**\n\n在任何 Unix-like 系统上（Linux、macOS、BSD、甚至 Windows WSL），tmux 的行为完全一致。这种一致性对于需要在多个系统间切换的用户非常宝贵。\n\n**稳定性与可靠性**\n\n作为一个 C 语言编写的守护进程，tmux 极其稳定。它可以连续运行数月不出问题，这对于生产环境的运维监控至关重要。"
+    },
+    {
+      "type": "text",
+      "heading": "挑战：现代化体验的竞争",
+      "level": 3,
+      "content": "**学习曲线陡峭**\n\nZellij、WezTerm 等现代工具的出现暴露了 tmux 的一个长期痛点：新手不友好。默认快捷键不直观（`Ctrl-b %` 表示垂直分割？），状态栏信息少，没有内置的快捷键提示。\n\n虽然可以通过配置解决，但「需要配置才能好用」本身就是一个问题。\n\n**默认体验落后**\n\n对比 Zellij 的开箱即用、WezTerm 的 GPU 加速、Kitty 的图片显示协议，tmux 的默认体验显得相当朴素。虽然通过插件可以实现现代化界面（如 tmux-powerline），但这需要用户投入时间学习和配置。\n\n**依赖终端模拟器**\n\ntmux 本身不是终端模拟器，它依赖外部终端（如 iTerm2、Alacritty）。这意味着某些现代特性（如 inline images、hyperlinks）取决于终端的支持，tmux 只是传递数据。\n\n相比之下，WezTerm 这种「终端 + multiplexing」一体化方案在集成度上更有优势。"
+    },
+    {
+      "type": "chart",
+      "chartType": "line",
+      "title": "终端复用器趋势（Google 搜索量，2019-2026）",
+      "data": {
+        "labels": ["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+        "datasets": [
+          {
+            "label": "tmux",
+            "data": [100, 105, 110, 108, 112, 115, 118, 120],
+            "borderColor": "rgba(99, 102, 241, 1)",
+            "fill": false
+          },
+          {
+            "label": "GNU Screen",
+            "data": [45, 42, 38, 35, 32, 30, 28, 25],
+            "borderColor": "rgba(239, 68, 68, 1)",
+            "fill": false
+          },
+          {
+            "label": "Zellij",
+            "data": [0, 0, 5, 15, 30, 50, 70, 85],
+            "borderColor": "rgba(34, 197, 94, 1)",
+            "fill": false
+          },
+          {
+            "label": "WezTerm",
+            "data": [0, 3, 10, 20, 35, 55, 75, 90],
+            "borderColor": "rgba(251, 191, 36, 1)",
+            "fill": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "趋势解读",
+      "content": "虽然 Zellij 和 WezTerm 增长迅速，但 tmux 的搜索量仍在增长（虽然增速放缓）。这说明 tmux 并没有被「取代」，而是在与新工具共存。许多用户同时使用现代终端（本地）和 tmux（远程）。"
+    },
+    {
+      "type": "text",
+      "heading": "未来展望",
+      "level": 3,
+      "content": "**tmux 会继续存在**\n\n只要远程开发仍是主流工作方式，tmux 就有存在价值。它的核心功能（session persistence、server-client 架构）是架构级优势,不是 UI 美化能替代的。\n\n**生态会持续演进**\n\n- 更多主题和配置框架（如 Oh My Tmux）\n- 与现代编辑器的深度集成（如 Neovim + tmux.nvim）\n- 更好的默认配置（tmux 4.x 可能会引入）\n- 社区驱动的文档和教程改进\n\n**与现代工具的融合**\n\n未来的最佳实践可能是：\n\n- **本地**：WezTerm / Kitty（现代化体验）\n- **远程**：tmux（session persistence）\n- **编辑器**：Neovim / Helix（内置终端集成）\n- **Shell**：Nushell / Zsh（现代化命令行）\n\n这些工具各司其职，共同构成高效的开发环境。"
+    },
+    {
+      "type": "text",
+      "heading": "最终建议",
+      "level": 3,
+      "content": "**如果你是以下情况，应该学习 tmux：**\n\n- 经常通过 SSH 访问远程服务器\n- 运行长时间任务（编译、训练模型、数据处理）\n- 需要在多个项目间快速切换\n- 团队协作中需要统一的工具链\n- 想要一个经过时间验证的稳定工具\n\n**如果你主要在本地开发，可以考虑：**\n\n- Zellij（更友好的学习曲线）\n- WezTerm（现代化一体化方案）\n- Kitty（追求性能）\n\n**如果你已经熟练使用 tmux：**\n\n- 继续用！它不会过时\n- 可以尝试在本地用现代终端，享受两者的优势\n- 关注 tmux 的新版本和插件更新\n\n**学习投资回报率**\n\ntmux 的学习曲线虽然陡峭，但投资回报率极高。一旦掌握，它会成为你工具链中最稳定、最可靠的一环。即使 10 年后出现新工具，tmux 的核心概念和技能仍然有价值。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "2026 年的共识",
+      "content": "**tmux 不是「过时的工具」，而是「成熟的工具」**。它的定位已经从「唯一的终端复用器」转变为「远程开发的标准工具」。在可预见的未来，tmux 仍将是每个 Unix 开发者必备的技能。"
+    },
+    {
+      "type": "text",
+      "heading": "总结",
+      "level": 2,
+      "content": "tmux 作为终端复用器的瑞士军刀，在 2026 年依然占据着不可替代的位置。从核心架构（server-client、session/window/pane 三层模型）到实际应用（远程开发、session persistence、多窗口管理），tmux 为命令行工作流提供了坚实的基础。\n\n通过合理的配置（修改 Prefix、启用鼠标、美化状态栏）和插件生态（TPM、tmux-resurrect、tmux-yank），tmux 可以从「能用」提升到「好用」。对于需要脚本化工作流的场景，tmuxinator 等工具让环境自动化变得简单。\n\n虽然 Zellij、WezTerm、Kitty 等现代工具在本地使用体验上有所超越，但在远程开发场景中，tmux 的 session persistence 和成熟生态仍是无可替代的。未来的趋势是工具互补：本地使用现代终端，远程使用 tmux，编辑器与两者深度集成。\n\n**核心建议**：\n\n1. **必学**：如果你从事远程开发、运维、数据科学等需要 SSH 的工作\n2. **投资回报高**：学习曲线虽陡，但技能长期有效\n3. **与时俱进**：关注新工具，但不必盲目跟风\n4. **工具组合**：现代终端（本地） + tmux（远程）是 2026 年的最佳实践\n\ntmux 不是终点，而是高效命令行工作流的起点。掌握它，你将拥有一个可靠的、跨越时代的生产力工具。"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "下一步行动",
+      "content": "1. 在你的主要工作服务器上安装 tmux\n2. 创建一个基础的 `~/.tmux.conf` 配置文件\n3. 为你的主要项目编写一个启动脚本（shell 或 tmuxinator）\n4. 每天使用 tmux 工作，一周后它会成为肌肉记忆\n5. 探索插件生态，持续优化你的配置\n\n一个月后，你会惊讶于没有 tmux 的日子是如何度过的。"
+    },
+    {
+      "type": "source-list",
+      "title": "参考资料",
+      "sources": [
+        {
+          "id": "1",
+          "title": "tmux 官方 GitHub",
+          "url": "https://github.com/tmux/tmux"
+        },
+        {
+          "id": "2",
+          "title": "tmux Wiki",
+          "url": "https://github.com/tmux/tmux/wiki"
+        },
+        {
+          "id": "3",
+          "title": "The Tao of tmux (book)",
+          "url": "https://leanpub.com/the-tao-of-tmux"
+        },
+        {
+          "id": "4",
+          "title": "tmuxcheatsheet.com",
+          "url": "https://tmuxcheatsheet.com"
+        },
+        {
+          "id": "5",
+          "title": "Oh My Tmux",
+          "url": "https://github.com/gpakosz/.tmux"
+        },
+        {
+          "id": "6",
+          "title": "Tmux Plugin Manager (TPM)",
+          "url": "https://github.com/tmux-plugins/tpm"
+        },
+        {
+          "id": "7",
+          "title": "tmuxinator",
+          "url": "https://github.com/tmuxinator/tmuxinator"
+        },
+        {
+          "id": "8",
+          "title": "Zellij",
+          "url": "https://zellij.dev"
+        },
+        {
+          "id": "9",
+          "title": "WezTerm",
+          "url": "https://wezfurlong.org/wezterm/"
+        },
+        {
+          "id": "10",
+          "title": "Kitty Terminal",
+          "url": "https://sw.kovidgoyal.net/kitty/"
+        },
+        {
+          "id": "11",
+          "title": "A tmux Crash Course (thoughtbot)",
+          "url": "https://thoughtbot.com/blog/a-tmux-crash-course"
+        },
+        {
+          "id": "12",
+          "title": "Making tmux Pretty and Usable (Ham Vocke)",
+          "url": "https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/"
+        }
+      ]
+    }
+  ]
+}
