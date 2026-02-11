@@ -1,5 +1,5 @@
 ---
-import { createHighlighter } from "shiki";
+import { highlight } from "../lib/shiki";
 
 interface Props {
   code: string;
@@ -9,19 +9,7 @@ interface Props {
 
 const { code, language = "text", filename } = Astro.props;
 
-const highlighter = await createHighlighter({
-  themes: ["one-light", "one-dark-pro"],
-  langs: [language],
-});
-
-const html = highlighter.codeToHtml(code, {
-  lang: language,
-  themes: {
-    light: "one-light",
-    dark: "one-dark-pro",
-  },
-  defaultColor: false,
-});
+const html = await highlight(code, language);
 ---
 
 <figure class="my-6 rounded-lg overflow-hidden border border-border">
