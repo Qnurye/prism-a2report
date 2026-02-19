@@ -6,31 +6,101 @@ interface Props {
 
 const { variant, title } = Astro.props;
 
-const styles = {
-  info: "border-primary bg-primary/5 text-primary",
-  warning: "border-yellow-500 bg-yellow-500/5 text-yellow-700 dark:text-yellow-400",
-  success: "border-green-500 bg-green-500/5 text-green-700 dark:text-green-400",
-  error: "border-destructive bg-destructive/5 text-red-700 dark:text-red-400",
+// Use :root variables where available, hardcode OKLCH for colors not in the theme
+const calloutColor = {
+  info: "var(--primary)",
+  warning: "oklch(0.68 0.15 75)",
+  success: "oklch(0.6 0.15 155)",
+  error: "var(--destructive)",
+};
+
+const iconColor = {
+  info: "text-primary",
+  warning: "text-yellow-600 dark:text-yellow-400",
+  success: "text-green-600 dark:text-green-400",
+  error: "text-red-600 dark:text-red-400",
 };
 
 const icons = {
-  info: "ℹ",
-  warning: "⚠",
-  success: "✓",
-  error: "✕",
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`,
+  success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+  error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
+};
+
+const watermarkIcons = {
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`,
+  success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+  error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
 };
 ---
 
-<aside class={`my-6 rounded-lg border-l-4 p-4 ${styles[variant]}`} role="note">
+<aside
+  class="a2r-callout my-6 relative overflow-hidden rounded-xl px-5 pt-3 pb-2.5"
+  role="note"
+  style={`--callout-color: ${calloutColor[variant]}`}
+>
+  <div class="a2r-callout-watermark" set:html={watermarkIcons[variant]} />
   {
     title && (
-      <p class="font-semibold font-ui mb-1 flex items-center gap-2">
-        <span class="text-lg">{icons[variant]}</span>
+      <p class="a2r-callout-title font-semibold font-ui text-[0.9rem] mb-2 flex items-center gap-2">
+        <span
+          class={`${iconColor[variant]} shrink-0 [&>svg]:w-[18px] [&>svg]:h-[18px]`}
+          set:html={icons[variant]}
+        />
         {title}
       </p>
     )
   }
-  <div class="text-sm leading-relaxed [&>*]:text-current">
+  <div
+    class="a2r-callout-content text-[0.875rem] leading-relaxed [&>p]:my-1.5 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
+  >
     <slot />
   </div>
 </aside>
+
+<style>
+  .a2r-callout {
+    background-color: color-mix(in srgb, var(--callout-color) 8%, var(--background));
+  }
+
+  :is(.dark) .a2r-callout {
+    background-color: color-mix(in srgb, var(--callout-color) 12%, var(--background));
+  }
+
+  .a2r-callout-title {
+    color: color-mix(in srgb, var(--callout-color) 85%, var(--foreground));
+  }
+
+  .a2r-callout-content {
+    color: color-mix(in srgb, var(--foreground) 80%, transparent);
+  }
+
+  .a2r-callout-watermark {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    width: 48px;
+    height: 48px;
+    color: var(--callout-color);
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  :is(.dark) .a2r-callout-watermark {
+    opacity: 0.12;
+  }
+
+  .a2r-callout-watermark :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .a2r-callout-title,
+  .a2r-callout-content {
+    position: relative;
+    z-index: 1;
+  }
+</style>

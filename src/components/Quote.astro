@@ -11,20 +11,63 @@ const { text, author, role } = Astro.props;
 const quoteId = `quote-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-<figure
-  class="border-l-4 border-primary rounded-lg bg-secondary/30 p-6 my-6 a2r-animate"
-  id={quoteId}
->
-  <span class="text-6xl text-primary/20 font-serif leading-none select-none" aria-hidden="true"
-    >&ldquo;</span
-  >
-  <blockquote class="font-serif text-lg italic -mt-6 ml-2">
-    <Fragment set:html={marked.parse(text)} />
-  </blockquote>
-  <figcaption class="font-ui text-sm text-muted-foreground mt-3 ml-2">
-    &mdash; {author}{role && <span>, {role}</span>}
+<figure class="a2r-quote my-8 a2r-animate" id={quoteId}>
+  <div class="relative pl-10">
+    <span class="a2r-quote-mark" aria-hidden="true">&ldquo;</span>
+    <blockquote class="font-serif text-[1.125rem] leading-[1.85] text-foreground/90">
+      <Fragment set:html={marked.parse(text, { breaks: true })} />
+    </blockquote>
+  </div>
+  <figcaption class="mt-4 pl-10 flex items-center gap-3">
+    <span class="block h-px w-8 bg-foreground/20" aria-hidden="true"></span>
+    <span class="font-ui text-sm text-muted-foreground">
+      {author}{
+        role && (
+          <span class="before:content-['·'] before:mx-1.5 before:text-foreground/25">{role}</span>
+        )
+      }
+    </span>
   </figcaption>
 </figure>
+
+<style>
+  .a2r-quote {
+    position: relative;
+  }
+
+  .a2r-quote-mark {
+    position: absolute;
+    left: -0.15rem;
+    top: -0.5rem;
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--primary);
+    opacity: 0.2;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .a2r-quote blockquote {
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-style: normal;
+    color: inherit;
+  }
+
+  .a2r-quote blockquote p {
+    margin-block: 0.4em;
+  }
+
+  .a2r-quote blockquote p:first-child {
+    margin-top: 0;
+  }
+
+  .a2r-quote blockquote p:last-child {
+    margin-bottom: 0;
+  }
+</style>
 
 <script>
   function initQuotes() {

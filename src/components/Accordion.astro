@@ -43,8 +43,8 @@ const accordionId = `accordion-${Math.random().toString(36).slice(2, 9)}`;
         >
           <div class="overflow-hidden">
             <div
-              class="px-4 pb-3 pt-0 text-sm leading-relaxed"
-              set:html={marked.parse(item.content)}
+              class="prose px-4 pb-3 pt-0 text-sm leading-relaxed"
+              set:html={marked.parse(item.content, { breaks: true })}
             />
           </div>
         </div>

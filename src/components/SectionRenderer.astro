@@ -42,7 +42,7 @@ const { sections } = Astro.props;
               set:html={`<h${section.level || 2} id="${slugify(section.heading)}">${section.heading}</h${section.level || 2}>`}
             />
           )}
-          <Fragment set:html={marked.parse(section.content)} />
+          <Fragment set:html={marked.parse(section.content, { breaks: true })} />
         </div>
       )}
       {section.type === "chart" && (
@@ -56,7 +56,7 @@ const { sections } = Astro.props;
       )}
       {section.type === "callout" && (
         <Callout variant={section.variant} title={section.title}>
-          <Fragment set:html={marked.parse(section.content)} />
+          <Fragment set:html={marked.parse(section.content, { breaks: true })} />
         </Callout>
       )}
       {section.type === "statcard" && (
