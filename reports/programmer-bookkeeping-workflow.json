@@ -1,0 +1,476 @@
+{
+  "title": "程序员记账工作流全景调研报告",
+  "author": "Prism AI",
+  "date": "2026-02-19",
+  "slug": "programmer-bookkeeping-workflow",
+  "metadata": {
+    "tags": ["记账", "复式记账", "Beancount", "个人理财", "工具调研"],
+    "category": "技术研究"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "前言",
+      "level": 2,
+      "content": "这是一份为程序员量身定制的记账工作流调研报告。如果你是一个在 macOS 上用 Zed 或 Neovim 写代码、需要管理 CNY 和 USD 双币种、偶尔接触一点 Crypto、但对复式记账一无所知的开发者——这份报告就是为你准备的。\n\n记账这件事，说起来简单，做起来难。市面上有无数记账 App，从轻量的随手记到专业的 YNAB，从自动同步的 MoneyWiz 到硬核的 Excel 表格，每一种都有人在用，也都有人放弃。问题的核心不在于工具不够多，而在于**你还没找到适合自己的记账哲学**。\n\n这份报告不会告诉你「记账很简单，下载个 App 就行」。相反，它会从记账的本质出发，带你走遍主流工作流，深入理解复式记账的思维方式，横评三大纯文本记账工具，探索自动化与 AI 的可能性，最后收束到一套为你量身定制的落地方案。\n\n这是一份深度长文，但我保证它不会枯燥。让我们开始吧。"
+    },
+    {
+      "type": "text",
+      "heading": "第一部分：记账的本质",
+      "level": 2,
+      "content": "在讨论具体工具之前，我们必须先回答一个根本问题：**为什么要记账？**不同的人有不同的答案，而这个答案决定了你适合哪种记账方式，以及你能否坚持下去。"
+    },
+    {
+      "type": "text",
+      "heading": "人们为什么开始记账",
+      "level": 3,
+      "content": "根据 Reddit、V2EX、少数派等社区的讨论，人们开始记账的动机大致可以归为四类：\n\n**焦虑驱动型**：这类人通常是在某个财务危机后突然意识到「我的钱去哪了」。可能是信用卡账单爆了，可能是存款莫名其妙少了一大笔，也可能是年底发现自己明明赚了不少钱却还是月光。焦虑让他们想要掌控财务，记账成为了缓解焦虑的手段。\n\n**好奇驱动型**：这类人（尤其是程序员）纯粹出于对数据的好奇。他们想知道自己一个月在外卖上花了多少钱，不同类别支出的占比是多少，收入增长曲线是什么样的。记账对他们来说就像写日志、追踪健身数据一样，是一种自我量化的乐趣。\n\n**目标驱动型**：这类人有明确的财务目标——可能是攒钱买房、提前退休（FIRE）、或者投资理财。记账是达成目标的工具，是财务规划的基础设施。他们需要精确知道自己离目标还有多远，需要优化哪些支出。\n\n**强迫症驱动型**：这类人无法忍受财务状态的模糊性。哪怕只有一笔小额支出没记清楚，也会让他们浑身不舒服。记账对他们来说是一种秩序感的需求，就像代码必须格式化、文件必须分类整理一样。"
+    },
+    {
+      "type": "quote",
+      "text": "我用了 Beancount 一年，几乎全部需求都很好得到了满足，非常满意。我同样相信：随着 AI 发展，这些门槛会越来越低。未来每个人都可以用更低成本驾驭这种强大的工具，实现对自己财务的全面掌控。",
+      "author": "DIYgod",
+      "role": "开源开发者"
+    },
+    {
+      "type": "text",
+      "heading": "不记账的真实痛点",
+      "level": 3,
+      "content": "不记账最直接的后果不是「钱没了」，而是**对财务状况的失控感**。Reddit 上有个高赞回复说得很精辟：「不记账时，你以为自己很节俭，但月底发现存款没增加；你以为自己花了很多，但实际上大部分钱都去了你根本不在意的地方。」\n\n具体来说，不记账的痛点包括：\n\n- **月底钱去哪了**：明明没买什么大件，怎么工资就没了？外卖、咖啡、订阅服务……小额支出累积起来才是大头，但你永远不会意识到。\n\n- **大额支出无感**：买了一台 MacBook Pro，但因为分期付款或者从多个账户拼凑，完全没有「我花了 3 万块」的实感。\n\n- **财务决策靠直觉**：要不要换工作？要不要投资？要不要买房？所有决策都基于「感觉自己还有钱」，而不是基于数据。\n\n- **多账户混乱**：银行卡、支付宝、微信、信用卡、交易所……钱分散在十几个地方，你根本不知道自己到底有多少资产。\n\n- **汇率与多币种困境**：如果你像很多程序员一样有 USD 收入或 Crypto 资产，不记账的话连「我到底赚了还是亏了」都算不清楚。"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "记账不是省钱",
+      "content": "很多人误以为记账的目的是省钱。错了。记账的目的是**了解钱的流向**，从而做出更明智的决策。有些人记账后反而花得更多，因为他们发现自己在真正喜欢的事情上花得太少了。记账是工具，不是道德约束。"
+    },
+    {
+      "type": "text",
+      "heading": "记账的终极目标：财务自由的前提",
+      "level": 3,
+      "content": "BYVoid 在他的 Beancount 系列文章中提到一个深刻的观点：**财务自由不是一夜暴富，而是一种可计算的状态**。\n\n财务自由的定义是：资产产生的收入（包括利息、分红、租金、以及资产折现）能够覆盖生活开销。要达到这个状态，你需要知道三件事：\n\n1. **对支出的预期**：你每月、每年需要多少钱？不同生活阶段的开销是多少？\n2. **对资产和收入的了解**：你有多少资产？这些资产能产生多少收入？\n3. **对寿命的期望**：你需要这些钱维持多久？\n\n记账解决前两个问题。它让你从「感觉自己还行」变成「我知道我每年需要 30 万，目前资产 200 万，按 4% 回报率可以产生 8 万年收入，还需要积累 550 万」。\n\n这种确定性，才是记账的终极价值。"
+    },
+    {
+      "type": "quote",
+      "text": "记账是个人理财的基础，更是通往财务自由的必经之路。如果不知道自己有多少开销，甚至不知道自己有多少资产、收入，即便是一夜暴富,财务自由也是不可能的事情。",
+      "author": "BYVoid",
+      "role": "前 Google 工程师"
+    },
+    {
+      "type": "text",
+      "heading": "第二部分：主流记账工作流巡礼",
+      "level": 2,
+      "content": "了解了「为什么记账」之后，让我们看看人们是**怎么记账**的。市面上的记账方案可以归为五大流派，每一种都有自己的适用场景和崩溃点。"
+    },
+    {
+      "type": "comparison",
+      "title": "五大记账流派对比",
+      "layout": "side-by-side",
+      "items": [
+        {
+          "label": "随手记/鲨鱼记账派",
+          "highlights": [
+            "轻量 App，10 秒记一笔",
+            "自动分类，月报自动生成",
+            "适合记账新手",
+            "崩溃点：手动输入太累，坚持不了三个月"
+          ],
+          "variant": "neutral"
+        },
+        {
+          "label": "自动同步派（YNAB/Mint）",
+          "highlights": [
+            "银行 API 自动拉流水",
+            "零手动输入，实时更新",
+            "适合欧美银行体系",
+            "崩溃点：国内银行不支持，隐私担忧，订阅费贵"
+          ],
+          "variant": "neutral"
+        },
+        {
+          "label": "电子表格派（Excel/Sheets）",
+          "highlights": [
+            "完全自定义，想怎么记就怎么记",
+            "可以写公式做复杂分析",
+            "适合数据控",
+            "崩溃点：维护成本高，容易出错，难以扩展"
+          ],
+          "variant": "neutral"
+        },
+        {
+          "label": "纯文本复式记账派",
+          "highlights": [
+            "Beancount/hledger/Ledger",
+            "数据完全掌控，永不过时",
+            "多币种、Crypto、投资追踪强大",
+            "崩溃点：学习曲线陡峭，移动端体验差"
+          ],
+          "variant": "positive"
+        },
+        {
+          "label": "混合派",
+          "highlights": [
+            "App 记日常，定期导出到复式记账",
+            "兼顾便捷性和数据掌控",
+            "适合追求平衡的人",
+            "崩溃点：流程复杂，容易遗漏"
+          ],
+          "variant": "neutral"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "随手记/鲨鱼记账派：轻量但难以坚持",
+      "level": 3,
+      "content": "这是最常见的入门方式。下载一个记账 App（随手记、鲨鱼记账、钱迹……），每次消费后立刻打开 App 记一笔。App 会自动分类、生成月报、提醒你记账。\n\n**适合的人**：刚开始记账、财务场景简单、主要用微信支付宝的人。\n\n**真实案例**：Reddit 上一个用户说，他用 Mint 记账两年，最大的收获是「发现自己每月在咖啡上花 200 刀，于是买了咖啡机，一年省了 2000 刀」。\n\n**崩溃点**：\n- 手动输入太累。吃顿饭还要掏出手机记账，很快就会觉得麻烦。\n- App 倒闭或跑路。网易有钱、Mint 都已经关闭服务，数据导出困难。\n- 无法处理复杂场景。多币种？投资？AA？分期？App 支持不了。\n\nV2EX 上有个高票回复说：「我用过十几个记账 App，最长坚持了 3 个月。不是 App 不好，是这种模式本身就不适合长期记账。」"
+    },
+    {
+      "type": "text",
+      "heading": "自动同步派：理想与现实的差距",
+      "level": 3,
+      "content": "YNAB（You Need A Budget）和已关闭的 Mint 代表了记账的另一个方向：通过 Plaid 等服务连接银行账户，自动拉取交易记录，零手动输入。\n\n**适合的人**：在欧美生活、主要用信用卡消费、愿意付订阅费的人。\n\n**优势**：\n- 真正的零摩擦。所有交易自动同步，你只需要定期分类和对账。\n- 实时更新。随时知道自己的财务状况。\n\n**崩溃点**：\n- **国内银行不支持**。中国的银行几乎都不提供 API，自动同步基本是梦。\n- **隐私担忧**。把所有银行账户的登录凭证交给第三方，很多人无法接受。\n- **订阅费贵**。YNAB 要 $99/年，Monarch Money 要 $89.99/年。\n\nReddit 上关于 YNAB 的讨论两极分化严重。支持者说「YNAB 彻底改变了我和金钱的关系」，反对者说「YNAB 让我觉得自己像个白痴，每次用都搞不清楚余额为什么对不上」。"
+    },
+    {
+      "type": "quote",
+      "text": "YNAB makes me feel like an idiot every time I use it. Somehow Mint was the opposite, I pay off my credit cards each month, and was easily able to see where money was going.",
+      "author": "Reddit 用户",
+      "role": "r/mintuit"
+    },
+    {
+      "type": "text",
+      "heading": "电子表格派：自由的代价",
+      "level": 3,
+      "content": "Excel 或 Google Sheets 硬核手搓记账表。这是程序员最容易想到的方案：反正就是记录数据嘛，表格不就够了？\n\n**优势**：\n- 完全自定义。想怎么记就怎么记，想做什么分析就做什么分析。\n- 可以写复杂公式。VLOOKUP、透视表、条件格式……Excel 能做的分析非常强大。\n\n**崩溃点**：\n- **维护成本爆炸**。一开始很简单，但随着账户增多、交易复杂，表格会变得越来越难维护。\n- **容易出错**。手动输入很容易打错数字，公式引用错误也很难发现。\n- **难以扩展**。当你需要记录多币种、投资、分期时，表格结构会变得非常复杂。\n\nReddit 上有人说：「我用 Google Sheets 记账五年，现在表格有 50 个 sheet，每次打开都要加载半分钟。我已经不敢改结构了，怕一改全炸。」"
+    },
+    {
+      "type": "text",
+      "heading": "纯文本复式记账派：程序员的终极方案",
+      "level": 3,
+      "content": "这是本报告的重点，也是最适合程序员的方案。用 Beancount、hledger 或 Ledger 这样的纯文本复式记账工具，把账本当代码管理。\n\n**为什么是「终极方案」**：\n- **数据永远属于你**。纯文本文件，可以用 Git 管理，永不过时。\n- **可以处理任何复杂场景**。多币种、投资、Crypto、分期、AA……没有什么是复式记账表达不了的。\n- **强大的查询和分析能力**。类 SQL 的查询语言，可以生成任何你想要的报表。\n- **程序员友好**。语法高亮、自动补全、格式化、CI/CD……所有你熟悉的工具链都能用上。\n\n**崩溃点**：\n- **学习曲线陡峭**。复式记账的概念对新手不友好，语法也需要学习。\n- **移动端体验差**。虽然有移动 App，但远不如专业记账 App 顺滑。\n- **初期投入高**。需要搭建工具链、写导入脚本、配置可视化……第一周会很痛苦。\n\n但一旦度过学习期，这套方案会成为你未来十年、二十年的记账基础设施。"
+    },
+    {
+      "type": "quote",
+      "text": "我才意识到，很多时候我们觉得记账麻烦，并不是 UI 不够漂亮、交互不够顺滑，而是记账方法不够科学。当方法足够科学时，你甚至不需要 UI，一个 CLI + 几个纯文本文件 + 一套清晰语法，就能把财务世界描述得非常准确。",
+      "author": "DIYgod",
+      "role": "Beancount 用户"
+    },
+    {
+      "type": "text",
+      "heading": "第三部分：复式记账入门",
+      "level": 2,
+      "content": "如果你之前从未接触过复式记账，这个概念可能听起来很吓人。「借」「贷」「会计恒等式」……这些术语让人联想到枯燥的会计教材。\n\n但事实是：**复式记账是一套极其优雅的思维模型，而且程序员天然适合这套模型**。让我用最直觉的方式讲清楚它。"
+    },
+    {
+      "type": "text",
+      "heading": "用五个桶理解复式记账",
+      "level": 3,
+      "content": "想象你有五个大桶，所有钱都装在这些桶里：\n\n**资产（Assets）**：你拥有的一切。现金、银行存款、支付宝余额、股票、房产、链上的 BTC……\n\n**负债（Liabilities）**：你欠别人的钱。信用卡欠款、房贷、车贷、朋友借你的钱……\n\n**收入（Income）**：钱的来源。工资、奖金、投资收益、副业收入……\n\n**支出（Expenses）**：钱的去处。吃饭、购物、房租、订阅服务……\n\n**权益（Equity）**：调节用的「底座」，用来处理期初余额、误差修正等。\n\n复式记账的核心思想是：**所有金融活动都是桶之间的转移**。每次转移，必须有一个桶增加，同时有另一个（或多个）桶减少，且增加和减少的总和必须为零。\n\n这个「总和为零」的规则就像物理守恒定律一样，是复式记账的核心约束。它确保你的账本永远是平衡的，任何错误都会被立刻发现。"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "为什么叫「复式」记账？",
+      "content": "因为每笔交易至少涉及两个账户（两个桶）。单式记账只记录「我花了 100 块买咖啡」，复式记账会记录「我的现金减少 100，我的咖啡支出增加 100」。看起来麻烦，但这种冗余恰恰是数据完整性的保证。"
+    },
+    {
+      "type": "text",
+      "heading": "为什么程序员天然适合复式记账",
+      "level": 3,
+      "content": "如果你是程序员，你会发现复式记账的思维方式非常熟悉：\n\n- **状态机模型**：每个账户都是一个状态，交易是状态转移。\n- **不可变数据**：账本是只增不改的日志（append-only log），就像 Git 历史一样。\n- **约束检查**：「总和为零」就像类型检查，编译期就能发现错误。\n- **声明式语法**：你只需要描述「发生了什么」，报表会自动生成，就像 SQL 一样。\n- **版本控制**：纯文本文件可以用 Git 管理，可以 diff、可以 rebase、可以 cherry-pick。\n\n更重要的是，复式记账强迫你**准确描述金融活动的结构**，而不是含糊地说「我花了钱」。这种精确性是程序员的本能。"
+    },
+    {
+      "type": "text",
+      "heading": "单式 vs 复式：一个完整的例子",
+      "level": 3,
+      "content": "让我们用一个程序员的真实财务场景来对比单式和复式记账。场景包括：发工资、交房租、信用卡还款、朋友 AA、月底对账。\n\n**单式记账**会这样记录：\n\n```\n2024-01-05  工资  +20000\n2024-01-10  房租  -5000\n2024-01-15  还信用卡  -8000\n2024-01-20  和朋友吃饭  -300（我付了 600，朋友应该给我 300）\n```\n\n这样记账有几个问题：\n1. 工资到底进了哪个账户？银行卡还是支付宝？\n2. 信用卡还的是哪张卡？还了多少本金、多少利息？\n3. 朋友欠你的 300 怎么追踪？\n4. 如果你有多个银行账户，怎么知道每个账户的余额？\n\n**复式记账**会这样记录："
+    },
+    {
+      "type": "code",
+      "language": "beancount",
+      "filename": "2024-01.bean",
+      "code": "; 1月5日 发工资\n2024-01-05 * \"公司\" \"1月工资\"\n  Assets:Bank:CMB           20000.00 CNY  ; 招商银行工资卡入账\n  Income:Salary            -20000.00 CNY  ; 收入减少（从收入桶取出）\n\n; 1月10日 交房租\n2024-01-10 * \"房东\" \"1月房租\"\n  Expenses:Housing:Rent      5000.00 CNY  ; 房租支出增加\n  Assets:Bank:CMB           -5000.00 CNY  ; 工资卡余额减少\n\n; 1月15日 还信用卡\n2024-01-15 * \"招商银行\" \"信用卡还款\"\n  Liabilities:CreditCard:CMB -8000.00 CNY  ; 信用卡欠款减少\n  Assets:Bank:CMB            -8000.00 CNY  ; 工资卡余额减少\n\n; 1月20日 和朋友吃饭 AA\n2024-01-20 * \"餐厅\" \"和 Bob 吃饭\"\n  Assets:Alipay               -600.00 CNY  ; 我用支付宝付了全款\n  Expenses:Food:DiningOut      300.00 CNY  ; 我的一半\n  Assets:Receivables:Bob       300.00 CNY  ; Bob 欠我的钱（应收账款）\n\n; 1月25日 Bob 还钱\n2024-01-25 * \"Bob\" \"还吃饭的钱\"\n  Assets:Alipay                300.00 CNY  ; 支付宝收款\n  Assets:Receivables:Bob      -300.00 CNY  ; 应收账款减少"
+    },
+    {
+      "type": "text",
+      "content": "看到区别了吗？复式记账精确地描述了：\n\n- 每笔钱从哪来、到哪去\n- 每个账户的当前余额（随时可以查询）\n- 朋友欠你的钱有专门的「应收账款」账户追踪\n- 收入、支出、资产、负债分门别类，清晰可查\n\n更重要的是，月底你可以自动生成：\n- **资产负债表**：我到底有多少钱？（工资卡 7000、支付宝 300、信用卡欠款 0）\n- **利润表**：这个月赚了多少、花了多少？（收入 20000、支出 5300）\n- **现金流量表**：每个账户的流水是什么？\n\n所有这些报表都是自动计算的，不需要手动维护。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "收入为什么是负数？",
+      "content": "很多人第一次看到复式记账时会困惑：为什么收入账户是负数？\n\n这是视角问题。把收入想象成「你一生劳动成果的总桶」。每次发工资，你从这个桶里取出一部分放进资产。你取得越多，这个桶的数值就越负。\n\n换个理解方式：会计恒等式是 `资产 = 负债 + 权益`，扩展后是 `(资产 + 支出) + (收入 + 负债 + 权益) = 0`。所以收入和负债、权益一样，符号是相反的。\n\n不用纠结，用几天就习惯了。"
+    },
+    {
+      "type": "text",
+      "heading": "第四部分：工具深度横评",
+      "level": 2,
+      "content": "纯文本复式记账工具主要有三个：**Ledger**（开创者）、**hledger**（Haskell 重写）、**Beancount**（Python 实现）。它们的核心理念相同，但在语法、生态、维护状态上有显著差异。"
+    },
+    {
+      "type": "table",
+      "caption": "Beancount / hledger / Ledger 核心对比",
+      "headers": ["维度", "Beancount", "hledger", "Ledger"],
+      "rows": [
+        ["语言", "Python", "Haskell", "C++"],
+        ["GitHub Stars", "~5.1k", "~3k", "~5.3k"],
+        ["首次发布", "2007", "2007", "2003"],
+        ["当前维护状态", "活跃（v3 2024年发布）", "非常活跃", "维护中（更新较慢）"],
+        ["语法风格", "严格、结构化", "灵活、宽松", "灵活、功能丰富"],
+        ["学习曲线", "中等", "较平缓", "较陡峭"],
+        ["性能", "中等（Python）", "快（Haskell）", "快（C++）"],
+        ["错误检查", "非常严格", "严格", "宽松"],
+        ["多币种支持", "原生支持，强大", "原生支持，强大", "原生支持"],
+        ["Web UI", "Fava（优秀）", "hledger-web（简洁）", "无官方 UI"],
+        ["移动端 App", "有（iOS/Android）", "社区方案", "无"],
+        ["查询语言", "BQL（类 SQL）", "内置查询 + 脚本", "强大的过滤器"],
+        ["文档质量", "优秀", "非常优秀", "详细但陈旧"],
+        ["社区活跃度", "活跃", "活跃", "较低"]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "语法设计：严格 vs 灵活",
+      "level": 3,
+      "content": "**Beancount** 的语法非常严格和结构化。它要求你先声明账户（`open`），明确指定商品类型（`commodity`），每笔交易必须平衡。这种严格性是双刃剑：学习期会觉得麻烦，但一旦上手，它会帮你发现很多潜在错误。\n\n**hledger** 和 **Ledger** 的语法更灵活。你不需要预先声明账户，可以直接开始记账。Ledger 的功能特别丰富，支持虚拟账户（virtual postings）、自动交易（automated transactions）等高级特性。\n\nReddit 上的共识是：「如果你追求灵活性和强大功能，用 Ledger；如果你追求可靠性和数据完整性，用 Beancount；如果你想要平衡，用 hledger。」\n\n对于不了解复式记账的新手，我的建议是 **Beancount**。它的严格性会逼着你正确理解复式记账的概念，而不是稀里糊涂地记流水账。"
+    },
+    {
+      "type": "text",
+      "heading": "编辑器支持：都很好，Beancount 稍优",
+      "level": 3,
+      "content": "三个工具都有不错的编辑器插件，但 Beancount 的生态最完善：\n\n**VSCode**：\n- Beancount: `Lencerf.beancount` 插件，支持语法高亮、自动补全、错误检查、格式化\n- hledger / Ledger: 也有插件，但功能相对简单\n\n**Neovim**：\n- Beancount: `beancount.nvim` - 全功能支持，LSP 集成\n- hledger: `hledger-vim` - 基础语法高亮和补全\n- Ledger: `vim-ledger` - 功能丰富，社区活跃\n\n**Zed**：\n- Beancount: 官方扩展支持语法高亮和 LSP（需要安装 `beancount-language-server`）\n- hledger / Ledger: 暂无官方扩展\n\n**语言服务器（LSP）**：\n- Beancount 有 `beancount-language-server`，支持诊断、补全、导航\n- hledger 和 Ledger 没有官方 LSP，但编辑器插件功能也够用\n\n对于 Zed/Neovim 用户，Beancount 的编辑器体验是最好的。"
+    },
+    {
+      "type": "text",
+      "heading": "可视化方案：Fava 一骑绝尘",
+      "level": 3,
+      "content": "纯文本记账的一个痛点是「看起来不直观」。这就是 Web UI 的价值。\n\n**Fava**（Beancount）：\n- 开箱即用，`pip install fava && fava main.bean` 即可启动\n- 界面现代、美观、响应式\n- 支持图表、报表、筛选、搜索、多账本切换\n- 有丰富的插件生态（fava-dashboards、fava-portfolio-returns 等）\n- 可以直接在 Web 界面添加和编辑交易\n\n**hledger-web**（hledger）：\n- 简洁实用，功能相对基础\n- 性能好，适合大账本\n- 界面朴素但够用\n\n**Ledger**：\n- 没有官方 Web UI\n- 社区有一些第三方工具，但维护状态不佳\n\n如果你想要「既有命令行的强大，又有图形界面的直观」，Beancount + Fava 是最佳选择。\n\nFava 还支持插件扩展。比如 **fava-dashboards** 可以让你用 BQL（Beancount Query Language）自定义仪表盘，**fava-portfolio-returns** 可以计算投资组合的各种收益率（时间加权、资金加权等）。"
+    },
+    {
+      "type": "text",
+      "heading": "移动端方案：都不理想，但有解决方案",
+      "level": 3,
+      "content": "纯文本记账的最大短板是**移动端体验**。你不可能在手机上打开 Vim 编辑 `.bean` 文件。\n\n**Beancount** 有官方移动 App（iOS 和 Android 都有），可以添加交易、查看报表。但说实话，体验比不上专业记账 App。\n\n**hledger** 没有官方移动 App，但有社区方案：\n- 用 Syncthing 或 pCloud WebDAV 同步账本到手机\n- 用 Termux（Android）或 a-Shell（iOS）在手机上运行 hledger\n- 用 Shortcuts（iOS）快速添加交易\n\n**Ledger** 同样没有移动 App。\n\n实际上，大多数纯文本记账用户采用的是**混合方案**：\n- 日常小额支出不记或者用别的 App 记（反正月底会从银行账单导入）\n- 大额支出或重要交易回到电脑上用编辑器记\n- 定期（每周或每月）整理和对账\n\n这不是缺陷，而是一种取舍：放弃即时性，换取数据完整性和长期可维护性。"
+    },
+    {
+      "type": "text",
+      "heading": "多币种与 Crypto 支持",
+      "level": 3,
+      "content": "三个工具对多币种的支持都很好，但 **Beancount** 在处理复杂汇率和 Crypto 交易时最清晰。\n\n关键优势：\n1. **成本价追踪**：可以记录每笔买入的成本价，卖出时自动匹配成本计算收益\n2. **汇率转换**：支持 `@` 和 `@@` 语法指定汇率，自动处理币种转换\n3. **浮盈浮亏**：通过 `price` 指令记录每日价格，自动计算未实现盈亏\n4. **自定义货币**：BTC、ETH、积分、里程……任何东西都可以当货币\n\nDIYgod 的博文中展示了如何用 Beancount 记录 OKX 的 Crypto 交易，包括现货、合约、手续费、收益计算……全部都能准确表达。\n\nhledger 和 Ledger 也支持多币种，但在成本价追踪和收益计算上需要更多手动操作。"
+    },
+    {
+      "type": "accordion",
+      "items": [
+        {
+          "title": "我应该选择哪个工具？",
+          "content": "**选 Beancount**，如果你：\n- 刚开始接触纯文本记账\n- 需要严格的数据完整性检查\n- 想要最好的 Web UI（Fava）\n- 有多币种或 Crypto 记账需求\n- 喜欢用 Python 写脚本\n\n**选 hledger**，如果你：\n- 追求性能和速度\n- 喜欢 Haskell 生态\n- 想要更灵活的语法\n- 重视文档质量\n\n**选 Ledger**，如果你：\n- 需要虚拟账户等高级功能\n- 已经有 Ledger 账本历史\n- 不在意维护频率"
+        },
+        {
+          "title": "这三个工具的账本可以互相转换吗？",
+          "content": "可以，但不是完全无损。\n\n- Ledger → Beancount: 有官方工具 `ledger2beancount`（Perl 写的）\n- Beancount → Ledger: 理论可行，但没有官方工具\n- hledger 的语法接近 Ledger，转换相对容易\n\n实际上，因为都是纯文本，写个脚本转换并不难。但最好一开始就选对工具，避免迁移。"
+        },
+        {
+          "title": "哪个工具的社区最活跃？",
+          "content": "**hledger** 的社区最活跃，维护者 Simon Michael 非常积极，几乎每周都有更新。\n\n**Beancount** 的社区也很活跃，尤其是在中文社区（V2EX、Telegram 群组）。2024 年发布的 v3 版本表明项目仍在积极开发。\n\n**Ledger** 的社区相对安静，更新频率较低，但工具本身已经很成熟稳定。"
+        }
+      ],
+      "allowMultiple": true
+    },
+    {
+      "type": "text",
+      "heading": "第五部分：自动化与 AI",
+      "level": 2,
+      "content": "纯文本记账的最大痛点是**手动输入**。但好消息是：自动化和 AI 正在彻底改变这个局面。"
+    },
+    {
+      "type": "text",
+      "heading": "账单导入：从手动到自动",
+      "level": 3,
+      "content": "国内用户最常见的需求是导入**支付宝和微信账单**。\n\n**支付宝账单导入**：\n1. 在支付宝 App 或网页端导出 CSV 账单（「我的」-「账单」-右上角设置）\n2. 用导入脚本转换成 Beancount 格式\n\n**微信账单导入**：\n1. 微信「服务」-「钱包」-「账单」-右上角「···」-「账单下载」\n2. 导出 CSV 或 ZIP 格式\n3. 用脚本解析转换\n\n**银行流水导入**：\n- 大部分银行支持导出 CSV 或 Excel\n- 格式各不相同，需要针对每家银行写解析脚本\n\n**现有工具**：\n- `beancount-trans`: Web 平台，支持支付宝/微信/银行账单上传转换\n- `double-entry-generator`: 命令行工具，支持支付宝/微信\n- `zsxsoft/my-beancount-scripts`: GitHub 上的个人脚本集合\n- DIYgod 的 `importer-*.js`: 支持 OKX、DBS 银行等\n\n大多数用户的做法是：参考现有脚本，针对自己的银行和交易所定制导入器。"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "filename": "alipay_importer.py",
+      "code": "# 简化版支付宝账单导入器示例\nimport csv\nfrom datetime import datetime\n\ndef parse_alipay_csv(csv_path):\n    with open(csv_path, 'r', encoding='utf-8') as f:\n        # 跳过支付宝 CSV 前面的注释行\n        for _ in range(17):\n            next(f)\n        \n        reader = csv.DictReader(f)\n        for row in reader:\n            date = datetime.strptime(row['交易时间'], '%Y-%m-%d %H:%M:%S')\n            payee = row['交易对方']\n            narration = row['商品说明']\n            amount = float(row['金额'].replace(',', ''))\n            \n            # 根据收支类型决定账户\n            if row['收/支'] == '支出':\n                print(f'{date.strftime(\"%Y-%m-%d\")} * \"{payee}\" \"{narration}\"')\n                print(f'  Assets:Alipay  {amount:.2f} CNY')\n                print(f'  Expenses:Unknown  ; TODO: 需要手动分类')\n                print()\n\nparse_alipay_csv('alipay_record.csv')"
+    },
+    {
+      "type": "text",
+      "heading": "LLM 辅助记账：游戏规则改变者",
+      "level": 3,
+      "content": "AI 正在彻底改变纯文本记账的体验。Beancount 官方文档专门有一节讨论「Using LLMs to Automate and Enhance Bookkeeping」。\n\n**AI 可以做什么**：\n\n**1. 自然语言输入转记账语法**\n\n你说：「今天在星巴克花了 45 块买咖啡，用的支付宝」\n\nLLM 生成：\n```\n2024-02-19 * \"星巴克\" \"咖啡\"\n  Assets:Alipay        -45.00 CNY\n  Expenses:Food:Coffee  45.00 CNY\n```\n\n**2. 交易自动分类**\n\n对于银行流水中的「STARBUCKS #12345」，LLM 可以自动识别这是咖啡支出，分类到 `Expenses:Food:Coffee`。\n\n这比传统的基于规则或机器学习的 `smart_importer` 更强大，因为 LLM 可以理解上下文和语义。\n\n**3. 账单解析和数据提取**\n\nDIYgod 在博文中展示了一个例子：直接把交易所的截图丢给 AI（Claude/GPT-4），让它识别并生成 Beancount 交易记录。这对于没有 API 或导出功能的平台特别有用。\n\n**4. BQL 查询生成**\n\n你说：「显示我所有加密货币持仓随时间的变化曲线」\n\nLLM 生成对应的 BQL 查询和 Fava Dashboards 配置。\n\n**5. 错误诊断**\n\n当账本不平衡时，LLM 可以帮你找出错误：「你的 2024-02-15 这笔交易少写了一个账户，应该是……」"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "AI 时代的记账哲学",
+      "content": "DIYgod 说得好：「随着 AI 发展，纯文本记账的门槛会越来越低。未来每个人都可以用更低成本驾驭这种强大的工具。」\n\n纯文本记账不再是「程序员的硬核玩具」，而是会变成「AI 辅助的普适方案」。你只需要用自然语言描述财务活动，AI 帮你生成精确的复式记账语法。"
+    },
+    {
+      "type": "text",
+      "heading": "CI/CD 式账本校验",
+      "level": 3,
+      "content": "把账本当代码管理的另一个好处是：可以用 CI/CD 工具自动校验。\n\n**GitHub Actions 示例**：\n\n每次 push 到 Git 仓库，自动运行：\n1. `bean-check main.bean` - 检查语法和平衡性\n2. `bean-query` - 运行自定义查询确保数据一致性\n3. 生成报表并提交到 Fava 或其他可视化工具\n\n如果有错误，CI 会失败，你会收到通知。\n\n这种工作流让记账变成了「可测试、可审计、可回滚」的工程实践。"
+    },
+    {
+      "type": "text",
+      "heading": "自动价格更新",
+      "level": 3,
+      "content": "对于投资和 Crypto 记账，每日价格更新是必需的。Beancount 提供了 `beanprice` 工具，可以自动从各种数据源拉取价格：\n\n- Coinbase、Coinmarketcap：Crypto 价格\n- Alpha Vantage：股票价格\n- Frankfurter、ExchangeRatesAPI：汇率\n\n配合 cron 或 GitHub Actions，可以实现每日自动更新价格到 `prices.bean`，让你的账本始终反映最新的资产估值。"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "filename": "update-prices.sh",
+      "code": "#!/bin/bash\n# 每日自动更新价格的脚本\n\n# 拉取最新价格并追加到 prices.bean\nbean-price -i --update-rate daily --no-cache main.bean >> books/2025/prices.bean\n\n# 提交到 Git\ngit add books/2025/prices.bean\ngit commit -m \"chore: update prices $(date +%Y-%m-%d)\"\ngit push\n\n# 可选：触发 Fava 重新加载\ncurl -X POST http://localhost:5000/api/reload"
+    },
+    {
+      "type": "text",
+      "heading": "第六部分：落地方案",
+      "level": 2,
+      "content": "说了这么多理论，现在到了最关键的部分：**你应该怎么开始**？\n\n针对目标用户画像（macOS、Zed/Neovim、CNY+USD 双币种、少量 Crypto、不了解复式记账），这是我的具体建议。"
+    },
+    {
+      "type": "text",
+      "heading": "技术栈推荐",
+      "level": 3,
+      "content": "不要模棱两可，这是我的明确选择：\n\n**记账工具**：Beancount v3  \n**原因**：严格的数据检查 + 最好的 Web UI（Fava）+ 活跃的社区 + 优秀的多币种支持\n\n**编辑器**：VSCode（如果你追求开箱即用）或 Neovim（如果你已经是 Vim 用户）  \n**插件**：VSCode 用 `Lencerf.beancount`，Neovim 用 `beancount.nvim`\n\n**可视化**：Fava + fava-dashboards + fava-portfolio-returns  \n**部署方式**：本地运行 `fava main.bean`，或者用 Docker 部署到 VPS\n\n**版本管理**：Git + GitHub/GitLab 私有仓库  \n**注意**：不要 push 到公开仓库！财务数据必须保密。\n\n**导入工具**：\n- 支付宝/微信：参考 `zsxsoft/my-beancount-scripts` 自己定制\n- 银行流水：根据你的银行 CSV 格式写简单 Python 脚本\n- Crypto：参考 DIYgod 的 `importer-okx.js` 改成你的交易所\n\n**价格更新**：`beanprice` + cron 每日运行\n\n**移动端**：老实说，放弃移动端即时记账。用每月导入账单的方式。如果实在需要，用 Beancount 官方 App 或者 Telegram bot。"
+    },
+    {
+      "type": "timeline",
+      "events": [
+        {
+          "date": "第 1 天",
+          "title": "环境搭建",
+          "description": "安装 Python、pip install beancount fava、配置编辑器插件（VSCode Beancount 或 Neovim beancount.nvim）。创建 Git 仓库，设置 .gitignore。"
+        },
+        {
+          "date": "第 2-3 天",
+          "title": "理解复式记账",
+          "description": "阅读 BYVoid 的「Beancount 复式记账」系列或官方文档 Getting Started。不要着急开始记账，先理解概念。手写几笔简单交易练手：发工资、买东西、还信用卡。"
+        },
+        {
+          "date": "第 4-5 天",
+          "title": "建立账户结构",
+          "description": "在 accounts.bean 中定义你的所有账户：银行卡、支付宝、微信、信用卡、工资收入、各类支出。参考 DIYgod 的结构，但根据自己的实际情况简化。不要一开始就建太细的分类，够用就行。"
+        },
+        {
+          "date": "第 6-7 天",
+          "title": "导入历史数据",
+          "description": "下载过去 1-3 个月的支付宝、微信、银行账单。写或找一个导入脚本转换成 Beancount 格式。手动调整和分类，确保每笔交易都正确。这是最痛苦的阶段，但只需要做一次。"
+        },
+        {
+          "date": "第 2 周",
+          "title": "日常记账节奏",
+          "description": "开始每周记账：大额支出当天记，小额支出周末批量记。不要追求完美，先建立习惯。运行 fava main.bean，在浏览器里看报表，感受复式记账的威力。"
+        },
+        {
+          "date": "第 3-4 周",
+          "title": "优化工作流",
+          "description": "根据实际情况调整账户结构、编写常用交易的模板（snippet）、设置 Git hooks 自动 bean-check。开始尝试 BQL 查询，生成自己想要的报表。"
+        },
+        {
+          "date": "第 1 个月后",
+          "title": "稳定运行",
+          "description": "此时你应该已经：(1) 习惯了复式记账的思维方式 (2) 建立了稳定的记账节奏 (3) 能够快速查询任何财务数据 (4) 对自己的财务状况有清晰认知。接下来可以探索高级功能：多币种、投资追踪、自定义仪表盘等。"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "项目结构示例",
+      "level": 3,
+      "content": "这是一个推荐的 Beancount 项目结构："
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "filename": "项目结构",
+      "code": "beancount-ledger/\n├── main.bean                # 主入口文件\n├── accounts.bean            # 账户定义\n├── commodity.bean           # 货币/资产定义\n├── books/                   # 按年份组织的账本\n│   ├── 2024/\n│   │   ├── 2024.bean       # 2024 年主文件\n│   │   ├── cn.bean         # 国内交易（支付宝/微信）\n│   │   ├── us.bean         # 美元交易\n│   │   ├── crypto.bean     # 加密货币交易\n│   │   ├── prices.bean     # 价格记录（自动生成）\n│   │   └── monthly/        # 每月详细记录（可选）\n│   └── 2025/\n│       └── ...\n├── scripts/                 # 导入脚本\n│   ├── import_alipay.py\n│   ├── import_wechat.py\n│   ├── import_bank.py\n│   └── update_prices.sh\n├── .gitignore\n├── README.md\n└── config/                  # 配置文件\n    ├── fava.yaml           # Fava 配置\n    └── dashboards.yaml     # 自定义仪表盘"
+    },
+    {
+      "type": "code",
+      "language": "beancount",
+      "filename": "main.bean",
+      "code": "; Beancount 账本主入口\n; 作者：[你的名字]\n; 开始日期：2024-01-01\n\noption \"title\" \"我的财务账本\"\noption \"operating_currency\" \"CNY\"\noption \"operating_currency\" \"USD\"\noption \"booking_method\" \"FIFO\"  ; 成本计算方法：先进先出\n\n; 包含账户定义\ninclude \"accounts.bean\"\n\n; 包含货币定义\ninclude \"commodity.bean\"\n\n; 包含年度账本\ninclude \"books/2024/2024.bean\"\ninclude \"books/2025/2025.bean\"\n\n; Fava 配置\n2024-01-01 custom \"fava-option\" \"auto-reload\" \"true\"\n2024-01-01 custom \"fava-option\" \"default-page\" \"income_statement/\""
+    },
+    {
+      "type": "code",
+      "language": "beancount",
+      "filename": "accounts.bean",
+      "code": "; 账户定义文件\n; 格式：YYYY-MM-DD open 账户类型:层级1:层级2... 货币1, 货币2\n\n; ===== 资产账户 =====\n2024-01-01 open Assets:Cash                    CNY  ; 现金\n2024-01-01 open Assets:Bank:CMB                CNY  ; 招商银行\n2024-01-01 open Assets:Bank:BOA                USD  ; 美国银行\n2024-01-01 open Assets:Alipay                  CNY  ; 支付宝\n2024-01-01 open Assets:WeChat                  CNY  ; 微信支付\n2024-01-01 open Assets:Crypto:Exchange:BTC     BTC  ; 交易所 BTC\n2024-01-01 open Assets:Crypto:Exchange:USDT    USDT ; 交易所 USDT\n2024-01-01 open Assets:Receivables:Friends     CNY  ; 朋友欠款\n\n; ===== 负债账户 =====\n2024-01-01 open Liabilities:CreditCard:CMB     CNY  ; 招商信用卡\n2024-01-01 open Liabilities:CreditCard:Amex    USD  ; 美国运通卡\n\n; ===== 收入账户 =====\n2024-01-01 open Income:Salary:Company          USD  ; 工资\n2024-01-01 open Income:Freelance               CNY  ; 自由职业\n2024-01-01 open Income:Investment              CNY, USD, BTC  ; 投资收益\n\n; ===== 支出账户 =====\n2024-01-01 open Expenses:Food:Restaurant        CNY  ; 外出就餐\n2024-01-01 open Expenses:Food:Grocery          CNY  ; 买菜做饭\n2024-01-01 open Expenses:Food:Coffee           CNY  ; 咖啡\n2024-01-01 open Expenses:Housing:Rent          CNY  ; 房租\n2024-01-01 open Expenses:Transportation:Taxi   CNY  ; 打车\n2024-01-01 open Expenses:Shopping:Electronics  CNY, USD  ; 电子产品\n2024-01-01 open Expenses:Subscription:Software CNY, USD  ; 软件订阅\n2024-01-01 open Expenses:TradingFee            CNY, USD, USDT  ; 交易手续费\n\n; ===== 权益账户 =====\n2024-01-01 open Equity:Opening-Balances        ; 期初余额"
+    },
+    {
+      "type": "text",
+      "heading": "常见坑和放弃原因",
+      "level": 3,
+      "content": "根据 Reddit 和 V2EX 的讨论，人们放弃记账的原因主要有这几个：\n\n**1. 完美主义陷阱**\n\n很多人觉得「既然要记账，就要记得完美无缺」。结果每天花大量时间记账，最后累死自己放弃了。\n\n**解决方案**：接受 80/20 原则。记录大额支出和关键交易就够了，小额零散支出可以月底从账单导入时再补。\n\n**2. 账户分类过细**\n\n一开始就建立了几十个支出类别，每次记账都要纠结「这笔算 Food:Snacks 还是 Food:Drinks」。\n\n**解决方案**：从粗粒度开始。只分 Food、Housing、Transportation、Shopping 几大类，用一段时间后再根据实际需求细分。\n\n**3. 历史数据导入太痛苦**\n\n想把过去一年的数据全部导入，结果发现工作量巨大，还没开始就放弃了。\n\n**解决方案**：从当前开始记。历史数据可以只导入上个月的，或者只记录各账户的期初余额，不追溯具体交易。\n\n**4. 移动端体验差**\n\n出门在外无法记账，回家后忘了，账本越来越乱。\n\n**解决方案**：不要追求即时记账。用备忘录或语音记录大额支出，周末统一整理。或者干脆等月底从账单导入。\n\n**5. 对不上账时的挫败感**\n\n银行余额和账本余额对不上，找不出错在哪，怀疑人生。\n\n**解决方案**：定期用 `balance` 断言记录实际余额。Beancount 会自动检查并指出哪里不对。刚开始允许有小误差（零钱、汇率波动），不要追求分毫不差。"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "记账不是目的，了解财务才是",
+      "content": "很多人把记账当成一种强迫症式的任务：「我必须记清每一笔钱」。错了。\n\n记账是工具，目的是让你**了解自己的财务状况**，从而做出更好的决策。如果记账让你焦虑、痛苦，那说明方法不对。\n\n好的记账应该是：花最少的时间，获得最有用的洞察。"
+    },
+    {
+      "type": "text",
+      "heading": "结语：记账是一种生活方式",
+      "level": 2,
+      "content": "这份报告写了很长，覆盖了从哲学到工具、从理论到实践的方方面面。如果你读到这里，我想说：**不要被复杂性吓倒**。\n\n记账，尤其是纯文本复式记账，确实有学习曲线。但一旦你跨过这道门槛，你会发现这是一套极其优雅、强大、可持续的系统。它不会因为某个 App 倒闭而消失，不会因为换了手机而丢失数据，不会因为需求变化而无法扩展。\n\n它是真正**属于你**的财务基础设施。\n\nBYVoid 说，记账是通往财务自由的必经之路。DIYgod 说，看到账本自己更新的时候会感到纯粹的快乐。这些话听起来可能有点夸张，但当你用了一年、两年、五年之后，你会明白他们在说什么。\n\n**这不是一份工具教程，这是一种生活方式的选择**。\n\n如果你准备好了，那就从今天开始吧。创建一个 Git 仓库，写下第一笔交易，然后一步步建立起自己的财务世界观。\n\n祝你在财务自由的路上越走越远。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "下一步行动",
+      "content": "**立刻做这三件事**：\n\n1. 安装 Beancount 和 Fava：`pip install beancount fava`\n2. 阅读官方 Getting Started：https://beancount.github.io/docs/getting_started_with_beancount.html\n3. 创建你的第一个 `.bean` 文件，记录今天的一笔交易\n\n不要拖延，不要等「准备好了再开始」。现在就开始，边做边学。"
+    },
+    {
+      "type": "source-list",
+      "title": "参考资料",
+      "sources": [
+        {
+          "id": "1",
+          "title": "上古神器 Beancount：Crypto 与 AI 时代的复式记账终极方案",
+          "url": "https://diygod.cc/beancount/",
+          "author": "DIYgod",
+          "date": "2025-12-12"
+        },
+        {
+          "id": "2",
+          "title": "Beancount复式记账（一）：为什么",
+          "url": "https://byvoid.com/zhs/blog/beancount-bookkeeping-1/",
+          "author": "BYVoid",
+          "date": "2019-05-26"
+        },
+        {
+          "id": "3",
+          "title": "Beancount 官方文档",
+          "url": "https://beancount.github.io/docs/",
+          "author": "Martin Blais"
+        },
+        {
+          "id": "4",
+          "title": "Plain Text Accounting",
+          "url": "https://plaintextaccounting.org/",
+          "author": "PTA 社区"
+        },
+        {
+          "id": "5",
+          "title": "r/plaintextaccounting - Reddit 社区讨论",
+          "url": "https://www.reddit.com/r/plaintextaccounting/"
+        },
+        {
+          "id": "6",
+          "title": "Beancount V2EX 讨论",
+          "url": "https://v2ex.com/t/847297"
+        },
+        {
+          "id": "7",
+          "title": "Using LLMs to Automate Bookkeeping",
+          "url": "https://beancount.io/docs/Solutions/using-llms-to-automate-and-enhance-bookkeeping-with-beancount",
+          "author": "Beancount.io"
+        }
+      ]
+    }
+  ]
+}
