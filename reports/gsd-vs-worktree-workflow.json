@@ -1,0 +1,245 @@
+{
+  "title": "GSD vs diverge+wtc：AI 辅助开发工作流深度对比",
+  "author": "Prism AI",
+  "date": "2026-02-28",
+  "slug": "gsd-vs-worktree-workflow",
+  "metadata": {
+    "tags": ["AI 编程", "Claude Code", "工作流", "Context Engineering", "Git Worktree"],
+    "category": "技术研究"
+  },
+  "sections": [
+    {
+      "type": "text",
+      "heading": "引言：AI 编程的核心瓶颈",
+      "level": 2,
+      "content": "AI 辅助开发正在重塑软件工程的工作方式，但随着项目规模增长，一个关键问题浮出水面：如何维持 AI 的输出质量？Claude Code、Cursor 等工具让单个开发者的生产力倍增，但「让 AI 跑起来」和「让 AI 持续高质量地跑」是两个截然不同的问题。\n\n这篇报告聚焦两种在实践中演化出来的工作流范式：**GSD（Get Shit Done）** 是一套基于上下文工程的重型工作流，通过结构化 prompt、磁盘持久化状态和多 agent 编排来对抗 context rot；**diverge+wtc** 则是一套轻量级的 git worktree 工作流，用文件系统隔离来控制上下文污染，最小化心智负担。\n\n两者解决的是同一个根本问题——随着代码库扩展和任务变复杂，AI 代理的输出质量如何维持——但选择了截然不同的路径。理解这两条路径的权衡，是做出明智选择的前提。"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Context Rot：被低估的 AI 工作流杀手",
+      "content": "Context rot 指的是 AI 在填满上下文窗口的过程中，输出质量逐渐下降的现象。表现包括：忘记早期的设计决策、开始生成与已有代码风格不符的代码、对错误做出奇怪的修复决策。这不是 AI「变笨了」——而是注意力机制在长序列上自然降级的物理限制。"
+    },
+    {
+      "type": "text",
+      "heading": "GSD 的核心机制：结构化对抗 Context Rot",
+      "level": 2,
+      "content": "GSD 的出发点是一个清醒的判断：AI 的上下文窗口是有限且脆弱的资源，不能依赖单个 agent 跑完整个项目。它的解法是把开发流程拆分为定义清晰的阶段，并在每个阶段的边界将关键状态序列化到磁盘——这样任何 agent 都可以从状态文件中恢复现场，而不需要依赖上下文记忆。\n\n磁盘持久化状态是 GSD 设计中最关键的一环。`.planning/PROJECT.md` 存储项目愿景和架构决策，`STATE.md` 记录当前所处的阶段和进展，`PLAN.md` 包含不超过 600 行的当前任务规格。这个上限不是任意的：它确保了执行 agent 加载计划后，剩余的上下文空间足以完成实际的编码工作。\n\n多 agent 编排是 GSD 的另一个核心支柱。一个「薄」的协调者 agent 负责生命周期管理，它本身不做大量推理，而是按需派生全新的 200k token 子 agent 来执行具体阶段。每个子 agent 启动时上下文是干净的，只加载当前阶段需要的状态。这相当于把 context rot 问题转化为一个工程问题：用新鲜的上下文换取持续的质量。\n\n研究阶段的设计也很有意思：GSD 在规划前会派生 4 个并行的研究 agent，分别负责技术栈、功能设计、架构方案和潜在陷阱。这些研究结果再汇入规划 agent 生成 `PLAN.md`。验证阶段类似——执行后由独立的审计 agent 检查输出，而不是让同一个 agent 自我审查（自我审查是有名的低效策略）。"
+    },
+    {
+      "type": "timeline",
+      "title": "GSD 工作流生命周期",
+      "events": [
+        {
+          "date": "Phase 0",
+          "title": "Discuss（讨论）",
+          "description": "与用户澄清需求，定义项目愿景。输出写入 PROJECT.md，确立共同理解的基线。这个阶段的产出是后续所有阶段的锚点。"
+        },
+        {
+          "date": "Phase 1",
+          "title": "Research（研究）",
+          "description": "派生 4 个并行研究 agent，分别调查技术栈、功能设计、架构选型和潜在陷阱。研究结果汇聚给规划 agent，避免规划阶段的信息盲区。"
+        },
+        {
+          "date": "Phase 2",
+          "title": "Plan（规划）",
+          "description": "规划 agent 基于研究输出生成 PLAN.md（≤600 行）。Plan-checker agent 独立验证计划的合理性和完整性，防止带着有缺陷的计划进入执行。"
+        },
+        {
+          "date": "Phase 3",
+          "title": "Execute（执行）",
+          "description": "全新上下文的执行 agent 加载 PLAN.md，实现代码。多个执行 agent 可以并行处理独立任务波次（execution waves），大幅加速开发进度。"
+        },
+        {
+          "date": "Phase 4",
+          "title": "Verify（验证）",
+          "description": "独立的验证 agent 审计执行输出，检查与计划的偏差、代码质量和边界情况。这是 GSD 质量保障体系的最后一道闸门。"
+        },
+        {
+          "date": "Phase 5",
+          "title": "Complete Milestone（完成里程碑）",
+          "description": "更新 STATE.md，标记里程碑完成，循环回到 Plan 阶段开始下一个迭代。磁盘状态确保任何时候都可以安全地 /clear 上下文重来。"
+        }
+      ]
+    },
+    {
+      "type": "statcard",
+      "label": "GSD 计划文件上限",
+      "value": "600 行",
+      "description": "PLAN.md 的硬性行数限制，确保执行 agent 有足够的剩余上下文完成任务",
+      "trend": "neutral"
+    },
+    {
+      "type": "text",
+      "heading": "diverge+wtc 的核心机制：文件系统级上下文隔离",
+      "level": 2,
+      "content": "diverge+wtc 采用了一条完全不同的路径：不是通过系统设计来管理 context rot，而是通过 git worktree 从物理上隔离不同任务的工作环境。`diverge` 是创建 worktree 的工具或别名——本质上是 `git worktree add` 的便捷封装，让开发者可以在独立目录中同时运行多个功能分支；`wtc`（worktree context）则是向 AI 传递当前 worktree 相关上下文的机制，帮助 AI 理解它在哪个特性分支上工作、目标是什么。\n\n这套工作流的核心洞见是：如果每个 Claude Code 会话只负责一个特性分支，在一个隔离的 worktree 目录中工作，那么这个会话的上下文自然就被限制在合理范围内了。多个并行任务通过多个独立的 worktree 实现，每个 worktree 有自己的 Claude Code 进程，互不干扰。开发者可以在多个终端窗口或 tmux pane 之间切换，对不同特性并行推进。\n\ndiverge+wtc 的最大优势在于它几乎没有学习曲线。git worktree 是 Git 的原生功能，`diverge` 只是让它更好用的便捷工具。没有需要学习的新 prompt 结构，没有需要维护的状态文件，没有需要理解的 agent 编排概念。开发者用熟悉的工具（git、终端、编辑器）工作，AI 作为辅助工具存在，而不是成为需要管理的系统。\n\n这套工作流也没有内置的验证机制。代码审查、测试和质量保证还是依赖开发者自己，或者 CI/CD 系统。这既是它轻量的原因，也是它的限制所在：当单个特性会话跑了很久、context rot 开始发生时，没有任何机制会提示你或介入。"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "git worktree 的物理隔离原理",
+      "content": "git worktree 允许同一个 git 仓库在多个目录中同时 checkout 不同分支。每个 worktree 有独立的工作目录、索引和 HEAD，但共享同一个对象数据库（.git）。diverge 工作流正是利用这种隔离：每个特性的 Claude Code 会话在自己的 worktree 目录中运行，彼此的文件系统变更完全隔离，不会有 context 泄漏。"
+    },
+    {
+      "type": "comparison",
+      "title": "核心设计哲学对比",
+      "layout": "side-by-side",
+      "items": [
+        {
+          "label": "GSD",
+          "highlights": [
+            "系统性对抗 context rot：结构化阶段 + 磁盘持久化 + agent 编排",
+            "复杂度集中在工作流系统本身，有详细的 prompt 规范和 agent 角色分工",
+            "显式状态管理：STATE.md / PLAN.md / PROJECT.md，/clear 安全可随时重启",
+            "内置独立验证层：plan-checker 执行前验证，verify agent 执行后审计",
+            "系统化多任务并行：execution waves 由协调者 agent 自动编排",
+            "为大型项目和跨会话持续演进而设计"
+          ],
+          "variant": "positive"
+        },
+        {
+          "label": "diverge+wtc",
+          "highlights": [
+            "物理隔离 context 污染：git worktree 文件系统级隔离，简单直接",
+            "复杂度留给开发者判断：任务边界、何时开新 worktree 都由人决定",
+            "隐式状态管理：依赖 git 分支历史，无额外状态文件抽象",
+            "无内置验证，依赖开发者 code review 和 CI/CD",
+            "手动多任务并行：多个 tmux pane 各跑一个 Claude 会话",
+            "为中小项目和短周期特性开发而优化"
+          ],
+          "variant": "neutral"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "六个维度的深度分析",
+      "level": 2,
+      "content": "理解两套工作流的权衡，需要从多个维度展开分析。以下从上手成本、Context 管理、质量保证、灵活性、规模适应性和并行能力六个维度进行系统对比。每个维度背后都有不同的设计取舍，没有绝对的优劣，只有不同场景下的适配度。"
+    },
+    {
+      "type": "table",
+      "caption": "GSD vs diverge+wtc 六维对比",
+      "headers": ["对比维度", "GSD", "diverge+wtc", "优势方"],
+      "rows": [
+        [
+          "上手成本",
+          "高——需要学习 prompt 结构、状态文件格式和 agent 角色分工",
+          "低——git worktree 是原生功能，diverge 只是便捷封装",
+          "diverge+wtc ✓"
+        ],
+        [
+          "Context 管理",
+          "系统级：agent 编排确保每个执行 agent 拿到干净的 200k token 上下文",
+          "隔离级：worktree 隔离防止跨任务污染，但单个会话内的 context rot 无保障",
+          "GSD ✓"
+        ],
+        [
+          "质量保证",
+          "内置：plan-checker 和 verify agent 在流程节点自动审查",
+          "外置：依赖开发者 review 和 CI，AI 输出质量波动取决于会话状态",
+          "GSD ✓"
+        ],
+        [
+          "灵活性",
+          "较低：有明确的阶段约束，绕过阶段会破坏系统一致性",
+          "高：随时开新 worktree、合并、丢弃，无系统性约束",
+          "diverge+wtc ✓"
+        ],
+        [
+          "规模适应性",
+          "强：为大型项目设计，里程碑机制支持长期演进",
+          "中：对中小项目友好，大型项目的任务协调完全依赖人",
+          "GSD ✓"
+        ],
+        [
+          "多任务并行",
+          "系统化：execution waves 自动编排多个 agent 并行执行",
+          "手动：开发者手动开多个 worktree 和会话，自行协调依赖关系",
+          "GSD ✓"
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "heading": "上手成本：系统复杂度的两面",
+      "level": 3,
+      "content": "GSD 的学习曲线是真实存在的。它不只是一套工具，而是一套工程范式——你需要理解为什么每个阶段存在、状态文件的语义、agent 角色的边界，才能有效地使用它。对于一个没有接触过「context 工程」概念的开发者，GSD 的初始配置和概念负担可能需要几天才能内化。一旦内化，它提供的结构带来的是确定性：你知道在哪个阶段、下一步是什么、如何恢复现场。\n\ndiverge+wtc 的低上手成本是它最直接的优势。你只需要知道 `git worktree add` 的语义，以及在启动 Claude 会话时提供当前 worktree 的上下文描述。对于大多数已经在用 git 的开发者来说，这几乎是零额外负担。这种「用熟悉的工具做新事情」的特性让它很容易推广，也很容易在需要时放弃——没有什么是你必须「解除」的系统状态。"
+    },
+    {
+      "type": "text",
+      "heading": "质量保证：内置 vs 外置",
+      "level": 3,
+      "content": "GSD 的质量保证是内嵌在流程中的。plan-checker 在执行前对计划做独立验证，可以发现规划阶段的逻辑漏洞；verify agent 在执行后做审计，对照计划检查实现是否偏轨。这两个独立视角的存在，是 GSD 能在长期项目中维持质量的关键——它们起的作用类似于代码 review，但是自动化的，且在每个里程碑处强制发生。从系统设计角度看，这是把「质量」从可选项变成了强制流程。\n\ndiverge+wtc 没有这层保障。Claude Code 会话里 AI 给出的代码质量，完全取决于当前会话的上下文状态和开发者的 prompt 质量。如果一个会话跑了很久，context rot 已经在发生，AI 的输出可能已经开始偏轨，但没有任何机制会提示你。这不意味着 diverge+wtc 无法保证质量——只是说质量保证的责任落在了人身上，而不是系统身上。对于有成熟 CI 和代码 review 文化的团队，这可能完全够用；对于个人开发者或快速迭代阶段，风险就要高一些。"
+    },
+    {
+      "type": "statcard",
+      "label": "GSD 并行研究 agent 数",
+      "value": "4",
+      "description": "规划前并行运行的研究 agent：技术栈 / 功能设计 / 架构方案 / 潜在陷阱",
+      "trend": "neutral"
+    },
+    {
+      "type": "statcard",
+      "label": "diverge+wtc 额外工具依赖",
+      "value": "~0",
+      "description": "git worktree 是 Git 原生功能，diverge 是便捷封装，几乎无额外系统依赖",
+      "trend": "neutral"
+    },
+    {
+      "type": "text",
+      "heading": "结论：选哪个，还是两个都要？",
+      "level": 2,
+      "content": "这两套工作流并不是竞争关系，而是适用于不同场景的互补工具。做出正确选择的关键是理解你的项目特征：任务规模、团队大小、迭代周期，以及你愿意为工作流本身投入多少管理成本。\n\n**选 GSD 的场景**：你在构建一个需要跨多个会话持续演进的项目；任务复杂度高，需要在开始编码前做充分的规划和研究；或者你发现 AI 的输出质量随着项目推进在下降，context rot 已经成为实际问题。GSD 也特别适合需要多人协作时——结构化的状态文件让不同人（或不同 agent）可以从同一个基准点接手工作，而不需要依赖口头传递的上下文。\n\n**选 diverge+wtc 的场景**：你在快速迭代一个中小型项目；任务相对独立且边界清晰，每个特性都能在单个会话内完成；或者你只是需要同时推进多个互不相关的小特性，不想被重型工作流的开销拖慢节奏。对于「今天要修三个 bug 和加一个小功能」这种场景，diverge+wtc 是正确答案——GSD 的仪式感在这里只是障碍。\n\n**两者结合**的可能性是真实存在的，也是值得探索的路径。你可以用 GSD 管理项目的宏观规划和里程碑——PROJECT.md、STATE.md 保持项目的总体方向——同时在执行层面，让每个 GSD 「执行 agent」在独立的 worktree 中工作，利用文件系统隔离来确保并行执行的 agent 之间不会产生文件冲突。这种组合在有多个并行 execution waves 的 GSD 工作流中尤为自然：execution waves × worktree isolation = 既有系统编排，又有物理隔离。"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "Quick Mode：GSD 的灵活逃生口",
+      "content": "GSD 内置了「Quick Mode」——对于小型 bug 修复和临时特性，可以跳过完整的 discuss→plan→execute 生命周期，直接进入简化流程。这在一定程度上弥合了 GSD 和 diverge+wtc 在轻量任务上的差距。如果你的团队已经在用 GSD 管理大型项目，Quick Mode 可以避免为小任务切换到不同的工作流，保持工作流的一致性。"
+    },
+    {
+      "type": "table",
+      "caption": "场景选型参考",
+      "headers": ["场景", "推荐工作流", "理由"],
+      "rows": [
+        ["大型项目，跨会话持续演进", "GSD", "磁盘状态持久化，/clear 安全，里程碑机制支持长期推进"],
+        [
+          "快速修 bug / 小特性",
+          "diverge+wtc 或 GSD Quick Mode",
+          "上手成本低，任务边界清晰，不需要完整规划流程"
+        ],
+        [
+          "多个独立特性并行开发",
+          "diverge+wtc 或 GSD execution waves",
+          "worktree 物理隔离天然适合；GSD 的执行波次适合有依赖的并行"
+        ],
+        ["团队协作，需要可交接的进度", "GSD", "结构化状态文件让任何人都能从同一基准接手"],
+        ["对 AI 输出质量有严格要求", "GSD", "内置 plan-checker 和 verify agent，有结构性质量保障"],
+        [
+          "探索性开发，需求还不清晰",
+          "diverge+wtc",
+          "灵活，随时可以丢弃 worktree 重来，无状态文件维护负担"
+        ],
+        [
+          "GSD 执行阶段并行化",
+          "GSD + diverge（结合）",
+          "execution waves 中每个 agent 使用独立 worktree，系统编排 + 物理隔离双重保障"
+        ]
+      ]
+    },
+    {
+      "type": "quote",
+      "text": "The best process is the one that makes the right work easy. For AI-assisted development, that means spending your complexity budget on the work itself — not on managing the AI.",
+      "author": "Prism AI",
+      "role": "AI-Assisted Development Research"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "关于本报告",
+      "content": "本报告由 Prism AI 于 2026 年 2 月 28 日生成，基于对 GSD（get-shit-done）系统设计文档和 diverge+wtc 工作流实践的分析整理。报告内容仅供技术参考，实际效果因项目特征和团队习惯而异。"
+    }
+  ]
+}
